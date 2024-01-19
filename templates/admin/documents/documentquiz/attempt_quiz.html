@@ -1,0 +1,174 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n admin_urls static admin_modify %}
+{% load static %}
+
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js'%}"></script>
+    <script type="text/javascript">
+        
+        function validateForm()
+        {
+            var required_questions = 0;
+            $('.question_class').each(function(i) {
+                console.log(i+"==="+$(this).attr("for"));
+                if($("input:radio[name='"+$(this).attr("for")+"_options']").is(":checked") == false)
+                {
+                    $(this).closest(".question-row").addClass("required-question");
+                    required_questions +=1;
+                }
+                else
+                {
+                    $(this).closest(".question-row").removeClass("required-question");
+                }
+            });
+            if(required_questions > 0)
+            {
+                alert("You have not selected answers for some question(s).");
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+        {% if opts.app_config.verbose_name %}
+            &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+        {% endif %}
+        {% if opts.verbose_name_plural %}
+            &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        {% endif %}
+        {% if object.name %}
+            &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}{{ object.id }}/change/">{{ object.name|capfirst }}</a>
+        {% endif %}
+        &rsaquo; ATTEMPT QUIZ
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h1>Attempt Quiz{% if request.GET.cq %} {{ request.GET.cq }}  {% endif %}</h1>
+    <h2>{{ object.name|capfirst }}</h2>
+    
+    <div id="content-main">
+        <div class="quiz_questions">
+            <form action="/attemptQuiz/{{ object.id }}" onsubmit="return validateForm();" method="post" id="quiz_question_form" novalidate>{% csrf_token %}
+                <input type="hidden" name="question_ids" value="{{ question_ids }}">
+                <div class="">
+                    <h2>Questions</h2>
+                    {% for quiz in quiz_questions %}
+                        <div class="question-row">
+                            <div class="module aligned ">
+                                <div class="form-row " style="margin-top: 5px;">
+                                    <div>
+                                        <div class="flex-container">
+                                            {{ form.question_91_options.errors }}
+                                            <label class="required label_order question_class" for="question_{{ quiz.id }}">Q{{ forloop.counter }}:</label>
+                                                <span>{{ quiz.question }}</span>
+                                                
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row " style="margin-top: 15px;">
+                                    <div>
+                                        <div class="flex-container">
+                                            <label class="required label_order" >A:&nbsp;&nbsp;&nbsp;</label>
+                                            <input type="radio" id="option_1_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="0" >
+                                            &nbsp;&nbsp;&nbsp;<label for="option_1_{{ quiz.id }}">{{ quiz.option_1 }}</label>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <div class="flex-container">
+                                            <label class="required label_order" >B:&nbsp;&nbsp;&nbsp;</label>
+                                            <input type="radio" id="option_2_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="1" >
+                                            &nbsp;&nbsp;&nbsp;<label for="option_2_{{ quiz.id }}">{{ quiz.option_2 }}</label>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <div class="flex-container">
+                                            <label class="required label_order" >C:&nbsp;&nbsp;&nbsp;</label>
+                                            <input type="radio" id="option_3_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="2" >
+                                            &nbsp;&nbsp;&nbsp;<label for="option_3_{{ quiz.id }}">{{ quiz.option_3 }}</label>
+                                        </div>
+                                    </div>
+                                    <div style="margin-top: 10px;">
+                                        <div class="flex-container">
+                                            <label class="required label_order" >D:&nbsp;&nbsp;&nbsp;</label>
+                                            <input type="radio" id="option_4_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="3" >
+                                            &nbsp;&nbsp;&nbsp;<label for="option_4_{{ quiz.id }}">{{ quiz.option_4 }}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% if quiz_questions %}
+                        <div class="submit-row">
+                            <input type="submit" value="Submit Quiz" class="default" name="_submit_quiz">
+                        </div>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+    <style>
+        .question-row {
+        padding: 12px 14px 12px;
+        margin: 0 0 20px;
+        background: var(--darkened-bg);
+        border: 1px solid var(--hairline-color);
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        
+        }
+        .required-question
+        {
+            border: 1px solid red;
+        }
+        .question-row .aligned label.label_order
+        {
+            width: 30px !important;
+            padding-top: 7px;
+            font-weight: bold;
+        }
+        .question-row .aligned span
+        {
+            padding-top: 10px;
+        }
+        #quiz_question_form .aligned
+        {
+            width: 100%;
+        }
+        .question-row .vTextField
+        {
+            width: 80%;
+            padding: 10px 6px;
+        }
+        .question-row .module
+        {
+            margin-bottom: 0px;
+        }
+        .question-row .vRadioTextField
+        {
+            width: 78.5%;
+            padding: 10px 6px;
+        }
+        .quiz_questions h2 {
+            margin: 0;
+            padding: 8px;
+            font-weight: 400;
+            font-size: 0.75rem;
+            text-align: left;
+            background: var(--primary);
+            color: var(--header-link-color);
+        }
+    </style>
+    
+{% endblock %}

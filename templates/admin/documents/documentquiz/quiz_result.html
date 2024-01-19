@@ -1,0 +1,67 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n admin_urls %}
+
+
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+        &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+        &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}{{ object.id }}/change/">{{ object.name|capfirst }}</a>
+        &rsaquo; QUIZ RESULT
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h1>Quiz Result</h1>
+    <h2>{{ object.name|capfirst }}</h2>
+    <div id="content-main">
+        <div class="quiz_questions">
+            <h2>Result</h2>
+            {% if request.GET.cq %} <h3 class="first_h3">Total Correct Answers: {{ request.GET.cq }}</h3> {% endif %}
+            
+            {% if request.GET.wq %} <h3>Total Wrong Answers: {{ request.GET.wq }}</h3> {% endif %}
+            
+            {% if request.GET.tq %} <h3>Total Questions: {{ request.GET.tq }}</h3> {% endif %}
+            
+            {% if request.GET.ts %} <h3>Your Score: {{ request.GET.ts }}%</h3> {% endif %}
+            
+            {% if request.GET.rs %} <h3 class="{% if request.GET.rs == 'Pass' %}success{% else %}failed{% endif %}">Result: {% if request.GET.rs == 'Pass' %}Successfull{% else %}Not successful.  Attempt it again.{% endif %}</h3> {% endif %}
+            
+        </div>
+    </div>
+    <style>
+        .quiz_questions h2 {
+            margin: 0;
+            padding: 8px;
+            font-weight: 400;
+            font-size: 0.75rem;
+            text-align: left;
+            background: var(--primary);
+            color: var(--header-link-color);
+        }
+        .quiz_questions h3 {
+            text-align: center;
+            font-size: 25px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: black;
+        }
+        .quiz_questions h3.success {
+            
+            color: green;
+        }
+        .quiz_questions h3.failed {
+            
+            color: red;
+        }
+        .quiz_questions h3.first_h3 {
+            
+            margin-top: 30px;
+        }
+    </style>
+{% endblock %}
+
+

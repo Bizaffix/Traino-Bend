@@ -1,0 +1,147 @@
+{% load i18n admin_urls static admin_modify %}
+<div class="js-inline-admin-formset inline-group" id="{{ inline_admin_formset.formset.prefix }}-group"
+     data-inline-type="tabular"
+     data-inline-formset="{{ inline_admin_formset.inline_formset_data }}">
+  <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
+{{ inline_admin_formset.formset.management_form }}
+<fieldset class="module {{ inline_admin_formset.classes }}">
+   {% if inline_admin_formset.formset.max_num == 1 %}
+     <h2>{{ inline_admin_formset.opts.verbose_name|capfirst }}</h2>
+   {% else %}
+     <h2>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</h2>
+   {% endif %}
+   {{ inline_admin_formset.formset.non_form_errors }}
+
+    
+    {% for inline_admin_form in inline_admin_formset %}
+        
+        {% if inline_admin_form.form.non_field_errors %}
+          <div class="row-form-errors"> <div>{{ inline_admin_form.form.non_field_errors }}</div> </div>
+        {% endif %}
+        <div class="form-row {% if inline_admin_form.original or inline_admin_form.show_url %}has_original{% endif %}{% if forloop.last and inline_admin_formset.has_add_permission %} empty-form{% endif %} question-row"
+        id="{{ inline_admin_formset.formset.prefix }}-{% if forloop.last and inline_admin_formset.has_add_permission %}empty{% else %}{{ forloop.counter0 }}{% endif %}">
+          <div class="original">
+            {% if inline_admin_form.original or inline_admin_form.show_url %}<p>
+              {% if inline_admin_form.original %}
+              <!-- {{ inline_admin_form.original }} -->
+              {% if inline_admin_form.model_admin.show_change_link and inline_admin_form.model_admin.has_registered_model %}<a href="{% url inline_admin_form.model_admin.opts|admin_urlname:'change' inline_admin_form.original.pk|admin_urlquote %}" class="{{ inline_admin_formset.has_change_permission|yesno:'inlinechangelink,inlineviewlink' }}">{% if inline_admin_formset.has_change_permission %}{% translate "Change" %}{% else %}{% translate "View" %}{% endif %}</a>{% endif %}
+              {% endif %}
+              {% if inline_admin_form.show_url %}<a href="{{ inline_admin_form.absolute_url }}">{% translate "View on site" %}</a>{% endif %}
+                </p>{% endif %}
+              {% if inline_admin_form.needs_explicit_pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
+              {% if inline_admin_form.fk_field %}{{ inline_admin_form.fk_field.field }}{% endif %}
+          </div>
+
+          {% include "admin/edit_inline/documents/quizquestions/inline_fieldset.html" %}
+
+        </div>
+        <!-- {% if inline_admin_formset.formset.can_delete and inline_admin_formset.has_delete_permission %}
+          <td class="delete">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</td>
+        {% endif %}
+        </tr> -->
+     {% endfor %}
+
+   
+</fieldset>
+  </div>
+</div>
+<style>
+  .question-row {
+  padding: 12px 14px 12px;
+  margin: 0 0 20px;
+  background: var(--darkened-bg);
+  border: 1px solid var(--hairline-color);
+  border-radius: 4px;
+  
+  }
+  .question-row label
+  {
+      font-weight: bold;
+      width: 30px !important;
+      padding-top: 7px;
+  }
+  .question-row .readonly
+  {
+      padding-top: 7px;
+  }
+  .question-row .correct-answer
+  {
+    border: 1px solid green;
+  }
+  .question-row .correct-answer, .question-row .correct-answer label
+  {
+      font-weight: bold;
+      font-size: 16px;
+      color: green;
+      
+  }
+  .question-row span
+  {
+      padding-top: 10px;
+  }
+  #quiz_question_form .aligned
+  {
+      width: 100%;
+  }
+  .question-row .vTextField
+  {
+      width: 80%;
+      padding: 10px 6px;
+  }
+  .question-row .vRadioTextField
+  {
+      width: 78.5%;
+      padding: 10px 6px;
+  }
+</style>
+<script>
+  window.addEventListener("load", function() {
+    (function($) {
+        $('.correct-answer').each(function(i) {
+            //console.log(i+"==="+$(this).val());
+            if($(this).val() == 0)
+            {
+              $( "#id_quizquestions_set-"+i+"-option_1_option" ).prop( "checked", true );
+            }
+            else if($(this).val() == 1)
+            {
+              $( "#id_quizquestions_set-"+i+"-option_2_option" ).prop( "checked", true );
+            }
+            else if($(this).val() == 2)
+            {
+              $( "#id_quizquestions_set-"+i+"-option_3_option" ).prop( "checked", true );
+            }
+            else if($(this).val() == 3)
+            {
+              $( "#id_quizquestions_set-"+i+"-option_4_option" ).prop( "checked", true );
+            }
+        });
+
+        $('.form-row .field-answer .readonly').each(function(i) {
+            if($(this).text() == 0)
+            {
+                $("#quizquestions_set-"+i+" .field-option_1").addClass("correct-answer")
+            }
+            else if($(this).text() == 1)
+            {
+                $("#quizquestions_set-"+i+" .field-option_2").addClass("correct-answer")
+            }
+            else if($(this).text() == 2)
+            {
+                $("#quizquestions_set-"+i+" .field-option_3").addClass("correct-answer")
+            }
+            else if($(this).text() == 3)
+            {
+                $("#quizquestions_set-"+i+" .field-option_4").addClass("correct-answer")
+            }
+          //console.log(i+"==="+$(this).text());
+        });
+    })(django.jQuery);
+  });
+
+  function updateAnswer(value, answer_id)
+  {
+      $("#"+answer_id).val(value);
+  }
+  
+</script>
