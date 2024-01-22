@@ -14,11 +14,20 @@
     <a href="{% add_preserved_filters delete_url %}" class="deletelink">{% translate "Delete" %}</a>
 {% endif %}
 {% if show_generate_button %}
-    <input type="button" value="Generate Quiz" name="_generatesummary" id="_generatesummary" >
+    <input type="button" value="Generate Quiz" name="_generatequiz" id="_generatequiz" >
+    <span class="general_loader">Generating quiz, Please wait...</span>
 {% endif %}
 {% if show_attempt_quiz %}
     <input type="button" value="Attempt Quiz" name="_attempt_quiz" id="_attempt_quiz" >
 {% endif %}
+<style>
+    .general_loader
+    {
+        padding: 10px 15px;
+        font-weight: bold;
+        display: none;
+    }
+</style>
 {% endblock %}
 
 </div>
@@ -33,7 +42,7 @@
         On click of generate summary button,
         call AJAX to generate document summary using open ai and show it in text area.
         */
-        $("#_generatesummary").click(function (e) {
+        $("#_generatequiz").click(function (e) {
             //return false;
             e.preventDefault();
             var prompt_text = $("#id_prompt_text").val();

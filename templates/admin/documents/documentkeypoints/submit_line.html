@@ -14,8 +14,17 @@
     <a href="{% add_preserved_filters delete_url %}" class="deletelink">{% translate "Delete" %}</a>
 {% endif %}
 {% if show_generate_button %}
-<input type="button" value="Generate Keypoints" name="_generatesummary" id="_generatesummary" >
+<input type="button" value="Generate Keypoints" name="_generatekeypoints" id="_generatekeypoints" >
+<span class="general_loader">Generating keypoints, Please wait...</span>
 {% endif %}
+<style>
+    .general_loader
+    {
+        padding: 10px 15px;
+        font-weight: bold;
+        display: none;
+    }
+</style>
 {% endblock %}
 </div>
 
@@ -27,7 +36,7 @@
         On click of generate summary button,
         call AJAX to generate document summary using open ai and show it in text area.
         */
-        $("#_generatesummary").click(function (e) {
+        $("#_generatekeypoints").click(function (e) {
             //return false;
             e.preventDefault();
             var prompt_text = $("#id_prompt_text").val();

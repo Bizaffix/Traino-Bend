@@ -15,7 +15,16 @@
 {% endif %}
 {% if show_generate_button %}
     <input type="button" value="Generate Summary" name="_generatesummary" id="_generatesummary" >
+    <span class="general_loader">Generating summary, Please wait...</span>
 {% endif %}
+<style>
+    .general_loader
+    {
+        padding: 10px 15px;
+        font-weight: bold;
+        display: none;
+    }
+</style>
 {% endblock %}
 </div>
 
@@ -36,6 +45,7 @@
                 alert("Please enter prompt text to generate summary");
                 return false;
             }
+            console.log(1);
             //GET AJAX request
             $.ajax({
                 type: 'POST',
