@@ -30,7 +30,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'http://ec2-54-144-87-172.compute-1.amazonaws.com',
+    'http://ec2-54-144-87-172.compute-1.amazonaws.com:8000/admin',
 ]
 
 
