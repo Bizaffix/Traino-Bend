@@ -6,21 +6,54 @@ from django.utils.html import format_html
 import json
 from django import forms
 from django.core.exceptions import ValidationError
-from .forms import QuizQuestionsForm
+from .forms import QuizQuestionsForm, DocumentForm
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from django.urls import path
+from django.utils import timezone, dateformat
 
 
+def day_hour_format_converter(date_time_UTC):
+    return dateformat.format(
+        timezone.localtime(date_time_UTC),
+        'm/d/Y H:i:s',
+    )
 
 class CustomDocumentAdmin(ModelAdmin):
 
     model = UserDocuments
-    list_display = ('name', 'view_file', 'created_date', 'summary', 'key_points', 'quiz')
-    #list_filter = ('user_id',)
-    search_fields = ('name',)
-    ordering = ('name', 'created_date',)
+    list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'is_publish', 'updated','added_by')
+    list_filter = [('published'), ('company', admin.RelatedOnlyFieldListFilter)]
+    fieldsets = (
+        (None, {'fields': ('name', 'file', 'company', 'department')}),
+    )
 
+    add_fieldsets = (
+        (None, {'fields': ('name', 'file', 'company', 'department')}),
+    )
+    search_fields = ('name',)
+    ordering = ('-id',)
+
+    form = DocumentForm
+
+    def is_publish(self, obj):
+        if obj.published:
+            return format_html('<a href="/admin/documents/userdocuments/{0}/change/" />Make Unpublish</a>', obj.id)
+        else:
+            return format_html('<a href="/admin/documents/userdocuments/{0}/change/" />Make Publish</a>', obj.id)
+
+    is_publish.short_description = 'Status'
+    
+    def updated(self, obj):
+        if obj.updated_at:
+            return day_hour_format_converter(obj.updated_at)
+    updated.short_description = 'UPDATED AT'    
+    
+    
+    def created_at(self, obj):
+        if obj.created_date:
+            return day_hour_format_converter(obj.created_date)
+    
     def view_file(self, obj):
         if obj.file:
             return mark_safe('<a href="{0}" target="_blank" />View Document</a>'.format(obj.file.url))
@@ -39,13 +72,16 @@ class CustomDocumentAdmin(ModelAdmin):
     def quiz(self, obj):
         dq = DocumentQuiz.objects.get(document=obj.id)
         return format_html('<a href="/admin/documents/documentquiz/{0}/change/" />View Quiz</a>', dq.id)
- 
-
+    
     def save_model(self, request, obj, form, change):
         """
         Given a model instance save it to the database.
         """
-        
+        if obj.id is None:
+            obj.added_by = request.user
+        elif obj.added_by is None:    
+            obj.added_by = request.user
+
         obj.save()
         
         try:
@@ -236,7 +272,6 @@ class AttemptQuizView(PermissionRequiredMixin, DetailView):
             "question_ids": quiz_ids
         }
 
-
 class DocumentQuizAdmin(ModelAdmin):
     
     model = DocumentQuiz
@@ -264,7 +299,7 @@ class DocumentQuizAdmin(ModelAdmin):
         ]
 
     def get_list_display(self, request):
-        if request.user.role == 'Admin':
+        if request.user.role == 'User':
             self.list_display = ('name', 'document')
             
         else:
@@ -273,7 +308,7 @@ class DocumentQuizAdmin(ModelAdmin):
         return super().get_list_display(request)
 
     def get_fieldsets(self, request, obj=None):
-        if request.user.role == 'Admin':
+        if request.user.role == 'User':
             self.fieldsets = (
                 (None, {'fields': ()}),
             )
@@ -298,7 +333,7 @@ class DocumentQuizAdmin(ModelAdmin):
         # context.update({'quiz_questions': dquiz})
         # context.update({'question_ids': quid_ids})
 
-        if request.user.role == 'Admin':
+        if request.user.role == 'User':
             context.update({'show_generate_button': False})
             context.update({'show_answers': False})
             context.update({'save_buttons_on_top': True})
@@ -322,10 +357,10 @@ class DocumentQuizAdmin(ModelAdmin):
         """
         Given a model instance save it to the database.
         """
-        print("reques is")
-        print(request)  
-        print("object is")
-        print(obj)
+        # print("reques is")
+        # print(request)  
+        # print("object is")
+        # print(obj)
         
         obj.save()
         

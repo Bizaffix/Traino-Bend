@@ -1,6 +1,9 @@
 from .models import DocumentQuiz, QuizQuestions
 from django import forms
 from django.core.exceptions import ValidationError
+from dal import autocomplete
+import djhacker
+from .models import UserDocuments, Departments
 
 
 def validate_question(value):
@@ -46,8 +49,8 @@ class AttemptQuizForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         question_ids = cleaned_data.get('question_ids')
-        print("test 1")
-        print(question_ids)
+        # print("test 1")
+        # print(question_ids)
         if(question_ids is not None):
             question_ids = question_ids.split(',')
             for question_id in question_ids:
@@ -57,4 +60,20 @@ class AttemptQuizForm(forms.Form):
                     raise forms.ValidationError("Please select one answer.")
                 elif not answer >= 0 or answer < 4:
                     raise forms.ValidationError("Invalid answer provided.")
-           
+
+class DocumentForm(forms.ModelForm):
+    company = djhacker.formfield(
+        UserDocuments.company,
+        forms.ModelChoiceField,
+        widget=autocomplete.ModelSelect2(url='company_autocomplete')
+    )
+
+    department = djhacker.formfield(
+        UserDocuments.department,
+        forms.ModelMultipleChoiceField,
+        widget=autocomplete.ModelSelect2Multiple(url='department_autocomplete', forward=['company'])
+    )
+
+    class Meta:
+        model = UserDocuments
+        fields = '__all__'           

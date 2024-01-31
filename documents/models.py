@@ -1,13 +1,17 @@
 from django.db import models
-from accounts.models import CustomUser
+from accounts.models import CustomUser, Departments
 
 
 class UserDocuments(models.Model):
     id = models.BigAutoField(primary_key = True)
     name = models.CharField(max_length = 100)
     file = models.FileField(upload_to='documents/',)
-    created_date = models.DateTimeField(auto_now_add=True)
-    #user_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='document_company', default=0)
+    department = models.ManyToManyField(Departments, related_name='document_departments')
+    published = models.BooleanField(default=False)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="document_added_by")
 
     def __str__(self):
         return self.name
@@ -21,7 +25,7 @@ class DocumentSummary(models.Model):
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.document.name
@@ -35,7 +39,7 @@ class DocumentKeyPoints(models.Model):
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.document.name
@@ -50,7 +54,7 @@ class DocumentQuiz(models.Model):
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -69,7 +73,7 @@ class QuizQuestions(models.Model):
     answer = models.CharField(max_length = 2, blank=True, null=True)
     quiz = models.ForeignKey(DocumentQuiz, on_delete=models.CASCADE)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.question

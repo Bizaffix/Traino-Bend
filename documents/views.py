@@ -14,8 +14,6 @@ import json
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 
-
-
 openai_api_key = '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'
 os.environ['OPENAI_API_KEY'] = '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'
 
@@ -213,8 +211,6 @@ def attemptQuiz(request, quiz_id):
                 result_status = 'Pass'
 
     return redirect("/admin/documents/documentquiz/"+str(quiz_id)+"/quizResult?cq="+str(correct_answers)+"&wq="+str(wrong_answers)+"&tq="+str(total_questions)+"&ts="+str(total_score)+"&rs="+str(result_status))
-
-        
 
 def generateDocumentQuiz(request):
     data = {'document_keypoints': '', 'msg': ''}

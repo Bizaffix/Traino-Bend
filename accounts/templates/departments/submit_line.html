@@ -1,0 +1,79 @@
+{% load i18n admin_urls %}
+<div class="submit-row">
+{% block submit-row %}
+{% if show_save %}<input type="submit" value="{% translate 'Save' %}" class="default" name="_save">{% endif %}
+{% if show_save_as_new %}<input type="submit" value="{% translate 'Save as new' %}" name="_saveasnew">{% endif %}
+{% if show_save_and_add_another %}<input type="submit" value="{% translate 'Save and add another' %}" name="_addanother">{% endif %}
+{% if show_save_and_continue %}<input type="submit" value="{% if can_change %}{% translate 'Save and continue editing' %}{% else %}{% translate 'Save and view' %}{% endif %}" name="_continue">{% endif %}
+{% if show_close %}
+    {% url opts|admin_urlname:'changelist' as changelist_url %}
+    <a href="{% add_preserved_filters changelist_url %}" class="closelink">{% translate 'Close' %}</a>
+{% endif %}
+{% if show_delete_link and original %}
+    {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+    <a href="{% add_preserved_filters delete_url %}" class="deletelink">{% translate "Delete" %}</a>
+{% endif %}
+{% if show_generate_button %}
+<input type="button" value="Generate Keypoints" name="_generatekeypoints" id="_generatekeypoints" >
+<span class="general_loader">Generating keypoints, Please wait...</span>
+{% endif %}
+ajsdkfjlajdsf
+<style>
+    .general_loader
+    {
+        padding: 10px 15px;
+        font-weight: bold;
+        display: none;
+    }
+</style>
+{% endblock %}
+</div>
+
+{% block generate_summary_javascript %}
+
+<script>
+    (function($) {
+        /*
+        On click of generate summary button,
+        call AJAX to generate document summary using open ai and show it in text area.
+        */
+        $("#_generatekeypoints").click(function (e) {
+            //return false;
+            e.preventDefault();
+            var prompt_text = $("#id_prompt_text").val();
+            if(prompt_text == '')
+            {
+                alert("Please enter prompt text to generate keypoints");
+                return false;
+            }
+            //GET AJAX request
+            $.ajax({
+                type: 'POST',
+                url: "/generateDocumentKeypoints/",
+                data: {"document_id": '{{ original.document_id }}', 'prompt_text': prompt_text, 'csrfmiddlewaretoken': '{{csrf_token}}'},
+                success: function (response)
+                {
+                    if(response["msg"] !='')
+                    {
+                        alert(response["msg"]);
+                    }
+                    else if(response["document_keypoints"] !='')
+                    {
+                        $("#id_content").val(response["document_keypoints"]);
+                    }
+                },
+                error: function (response) {
+                    console.log(response)
+                },
+                beforeSend: function(){
+                    $(".general_loader").fadeIn("slow");
+                },
+                complete: function(){
+                    $(".general_loader").fadeOut("slow");
+                }
+            })
+            
+        })
+    })(django.jQuery);
+</script>
+{% endblock %}
