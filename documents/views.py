@@ -183,6 +183,9 @@ def generateDocumentKeypoints(request):
                 #print("test: 6")
     return JsonResponse(data, status=200)
 
+def publishDocument(request, document_id):
+    print("in publishDocument view")
+
 def attemptQuiz(request, quiz_id):
     correct_answers = 0
     wrong_answers = 0

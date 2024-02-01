@@ -17,8 +17,17 @@ class UserDocuments(models.Model):
         return self.name
     
     class Meta:
-        verbose_name = ("Document")
-        verbose_name_plural = ("Documents")
+        verbose_name = ("Company Document")
+        verbose_name_plural = ("Company Documents")
+
+class DocumentAssignee(models.Model):
+    id = models.BigAutoField(primary_key= True)
+    document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE, related_name='assignee_document', default=0)
+    # company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assignee_company', default=0)
+    department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='assignee_department', default=0)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assignee_user', default=0)
+    is_assigned = models.BooleanField(default=False)
+    notify_frequency =models.CharField(max_length = 2, default = '0')
 
 class DocumentSummary(models.Model):
     id = models.BigAutoField(primary_key=True)

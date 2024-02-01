@@ -6,6 +6,7 @@ from .forms import CustomUserCreationForm, CustomUserChangeForm, CompanyTeamCrea
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import Group
 from django.utils import timezone, dateformat
+from documents.models import DocumentAssignee, UserDocuments
 
 
 def day_hour_format_converter(date_time_UTC):
@@ -13,6 +14,17 @@ def day_hour_format_converter(date_time_UTC):
         timezone.localtime(date_time_UTC),
         'm/d/Y H:i:s',
     )
+
+def assignDocumentToUser(user, doc, department):
+    try:
+        das = DocumentAssignee.objects.get(user_id = user.id, document_id = doc.id, department_id = department.id)
+    except DocumentAssignee.DoesNotExist:
+        das = None
+
+
+    if das is None:
+        das = DocumentAssignee(user_id = user.id, document_id = doc.id, department_id = department.id, is_assigned = False, notify_frequency = 0)
+        das.save()
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -208,8 +220,13 @@ class CompanyTeamAdmin(UserAdmin):
             obj.added_by = request.user
         elif obj.added_by is None:    
             obj.added_by = request.user
-
+        
         obj.save()
+
+        company_documents = UserDocuments.objects.filter(company_id = obj.company_id, department = obj.department_id)
+        print(company_documents)
+        for company_document in company_documents:
+            assignDocumentToUser(obj, company_document, obj.department)
 
         permissions = Permission.objects.filter(pk__in =(32,36,40,44,48,52))
         obj.user_permissions.add(*permissions)

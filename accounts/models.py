@@ -66,7 +66,7 @@ class CustomCompanyUser(CustomUser):
 
 class MyAdminSite(AdminSite):
     
-    def get_app_list(self, request):
+    def get_app_list(self, request, app_label=None):
         """
         Return a sorted list of all the installed apps that have been
         registered in this site.
@@ -76,13 +76,18 @@ class MyAdminSite(AdminSite):
             "Company Admins": 2,
             "Company Departments": 3,
             "Company Teams": 4,
-            "Documents": 5,
+            "Company Documents": 5,
             "Summary": 6,
             "Keypoints": 7,
             "Quizes": 8,
         }
+
+        app_dict = self._build_app_dict(request, app_label)
+
+        # Sort the apps alphabetically.
+        app_list = sorted(app_dict.values(), key=lambda x: x["name"].lower())
         
-        app_list = original_get_app_list(self, request)
+        # app_list = original_get_app_list(self, request)
 
         # Sort the models custom within each app.
         for app in app_list:

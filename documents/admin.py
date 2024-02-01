@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from .models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, QuizQuestions
+from .models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, QuizQuestions, DocumentAssignee
+from accounts.models import CompanyTeam, Departments
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
 import json
@@ -9,7 +10,7 @@ from django.core.exceptions import ValidationError
 from .forms import QuizQuestionsForm, DocumentForm
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic.detail import SingleObjectMixin, DetailView
-from django.urls import path
+from django.urls import path, reverse
 from django.utils import timezone, dateformat
 
 
@@ -19,10 +20,51 @@ def day_hour_format_converter(date_time_UTC):
         'm/d/Y H:i:s',
     )
 
+def assignDocumentToUser(user, doc, department):
+    try:
+        das = DocumentAssignee.objects.get(user_id = user.id, document_id = doc.id, department_id = department.id)
+    except DocumentAssignee.DoesNotExist:
+        das = None
+
+
+    if das is None:
+        das = DocumentAssignee(user_id = user.id, document_id = doc.id, department_id = department.id, is_assigned = False, notify_frequency = 0)
+        das.save()    
+
+class viewTeamView(PermissionRequiredMixin, DetailView):
+    permission_required = "documents.view_userdocuments"
+    template_name = "admin/documents/publish_document.html"
+    model = UserDocuments
+        
+
+    def get_context_data(self, **kwargs):
+        try:
+            # documents = UserDocuments.objects.filter(id = kwargs['object'].id)
+            # for document in documents:
+                departments = kwargs['object'].department.all().order_by('name')
+                for dept in departments:
+                    dept.team_users = DocumentAssignee.objects.filter(document_id = kwargs['object'].id, department_id = dept.id ).order_by('user__email')
+        except UserDocuments.DoesNotExist:
+            departments = None
+        # print(departments[0].team_users)
+        # quiz_ids = []
+        # for quiz in dquiz:
+        #     quiz_ids.append(str(quiz.id))
+        # quiz_ids = ','.join(quiz_ids)
+
+        return {
+            **super().get_context_data(**kwargs),
+            **admin.site.each_context(self.request),
+            "opts": self.model._meta,
+            "company_id": kwargs['object'].company,
+            "departments": departments,
+            # "question_ids": quiz_ids
+        }
+
 class CustomDocumentAdmin(ModelAdmin):
 
     model = UserDocuments
-    list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'is_publish', 'updated','added_by')
+    list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'assign_team', 'updated','added_by')
     list_filter = [('published'), ('company', admin.RelatedOnlyFieldListFilter)]
     fieldsets = (
         (None, {'fields': ('name', 'file', 'company', 'department')}),
@@ -36,13 +78,48 @@ class CustomDocumentAdmin(ModelAdmin):
 
     form = DocumentForm
 
+    def get_urls(self):
+        return [
+            path(
+                "<pk>/viewTeam/",
+                self.admin_site.admin_view(viewTeamView.as_view()),
+                name=f"documents_viewTeam",
+            ),
+            *super().get_urls(),
+        ]
+
+    def get_list_display(self, request):
+        if request.user.role == 'User':
+            self.list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'updated','added_by')
+            
+        else:
+            self.list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'assign_team', 'updated','added_by')
+            
+        return super().get_list_display(request)
+    
+    def get_list_filter(self, request):
+        if request.user.role == 'User':
+            self.list_filter = []
+            
+        else:
+            self.list_filter = [('published'), ('company', admin.RelatedOnlyFieldListFilter)]
+            
+        return super().get_list_filter(request)
+
     def is_publish(self, obj):
         if obj.published:
-            return format_html('<a href="/admin/documents/userdocuments/{0}/change/" />Make Unpublish</a>', obj.id)
+            return format_html('<a href="javascript:;" onclick="javascript: unPublishDocument({0});" />Make Unpublish</a>', obj.id)
         else:
-            return format_html('<a href="/admin/documents/userdocuments/{0}/change/" />Make Publish</a>', obj.id)
-
+            url = reverse("admin:documents_publishDocument", args=[obj.pk])
+            return format_html(f'<a href="{url}">Make Publish</a>')
+            # return format_html('<a href="/admin/documents/userdocuments/{0}/publishDocument/" />Make Publish</a>', obj.id)
     is_publish.short_description = 'Status'
+
+    def assign_team(self, obj):
+        url = reverse("admin:documents_viewTeam", args=[obj.pk])
+        return format_html(f'<a href="{url}">View Team</a>')
+    assign_team.short_description = 'Status'
+    
     
     def updated(self, obj):
         if obj.updated_at:
@@ -81,6 +158,14 @@ class CustomDocumentAdmin(ModelAdmin):
             obj.added_by = request.user
         elif obj.added_by is None:    
             obj.added_by = request.user
+
+        document_departments = obj.department.all().order_by('name')
+        for doc_dept in document_departments:
+            team_users = CompanyTeam.objects.filter(company_id = obj.company_id, department_id = doc_dept.id ).order_by('first_name')
+            for team_user in team_users:
+                assignDocumentToUser(team_user, obj, doc_dept)
+
+        print(document_departments)
 
         obj.save()
         
