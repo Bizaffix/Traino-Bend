@@ -6,7 +6,7 @@ from .forms import CustomUserCreationForm, CustomUserChangeForm, CompanyTeamCrea
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import Group
 from django.utils import timezone, dateformat
-from documents.models import DocumentAssignee, UserDocuments
+from documents.models import DocumentTeam, UserDocuments
 
 
 def day_hour_format_converter(date_time_UTC):
@@ -17,13 +17,13 @@ def day_hour_format_converter(date_time_UTC):
 
 def assignDocumentToUser(user, doc, department):
     try:
-        das = DocumentAssignee.objects.get(user_id = user.id, document_id = doc.id, department_id = department.id)
-    except DocumentAssignee.DoesNotExist:
+        das = DocumentTeam.objects.get(user_id = user.id, document_id = doc.id, department_id = department.id)
+    except DocumentTeam.DoesNotExist:
         das = None
 
 
     if das is None:
-        das = DocumentAssignee(user_id = user.id, document_id = doc.id, department_id = department.id, is_assigned = False, notify_frequency = 0)
+        das = DocumentTeam(user_id = user.id, document_id = doc.id, department_id = department.id, is_assigned = False, notify_frequency = 0)
         das.save()
 
 class CustomUserAdmin(UserAdmin):
@@ -34,14 +34,14 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('id', 'email', 'first_name', 'last_name', 'is_active', 'role', 'created','updated','added_by',)
     list_filter = ('is_active',)
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'first_name', 'last_name')}),
+        (None, {'fields': ('email', 'password', ('first_name', 'last_name'))}),
         ('Permissions', {'fields' : ('is_active',)}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'first_name', 'last_name')}
+            'fields': ('email', 'password1', 'password2', ('first_name', 'last_name'))}
         ),
         ('Permissions', {'fields' : ('is_active',)}),
     )
@@ -118,14 +118,14 @@ class CustomCompanyAdmin(UserAdmin):
     list_display = ('id','email', 'first_name', 'last_name', 'is_active', 'role', 'created','updated','added_by',)
     list_filter = ('is_active',)
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'first_name', 'last_name')}),
+        (None, {'fields': ('email', 'password', ('first_name', 'last_name'))}),
         ('Permissions', {'fields' : ('is_active',)}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'first_name', 'last_name')}
+            'fields': ('email', 'password1', 'password2', ('first_name', 'last_name'))}
         ),
         ('Permissions', {'fields' : ('is_active',)}),
     )
@@ -178,14 +178,14 @@ class CompanyTeamAdmin(UserAdmin):
     list_display = ('id','email', 'first_name', 'last_name', 'is_active', 'company', 'department', 'role', 'created','updated','added_by',)
     list_filter = [('is_active'),('company', admin.RelatedOnlyFieldListFilter)]
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'first_name', 'last_name', 'company', 'department')}),
+        (None, {'fields': ('email', 'password', ('first_name', 'last_name'), 'company', 'department')}),
         ('Permissions', {'fields' : ('is_active',)}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'first_name', 'last_name', 'company', 'department')}
+            'fields': ('email', 'password1', 'password2', ('first_name', 'last_name'), 'company', 'department')}
         ),
         ('Permissions', {'fields' : ('is_active',)}),
     )

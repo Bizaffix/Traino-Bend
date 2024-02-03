@@ -20,7 +20,7 @@ class UserDocuments(models.Model):
         verbose_name = ("Company Document")
         verbose_name_plural = ("Company Documents")
 
-class DocumentAssignee(models.Model):
+class DocumentTeam(models.Model):
     id = models.BigAutoField(primary_key= True)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE, related_name='assignee_document', default=0)
     # company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assignee_company', default=0)

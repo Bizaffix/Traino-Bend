@@ -6,13 +6,15 @@ from langchain.docstore.document import Document
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from langchain.document_loaders import PyPDFLoader
-from .models import UserDocuments, QuizQuestions, DocumentQuiz
+from .models import UserDocuments, QuizQuestions, DocumentQuiz, DocumentTeam
 from PyPDF2 import PdfReader
 from langchain.prompts import PromptTemplate
 import os
 import json
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
+from django.contrib import messages
+
 
 openai_api_key = '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'
 os.environ['OPENAI_API_KEY'] = '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'
@@ -183,8 +185,24 @@ def generateDocumentKeypoints(request):
                 #print("test: 6")
     return JsonResponse(data, status=200)
 
-def publishDocument(request, document_id):
-    print("in publishDocument view")
+def saveDocumentTeam(request, document_id):
+    if request.method == 'POST':
+
+        doc_team_ids = request.POST.get('doc_team_ids')
+        
+        if(doc_team_ids is not None):
+            doc_team_ids = doc_team_ids.split(',')
+            for doc_team_id in doc_team_ids:
+                is_assigned = request.POST.get('assigned_'+doc_team_id+"_options")
+                notify_frequency = request.POST.get('frequency_'+doc_team_id)
+                doc_team = DocumentTeam.objects.get(id=doc_team_id)
+                if doc_team is not None:
+                    doc_team.is_assigned = is_assigned
+                    doc_team.notify_frequency = notify_frequency
+                    doc_team.save()
+            messages.success(request, "Document team(s) updated.")
+
+    return redirect("/admin/documents/userdocuments/"+str(document_id)+"/viewTeam")
 
 def attemptQuiz(request, quiz_id):
     correct_answers = 0

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from .models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, QuizQuestions, DocumentAssignee
+from .models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, QuizQuestions, DocumentTeam
 from accounts.models import CompanyTeam, Departments
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
@@ -22,13 +22,13 @@ def day_hour_format_converter(date_time_UTC):
 
 def assignDocumentToUser(user, doc, department):
     try:
-        das = DocumentAssignee.objects.get(user_id = user.id, document_id = doc.id, department_id = department.id)
-    except DocumentAssignee.DoesNotExist:
+        das = DocumentTeam.objects.get(user_id = user.id, document_id = doc.id, department_id = department.id)
+    except DocumentTeam.DoesNotExist:
         das = None
 
 
     if das is None:
-        das = DocumentAssignee(user_id = user.id, document_id = doc.id, department_id = department.id, is_assigned = False, notify_frequency = 0)
+        das = DocumentTeam(user_id = user.id, document_id = doc.id, department_id = department.id, is_assigned = False, notify_frequency = 0)
         das.save()    
 
 class viewTeamView(PermissionRequiredMixin, DetailView):
@@ -38,19 +38,18 @@ class viewTeamView(PermissionRequiredMixin, DetailView):
         
 
     def get_context_data(self, **kwargs):
+        doc_team_ids = []
         try:
             # documents = UserDocuments.objects.filter(id = kwargs['object'].id)
             # for document in documents:
                 departments = kwargs['object'].department.all().order_by('name')
                 for dept in departments:
-                    dept.team_users = DocumentAssignee.objects.filter(document_id = kwargs['object'].id, department_id = dept.id ).order_by('user__email')
+                    dept.team_users = DocumentTeam.objects.filter(document_id = kwargs['object'].id, department_id = dept.id ).order_by('user__email')
+                    for t_user in dept.team_users:
+                        doc_team_ids.append(t_user.id)
         except UserDocuments.DoesNotExist:
             departments = None
-        # print(departments[0].team_users)
-        # quiz_ids = []
-        # for quiz in dquiz:
-        #     quiz_ids.append(str(quiz.id))
-        # quiz_ids = ','.join(quiz_ids)
+        doc_team_ids = ','.join(doc_team_ids)
 
         return {
             **super().get_context_data(**kwargs),
@@ -58,7 +57,7 @@ class viewTeamView(PermissionRequiredMixin, DetailView):
             "opts": self.model._meta,
             "company_id": kwargs['object'].company,
             "departments": departments,
-            # "question_ids": quiz_ids
+            "doc_team_ids": doc_team_ids
         }
 
 class CustomDocumentAdmin(ModelAdmin):

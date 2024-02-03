@@ -5,6 +5,8 @@
 
 {% block extrahead %}
     {{ block.super }}
+
+    <link rel="stylesheet" href="{% static 'admin/css/forms.css'%}">
     <script src="{% static 'admin/js/vendor/jquery/jquery.js'%}"></script>
     <script type="text/javascript">
         
@@ -48,127 +50,158 @@
         {% if object.name %}
             &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}{{ object.id }}/change/">{{ object.name|capfirst }}</a>
         {% endif %}
-        &rsaquo; ASSIGN TO TEAM
+        &rsaquo; ASSIGN TO TEAM(s)
     </div>
 {% endblock %}
 
 {% block content %}
-    <h1>ASSIGN TO TEAM{% if request.GET.cq %} {{ request.GET.cq }}  {% endif %}</h1>
+    <h1>ASSIGN TO TEAM(s){% if request.GET.cq %} {{ request.GET.cq }}  {% endif %}</h1>
     <h2>{{ object.name|capfirst }}</h2>
     
     <div id="content-main">
-        <div class="quiz_questions">
-            <form action="/publishDocument/{{ object.id }}" onsubmit="return validateForm();" method="post" id="quiz_question_form" novalidate>{% csrf_token %}
-                <input type="hidden" name="question_ids" value="{{ question_ids }}">
+        <!-- <div class="quiz_questions"> -->
+            <form action="/saveDocumentTeam/{{ object.id }}" onsubmit="return validateForm();" method="post" id="quiz_question_form" novalidate>{% csrf_token %}
+                <input type="hidden" name="doc_team_ids" value="{{ doc_team_ids }}">
                 <div class="">
-                    {% for dept in departments %}
-                        {% if dept.team_users %}
-                            <h2 style="text-align: center; margin-top: 10px;">{{ dept.name }}</h2>
-                        {% endif %}
-                        {% for t_user in dept.team_users %}
-                        <h2 style="text-align: center; margin-top: 10px;">{{ t_user.user.first_name }} {{ t_user.user.last_name }} ({{ t_user.user.email }})</h2>
-                        {% endfor %}
-                    {% endfor %}
-                    {% for quiz in quiz_questions %}
-                        <div class="question-row">
-                            <div class="module aligned ">
-                                <div class="form-row " style="margin-top: 5px;">
-                                    <div>
-                                        <div class="flex-container">
-                                            {{ form.question_91_options.errors }}
-                                            <label class="required label_order question_class" for="question_{{ quiz.id }}">Q{{ forloop.counter }}:</label>
-                                                <span>{{ quiz.question }}</span>
-                                                
+                    <fieldset class="module aligned wide">
+                        {% for dept in departments %}
+                            {% if dept.team_users %}
+                                <h2 style="text-align: center; margin-top: 10px;">{{ dept.name }}</h2>
+                            {% endif %}
+                            {% for t_user in dept.team_users %}
+                                <!-- <div class="question-row">
+                                    <div class="module aligned">
+                                        <div class="form-row " style="margin-top: 5px;">
+                                            <div >
+                                                <div class="flex-container ">
+                                                    {{ t_user.user.first_name }} {{ t_user.user.last_name }} ({{ t_user.user.email }})
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-row " style="margin-top: 15px;">
+                                            <div >
+                                                <div class="flex-container ">
+                                                    <input type="radio" id="option_1_{{ t_user.user.id }}" name="assigned_{{ t_user.user.id }}_options" value="True" >
+                                                        &nbsp;&nbsp;&nbsp;<label for="option_1_{{ t_user.user.id }}">Assigned</label>
+                                                        &nbsp;&nbsp;&nbsp;<input type="radio" id="option_2_{{ t_user.user.id }}" name="assigned_{{ t_user.user.id }}_options" value="True" >
+                                                        &nbsp;&nbsp;&nbsp;<label for="option_2_{{ t_user.user.id }}">Not Assigned</label>
+                                                </div>
+                                            </div>
+
+                                            <div >
+                                                <div class="flex-container">
+                                                    <select class="vTextField">
+                                                        <option value="">Select Frequency</option>
+                                                        <option value="0">Once a dat</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <div class="form-row">
+                                    <div class="flex-container form-multiline">
+                                        <div >
+                                            <div class="flex-container fieldBox">
+                                                <span style="padding: 5px 6px;">{{ t_user.user.first_name }} {{ t_user.user.last_name }} [{{ t_user.user.email }}]</span>
+                                            </div>
+                                        </div>
+                                    
+                                        <div >
+                                            <div class="flex-container fieldBox">
+                                                <input type="radio" id="option_1_{{ t_user.id }}" name="assigned_{{ t_user.id }}_options" {% if t_user.is_assigned %} checked="checked" {% endif %} value="True" ></label>&nbsp;&nbsp;&nbsp;<label for="option_1_{{ t_user.id }}">Assigned
+                                            </div>
+                                        </div>
+
+                                        <div >
+                                            <div class="flex-container fieldBox">
+                                                <input type="radio" id="option_2_{{ t_user.id }}" name="assigned_{{ t_user.id }}_options" {% if not t_user.is_assigned %} checked="checked" {% endif %} value="False" ></label>&nbsp;&nbsp;&nbsp;<label for="option_2_{{ t_user.id }}">Not Assigned
+                                                    
+                                            </div>
+                                        </div>
+
+                                        <div >
+                                            <div class="flex-container fieldBox">
+                                                <select class="vTextField" name="frequency_{{ t_user.id }}">
+                                                    <option value="">Select Frequency</option>
+                                                    <option value="0" {% if t_user.notify_frequency == '0' %} selected="selected" {% endif %}>Once a day</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-row " style="margin-top: 15px;">
-                                    <div>
-                                        <div class="flex-container">
-                                            <label class="required label_order" >A:&nbsp;&nbsp;&nbsp;</label>
-                                            <input type="radio" id="option_1_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="0" >
-                                            &nbsp;&nbsp;&nbsp;<label for="option_1_{{ quiz.id }}">{{ quiz.option_1 }}</label>
+                                
+                            {% endfor %}
+                        {% endfor %}
+                        {% for quiz in quiz_questions %}
+                            <div class="question-row">
+                                <div class="module aligned ">
+                                    <div class="form-row " style="margin-top: 5px;">
+                                        <div>
+                                            <div class="flex-container">
+                                                {{ form.question_91_options.errors }}
+                                                <label class="required label_order question_class" for="question_{{ quiz.id }}">Q{{ forloop.counter }}:</label>
+                                                    <span>{{ quiz.question }}</span>
+                                                    
+                                            </div>
                                         </div>
                                     </div>
-                                    <div style="margin-top: 10px;">
-                                        <div class="flex-container">
-                                            <label class="required label_order" >B:&nbsp;&nbsp;&nbsp;</label>
-                                            <input type="radio" id="option_2_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="1" >
-                                            &nbsp;&nbsp;&nbsp;<label for="option_2_{{ quiz.id }}">{{ quiz.option_2 }}</label>
+                                    <div class="form-row " style="margin-top: 15px;">
+                                        <div>
+                                            <div class="flex-container">
+                                                <label class="required label_order" >A:&nbsp;&nbsp;&nbsp;</label>
+                                                <input type="radio" id="option_1_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="0" >
+                                                &nbsp;&nbsp;&nbsp;<label for="option_1_{{ quiz.id }}">{{ quiz.option_1 }}</label>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div style="margin-top: 10px;">
-                                        <div class="flex-container">
-                                            <label class="required label_order" >C:&nbsp;&nbsp;&nbsp;</label>
-                                            <input type="radio" id="option_3_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="2" >
-                                            &nbsp;&nbsp;&nbsp;<label for="option_3_{{ quiz.id }}">{{ quiz.option_3 }}</label>
+                                        <div style="margin-top: 10px;">
+                                            <div class="flex-container">
+                                                <label class="required label_order" >B:&nbsp;&nbsp;&nbsp;</label>
+                                                <input type="radio" id="option_2_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="1" >
+                                                &nbsp;&nbsp;&nbsp;<label for="option_2_{{ quiz.id }}">{{ quiz.option_2 }}</label>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div style="margin-top: 10px;">
-                                        <div class="flex-container">
-                                            <label class="required label_order" >D:&nbsp;&nbsp;&nbsp;</label>
-                                            <input type="radio" id="option_4_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="3" >
-                                            &nbsp;&nbsp;&nbsp;<label for="option_4_{{ quiz.id }}">{{ quiz.option_4 }}</label>
+                                        <div style="margin-top: 10px;">
+                                            <div class="flex-container">
+                                                <label class="required label_order" >C:&nbsp;&nbsp;&nbsp;</label>
+                                                <input type="radio" id="option_3_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="2" >
+                                                &nbsp;&nbsp;&nbsp;<label for="option_3_{{ quiz.id }}">{{ quiz.option_3 }}</label>
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 10px;">
+                                            <div class="flex-container">
+                                                <label class="required label_order" >D:&nbsp;&nbsp;&nbsp;</label>
+                                                <input type="radio" id="option_4_{{ quiz.id }}" name="question_{{ quiz.id }}_options" value="3" >
+                                                &nbsp;&nbsp;&nbsp;<label for="option_4_{{ quiz.id }}">{{ quiz.option_4 }}</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </fieldset>
                     {% if departments %}
                         <div class="submit-row">
-                            <input type="submit" value="Assign Document to Team" class="default" name="_assign_document_to_team">
+                            <input type="submit" value="Assign Document to Team(s)" class="default" name="_assign_document_to_team">
                         </div>
                     {% endif %}
                 </div>
             </form>
-        </div>
+        <!-- </div> -->
     </div>
     <style>
-        .question-row {
-        padding: 12px 14px 12px;
-        margin: 0 0 20px;
+        .form-row {
+        padding: 10px 0px 0px 0px;
+        margin: 10px 0 10px;
         background: var(--darkened-bg);
         border: 1px solid var(--hairline-color);
         border-radius: 4px;
         overflow: hidden;
-        display: flex;
         
-        }
-        .required-question
-        {
-            border: 1px solid red;
-        }
-        .question-row .aligned label.label_order
-        {
-            width: 30px !important;
-            padding-top: 7px;
-            font-weight: bold;
-        }
-        .question-row .aligned span
-        {
-            padding-top: 10px;
-        }
-        #quiz_question_form .aligned
-        {
-            width: 100%;
-        }
-        .question-row .vTextField
-        {
-            width: 80%;
-            padding: 10px 6px;
-        }
-        .question-row .module
-        {
-            margin-bottom: 0px;
-        }
-        .question-row .vRadioTextField
-        {
-            width: 78.5%;
-            padding: 10px 6px;
-        }
-        .quiz_questions h2 {
+        }        
+        fieldset h2 {
             margin: 0;
+            margin-bottom: 20px;
             padding: 8px;
             font-weight: 400;
             font-size: 0.75rem;
