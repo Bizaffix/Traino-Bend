@@ -46,7 +46,7 @@ class viewTeamView(PermissionRequiredMixin, DetailView):
                 for dept in departments:
                     dept.team_users = DocumentTeam.objects.filter(document_id = kwargs['object'].id, department_id = dept.id ).order_by('user__email')
                     for t_user in dept.team_users:
-                        doc_team_ids.append(t_user.id)
+                        doc_team_ids.append(str(t_user.id))
         except UserDocuments.DoesNotExist:
             departments = None
         doc_team_ids = ','.join(doc_team_ids)
@@ -63,7 +63,7 @@ class viewTeamView(PermissionRequiredMixin, DetailView):
 class CustomDocumentAdmin(ModelAdmin):
 
     model = UserDocuments
-    list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'assign_team', 'updated','added_by')
+    list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'assign_team', 'is_publish', 'updated','added_by')
     list_filter = [('published'), ('company', admin.RelatedOnlyFieldListFilter)]
     fieldsets = (
         (None, {'fields': ('name', 'file', 'company', 'department')}),
@@ -92,7 +92,7 @@ class CustomDocumentAdmin(ModelAdmin):
             self.list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'updated','added_by')
             
         else:
-            self.list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'assign_team', 'updated','added_by')
+            self.list_display = ('id', 'name', 'view_file', 'company', 'created_at', 'summary', 'key_points', 'quiz', 'assign_team', 'is_publish', 'updated','added_by')
             
         return super().get_list_display(request)
     
@@ -107,17 +107,15 @@ class CustomDocumentAdmin(ModelAdmin):
 
     def is_publish(self, obj):
         if obj.published:
-            return format_html('<a href="javascript:;" onclick="javascript: unPublishDocument({0});" />Make Unpublish</a>', obj.id)
+            return format_html('<a href="javascript:;" onclick="javascript: togglePublishDocument({0}, this);" />Make Unpublish</a>', obj.id)
         else:
-            url = reverse("admin:documents_publishDocument", args=[obj.pk])
-            return format_html(f'<a href="{url}">Make Publish</a>')
-            # return format_html('<a href="/admin/documents/userdocuments/{0}/publishDocument/" />Make Publish</a>', obj.id)
+            return format_html('<a href="javascript:;" onclick="javascript: togglePublishDocument({0}, this);" />Make Publish</a>', obj.id)
     is_publish.short_description = 'Status'
 
     def assign_team(self, obj):
         url = reverse("admin:documents_viewTeam", args=[obj.pk])
         return format_html(f'<a href="{url}">View Team</a>')
-    assign_team.short_description = 'Status'
+    assign_team.short_description = 'Team'
     
     
     def updated(self, obj):

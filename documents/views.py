@@ -204,6 +204,21 @@ def saveDocumentTeam(request, document_id):
 
     return redirect("/admin/documents/userdocuments/"+str(document_id)+"/viewTeam")
 
+def publishDocument(request):
+    data = {'label': '', 'msg': ''}
+    if request.method == 'POST':
+        document_id = request.POST.get('document_id')
+        company_document = UserDocuments.objects.get(id=document_id)
+        if company_document is not None and company_document.published is True:
+            company_document.published = False
+            company_document.save()
+            data['label'] = 'Make Publish'
+        elif company_document is not None and company_document.published is False:
+            company_document.published = True
+            company_document.save()
+            data['label'] = 'Make Unpublish'
+    return JsonResponse(data, status=200)
+
 def attemptQuiz(request, quiz_id):
     correct_answers = 0
     wrong_answers = 0
