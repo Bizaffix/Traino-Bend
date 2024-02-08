@@ -274,105 +274,108 @@ def generateDocumentQuiz(request):
 
             document = UserDocuments.objects.get(id=document_id)
             if document.file.path is not None:
-                #print("test: 1")
-                # Instantiate the LLM model
-                #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
-                llm = ChatOpenAI(model_name='gpt-3.5-turbo')
-                #print("test: 2")
-                print(document.file.path)
-                text = readPDFFile(document.file.path)
-                #print("test: 3")
-
-                loader = PyPDFLoader(document.file.path)
-                # text = loader.load_and_split()
-                # print(text)
-
-                pages = loader.load()
-                text = ""
-                for page in pages:
-                    text+=page.page_content
-                text= text.replace('\t', ' ')
-                text= text.replace('\xa0', '')
-
-                #print(len(text))
-
-                #splits a long document into smaller chunks that can fit into the LLM's 
-                #model's context window
-                
-                text_splitter = CharacterTextSplitter(
-                        separator="\n",
-                        chunk_size=4000,
-                        chunk_overlap=200
-                    )
-                # print(text_splitter)
-                
-                #create_documents() create documents froma list of texts
-                
-                text = text_splitter.create_documents([text])
-
-                text_chunk_index = 0
-                for text_chunk in text:
-                    # print(text_chunk.page_content)
-                    # print('-----------------------')
-                    text[text_chunk_index].page_content = text_chunk.page_content.replace('\n', '')
-                    text_chunk_index += 1
-
-
-                #print(text)
-                #print("test: 4")
-
-                # Define prompt
-                # prompt_template = """You are required to generate """+prompt_text+""" based on the provided text:
-                # {text}
-                # CONCISE OUTLINE:"""
-
-                # prompt_template = """You are required to generate 25 multiple choice questions having four options and correct answer in json format based on the provided text:
-                # {text}
-                # MCQ QUIZ:"""
-
-                prompt_template = """You are a teacher preparing questions for a quiz. Based on the following document, please generate upto """+prompt_text+""" with four options and a correct answer. Follow below example format and convert result to json array of objects:
-                
-                Example question:
-                
-                question:question here
-                options:option 1, option 2, option 3, option 4
-                answer:0 or 1 or 2 or 3
-                
-                <Begin Document>
-                {text}
-                <End Document>
-                MCQ QUIZ:"""
-
-                prompt_template = PromptTemplate(template=prompt_template, input_variables=["text"])
-
-                
-
-                # Text summarization
-                chain = load_summarize_chain(llm, chain_type='stuff', prompt=prompt_template)
-                #print("test: 5")
-                document_quiz = chain.run(text)
-                # print(len(document_quiz))
-                # print(document_quiz)
-                # print("test: 6")
-                if(document_quiz.endswith(']') == False):
-                   quiz_array = document_quiz.split('},')
-                   quiz_array.pop((len(quiz_array) - 1))
-                   document_quiz = '},'.join(quiz_array)
-                   document_quiz = document_quiz + '}]'
-                # print(document_quiz)
-                # print("test: 7")
-                document_quiz = json.loads(document_quiz)
                 try:
-                    dquiz = QuizQuestions.objects.filter(quiz_id = int(quiz_id) ).delete() 
-                except QuizQuestions.DoesNotExist:
-                    dquiz = None
-                # for quiz in document_quiz:
-                #     if(quiz['question'] is not None and quiz['options'] is not None and quiz['answer'] is not None):
-                #         q_question = QuizQuestions(question = quiz['question'], option_1 = quiz['options'][0], option_2 = quiz['options'][1], option_3 = quiz['options'][2], option_4 = quiz['options'][3], answer = quiz['answer'], quiz_id = quiz_id, document_id = document_id)
-                #         q_question.save()
+                    #print("test: 1")
+                    # Instantiate the LLM model
+                    #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+                    llm = ChatOpenAI(model_name='gpt-3.5-turbo')
+                    #print("test: 2")
+                    print(document.file.path)
+                    text = readPDFFile(document.file.path)
+                    #print("test: 3")
 
-                # print(document_quiz[0]['question'])
-                # print(document_quiz[0]['options'])
-                # print(document_quiz[0]['answer'])
-                data['document_quiz'] = json.dumps(document_quiz, indent=4)
+                    loader = PyPDFLoader(document.file.path)
+                    # text = loader.load_and_split()
+                    # print(text)
+
+                    pages = loader.load()
+                    text = ""
+                    for page in pages:
+                        text+=page.page_content
+                    text= text.replace('\t', ' ')
+                    text= text.replace('\xa0', '')
+
+                    #print(len(text))
+
+                    #splits a long document into smaller chunks that can fit into the LLM's 
+                    #model's context window
+                    
+                    text_splitter = CharacterTextSplitter(
+                            separator="\n",
+                            chunk_size=4000,
+                            chunk_overlap=200
+                        )
+                    # print(text_splitter)
+                    
+                    #create_documents() create documents froma list of texts
+                    
+                    text = text_splitter.create_documents([text])
+
+                    text_chunk_index = 0
+                    for text_chunk in text:
+                        # print(text_chunk.page_content)
+                        # print('-----------------------')
+                        text[text_chunk_index].page_content = text_chunk.page_content.replace('\n', '')
+                        text_chunk_index += 1
+
+
+                    #print(text)
+                    #print("test: 4")
+
+                    # Define prompt
+                    # prompt_template = """You are required to generate """+prompt_text+""" based on the provided text:
+                    # {text}
+                    # CONCISE OUTLINE:"""
+
+                    # prompt_template = """You are required to generate 25 multiple choice questions having four options and correct answer in json format based on the provided text:
+                    # {text}
+                    # MCQ QUIZ:"""
+
+                    prompt_template = """You are a teacher preparing questions for a quiz. Based on the following document, please generate upto """+prompt_text+""" with four options and a correct answer. Follow below example format and convert result to json array of objects:
+                    
+                    Example question:
+                    
+                    question:question here
+                    options:option 1, option 2, option 3, option 4
+                    answer:0 or 1 or 2 or 3
+                    
+                    <Begin Document>
+                    {text}
+                    <End Document>
+                    MCQ QUIZ:"""
+
+                    prompt_template = PromptTemplate(template=prompt_template, input_variables=["text"])
+
+                    
+
+                    # Text summarization
+                    chain = load_summarize_chain(llm, chain_type='stuff', prompt=prompt_template)
+                    #print("test: 5")
+                    document_quiz = chain.run(text)
+                    # print(len(document_quiz))
+                    # print(document_quiz)
+                    # print("test: 6")
+                    if(document_quiz.endswith(']') == False):
+                        quiz_array = document_quiz.split('},')
+                        quiz_array.pop((len(quiz_array) - 1))
+                        document_quiz = '},'.join(quiz_array)
+                        document_quiz = document_quiz + '}]'
+                    # print(document_quiz)
+                    # print("test: 7")
+                    document_quiz = json.loads(document_quiz)
+                    try:
+                        dquiz = QuizQuestions.objects.filter(quiz_id = int(quiz_id) ).delete() 
+                    except QuizQuestions.DoesNotExist:
+                        dquiz = None
+                    # for quiz in document_quiz:
+                    #     if(quiz['question'] is not None and quiz['options'] is not None and quiz['answer'] is not None):
+                    #         q_question = QuizQuestions(question = quiz['question'], option_1 = quiz['options'][0], option_2 = quiz['options'][1], option_3 = quiz['options'][2], option_4 = quiz['options'][3], answer = quiz['answer'], quiz_id = quiz_id, document_id = document_id)
+                    #         q_question.save()
+
+                    # print(document_quiz[0]['question'])
+                    # print(document_quiz[0]['options'])
+                    # print(document_quiz[0]['answer'])
+                    data['document_quiz'] = json.dumps(document_quiz, indent=4)
+                except:
+                    data['msg'] = 'Your document content is too large, Please try with some other document.'
     return JsonResponse(data, status=200)

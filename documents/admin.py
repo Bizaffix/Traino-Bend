@@ -157,6 +157,8 @@ class CustomDocumentAdmin(ModelAdmin):
         elif obj.added_by is None:    
             obj.added_by = request.user
 
+        obj.save()
+        
         document_departments = obj.department.all().order_by('name')
         for doc_dept in document_departments:
             team_users = CompanyTeam.objects.filter(company_id = obj.company_id, department_id = doc_dept.id ).order_by('first_name')
@@ -165,8 +167,6 @@ class CustomDocumentAdmin(ModelAdmin):
 
         print(document_departments)
 
-        obj.save()
-        
         try:
             dq = DocumentQuiz.objects.get(document_id=obj.id)
         except DocumentQuiz.DoesNotExist:
