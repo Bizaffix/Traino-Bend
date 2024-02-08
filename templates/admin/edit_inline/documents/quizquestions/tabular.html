@@ -10,7 +10,7 @@
    {% else %}
      <h2>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</h2>
    {% endif %}
-   {{ inline_admin_formset.formset.non_form_errors }}
+   <!-- {{ inline_admin_formset.formset.non_form_errors }} -->
 
     
     {% for inline_admin_form in inline_admin_formset %}
@@ -30,15 +30,19 @@
                 </p>{% endif %}
               {% if inline_admin_form.needs_explicit_pk_field %}{{ inline_admin_form.pk_field.field }}{% endif %}
               {% if inline_admin_form.fk_field %}{{ inline_admin_form.fk_field.field }}{% endif %}
+              
+              {% if inline_admin_form.original %}
+                <span><a class="inline-deletelink custom_delete_link" onclick="javascript: deleteQuizQuestion({{ inline_admin_form.original.id }}, {{ forloop.counter0 }});" href="javascript:;"><img height="32" src="/media/images/icon-deletelink.svg" alt="Delete Question" ></a></span>
+              {% endif %}
           </div>
 
           {% include "admin/edit_inline/documents/quizquestions/inline_fieldset.html" %}
 
         </div>
-        <!-- {% if inline_admin_formset.formset.can_delete and inline_admin_formset.has_delete_permission %}
+        {% if inline_admin_formset.formset.can_delete and inline_admin_formset.has_delete_permission %}
           <td class="delete">{% if inline_admin_form.original %}{{ inline_admin_form.deletion_field.field }}{% endif %}</td>
         {% endif %}
-        </tr> -->
+        </tr>
      {% endfor %}
 
    
@@ -47,12 +51,17 @@
 </div>
 <style>
   .question-row {
-  padding: 12px 14px 12px;
-  margin: 0 0 20px;
+  padding: 0px 14px 12px;
+  margin: 10px 0px 10px 0px;
   background: var(--darkened-bg);
   border: 1px solid var(--hairline-color);
   border-radius: 4px;
   
+  }
+  .custom_delete_link
+  {
+    background: none;
+    text-indent: unset;
   }
   .question-row label
   {
@@ -99,21 +108,25 @@
     (function($) {
         $('.correct-answer').each(function(i) {
             //console.log(i+"==="+$(this).val());
-            if($(this).val() == 0)
+            if($(this).val() == '0')
             {
               $( "#id_quizquestions_set-"+i+"-option_1_option" ).prop( "checked", true );
             }
-            else if($(this).val() == 1)
+            else if($(this).val() == '1')
             {
               $( "#id_quizquestions_set-"+i+"-option_2_option" ).prop( "checked", true );
             }
-            else if($(this).val() == 2)
+            else if($(this).val() == '2')
             {
               $( "#id_quizquestions_set-"+i+"-option_3_option" ).prop( "checked", true );
             }
-            else if($(this).val() == 3)
+            else if($(this).val() == '3')
             {
               $( "#id_quizquestions_set-"+i+"-option_4_option" ).prop( "checked", true );
+            }
+            else
+            {
+              $(this).val('0');
             }
         });
 
@@ -141,7 +154,46 @@
 
   function updateAnswer(value, answer_id)
   {
+    (function($) {
       $("#"+answer_id).val(value);
+    })(django.jQuery);
+  }
+
+  function deleteQuizQuestion(question_id, row_id)
+  {
+    (function($) {
+      if(question_id > 0)
+      {
+          if(confirm("Are you sure you want to remove that question?"))
+          {
+            $.ajax({
+                type: 'POST',
+                url: "/deleteQuizQuestion/"+question_id,
+                data: {'csrfmiddlewaretoken': '{{csrf_token}}'},
+                success: function (response)
+                {
+                    if(response["msg"] !='')
+                    {
+                        alert(response["msg"]);
+                    }
+                    else if(response["status"] == 1)
+                    {
+                        $("#quizquestions_set-"+row_id).remove();
+                    }
+                },
+                error: function (response) {
+                    console.log(response)
+                },
+                beforeSend: function(){
+                    //$(".general_loader").fadeIn("slow");
+                },
+                complete: function(){
+                    //$(".general_loader").fadeOut("slow");
+                }
+            });
+          }
+      }
+    })(django.jQuery);
   }
   
 </script>

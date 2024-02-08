@@ -219,6 +219,15 @@ def publishDocument(request):
             data['label'] = 'Make Unpublish'
     return JsonResponse(data, status=200)
 
+def deleteQuizQuestion(request, question_id):
+    data = {'status': 0, 'msg': ''}
+    if request.method == 'POST':
+        quiz_question = QuizQuestions.objects.get(id=question_id)
+        if quiz_question is not None:
+            quiz_question.delete()
+            data['status'] = 1
+    return JsonResponse(data, status=200)
+
 def attemptQuiz(request, quiz_id):
     correct_answers = 0
     wrong_answers = 0

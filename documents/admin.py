@@ -12,6 +12,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic.detail import SingleObjectMixin, DetailView
 from django.urls import path, reverse
 from django.utils import timezone, dateformat
+from django.conf import settings
 
 
 def day_hour_format_converter(date_time_UTC):
@@ -300,21 +301,31 @@ class QuizQuestionsInline(admin.TabularInline):
     model = QuizQuestions
     readonly_fields = ('id',)
     extra = 0
-    # can_delete = True
-    show_change_link = True
+    can_delete = False
+    show_change_link = False
     # classes = ('collapse', )
     form = QuizQuestionsForm
+
+    @property
+    def media(self):
+        media = super(QuizQuestionsInline, self).media
+
+        # media._css_lists(css)
+        media._js_lists[0].pop()
+        media._js_lists[0].append("/media/js/inlines.js")
+        return media
+
 
     template = 'admin/edit_inline/documents/quizquestions/tabular.html'
 
     def has_add_permission(self, request, obj):
-        return False
+        return True
     
     def has_change_permission(self, request, obj=None):
         return True
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return True
 
 class QuizResultView(PermissionRequiredMixin, DetailView):
     permission_required = "documents.view_documentquiz"
@@ -364,6 +375,8 @@ class DocumentQuizAdmin(ModelAdmin):
     
 
     inlines = [QuizQuestionsInline]
+
+    
 
     def get_urls(self):
         return [

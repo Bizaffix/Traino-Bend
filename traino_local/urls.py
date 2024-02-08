@@ -19,7 +19,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from documents.views import generateDocumentSummary, generateDocumentKeypoints, generateDocumentQuiz, attemptQuiz, saveDocumentTeam, publishDocument
+from documents.views import generateDocumentSummary, generateDocumentKeypoints, generateDocumentQuiz, attemptQuiz, saveDocumentTeam, publishDocument, deleteQuizQuestion
 from accounts.views import DepartmentAutocompleteView, CompanyAutocompleteView
 
 
@@ -29,6 +29,7 @@ urlpatterns = [
     path('generateDocumentKeypoints/', generateDocumentKeypoints),
     path('generateDocumentQuiz/', generateDocumentQuiz),
     path('attemptQuiz/<int:quiz_id>', attemptQuiz),
+    path('deleteQuizQuestion/<int:question_id>', deleteQuizQuestion),
     path('saveDocumentTeam/<int:document_id>', saveDocumentTeam),
     path('publishDocument/', publishDocument),
     path('department_autocomplete/', DepartmentAutocompleteView.as_view(), name='department_autocomplete'),

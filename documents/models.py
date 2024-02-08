@@ -85,7 +85,7 @@ class QuizQuestions(models.Model):
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
-        return self.question
+        return self.question or ''
     
     class Meta:
         verbose_name = ("Question")
