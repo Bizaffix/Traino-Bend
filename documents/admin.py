@@ -138,15 +138,15 @@ class CustomDocumentAdmin(ModelAdmin):
 
     def summary(self, obj):
         ds = DocumentSummary.objects.get(document=obj.id)
-        return format_html('<a href="/admin/documents/documentsummary/{0}/change/" />View Summary</a>', ds.id)
+        return format_html('<a href="/documents/documentsummary/{0}/change/" />View Summary</a>', ds.id)
 
     def key_points(self, obj):
         dkp = DocumentKeyPoints.objects.get(document=obj.id)
-        return format_html('<a href="/admin/documents/documentkeypoints/{0}/change/" />View Keypoints</a>', dkp.id)
+        return format_html('<a href="/documents/documentkeypoints/{0}/change/" />View Keypoints</a>', dkp.id)
  
     def quiz(self, obj):
         dq = DocumentQuiz.objects.get(document=obj.id)
-        return format_html('<a href="/admin/documents/documentquiz/{0}/change/" />View Quiz</a>', dq.id)
+        return format_html('<a href="/documents/documentquiz/{0}/change/" />View Quiz</a>', dq.id)
     
     def save_model(self, request, obj, form, change):
         """
@@ -463,8 +463,9 @@ class DocumentQuizAdmin(ModelAdmin):
             dquiz = QuizQuestions.objects.filter(quiz_id=obj.id)
         except QuizQuestions.DoesNotExist:
             dquiz = None
-        if dquiz is None or len(dquiz) == 0:
+        if (dquiz is None or len(dquiz) == 0) and obj.content is not None and obj.content != '':
             print("adding quiz")
+            print(obj.content)
             document_quiz = json.loads(obj.content)
             for quiz in document_quiz:
                 if quiz['question'] is not None and quiz['options'] is not None and quiz['answer'] is not None:
