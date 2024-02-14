@@ -202,7 +202,7 @@ def saveDocumentTeam(request, document_id):
                     doc_team.save()
             messages.success(request, "Document team(s) updated.")
 
-    return redirect("/documents/userdocuments/"+str(document_id)+"/viewTeam")
+    return redirect("/admin/documents/userdocuments/"+str(document_id)+"/viewTeam")
 
 def publishDocument(request):
     data = {'label': '', 'msg': ''}

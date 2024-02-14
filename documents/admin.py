@@ -13,7 +13,7 @@ from django.views.generic.detail import SingleObjectMixin, DetailView
 from django.urls import path, reverse
 from django.utils import timezone, dateformat
 from django.conf import settings
-
+from django.contrib import messages
 
 def day_hour_format_converter(date_time_UTC):
     return dateformat.format(
@@ -138,16 +138,19 @@ class CustomDocumentAdmin(ModelAdmin):
 
     def summary(self, obj):
         ds = DocumentSummary.objects.get(document=obj.id)
-        return format_html('<a href="/documents/documentsummary/{0}/change/" />View Summary</a>', ds.id)
+        url = reverse("admin:documents_documentsummary_change", args=[ds.id])
+        return format_html(f'<a href="{url}">View Summary</a>')
 
     def key_points(self, obj):
         dkp = DocumentKeyPoints.objects.get(document=obj.id)
-        return format_html('<a href="/documents/documentkeypoints/{0}/change/" />View Keypoints</a>', dkp.id)
+        url = reverse("admin:documents_documentkeypoints_change", args=[dkp.id])
+        return format_html(f'<a href="{url}">View Keypoints</a>')
  
     def quiz(self, obj):
         dq = DocumentQuiz.objects.get(document=obj.id)
-        return format_html('<a href="/documents/documentquiz/{0}/change/" />View Quiz</a>', dq.id)
-    
+        url = reverse("admin:documents_documentquiz_change", args=[dq.id])
+        return format_html(f'<a href="{url}">View Quiz</a>')
+
     def save_model(self, request, obj, form, change):
         """
         Given a model instance save it to the database.
@@ -159,13 +162,12 @@ class CustomDocumentAdmin(ModelAdmin):
 
         obj.save()
         
-        document_departments = obj.department.all().order_by('name')
-        for doc_dept in document_departments:
+        document_departments = request.POST.getlist('department')
+        for dept_id in document_departments:
+            doc_dept = Departments.objects.get(id=dept_id)
             team_users = CompanyTeam.objects.filter(company_id = obj.company_id, department_id = doc_dept.id ).order_by('first_name')
             for team_user in team_users:
                 assignDocumentToUser(team_user, obj, doc_dept)
-
-        print(document_departments)
 
         try:
             dq = DocumentQuiz.objects.get(document_id=obj.id)
@@ -465,7 +467,6 @@ class DocumentQuizAdmin(ModelAdmin):
             dquiz = None
         if (dquiz is None or len(dquiz) == 0) and obj.content is not None and obj.content != '':
             print("adding quiz")
-            print(obj.content)
             document_quiz = json.loads(obj.content)
             for quiz in document_quiz:
                 if quiz['question'] is not None and quiz['options'] is not None and quiz['answer'] is not None:
@@ -473,7 +474,7 @@ class DocumentQuizAdmin(ModelAdmin):
                     q_question.save()
         else:
             print("quiz already there")
-            print(len(dquiz))
+            # print(len(dquiz))
     
 
 admin.site.register(UserDocuments, CustomDocumentAdmin)
