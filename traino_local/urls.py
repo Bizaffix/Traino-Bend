@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
@@ -33,6 +33,7 @@ urlpatterns = [
     path('publishDocument/', publishDocument),
     path('department_autocomplete/', DepartmentAutocompleteView.as_view(), name='department_autocomplete'),
     path('company_autocomplete/', CompanyAutocompleteView.as_view(), name='company_autocomplete'),
+    path('api/', include('accounts.urls'))
 ]
 
 
