@@ -30,8 +30,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'traino.ai',
-    'ec2-54-144-87-172.compute-1.amazonaws.com',
+    'app.traino.ai',
 ]
 
 
