@@ -152,6 +152,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # JWT Configurations
 
 REST_FRAMEWORK = {
+    'DATETIME_FORMAT': "%m/%d/%Y %H:%M:%S",
+    'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE':10,
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
