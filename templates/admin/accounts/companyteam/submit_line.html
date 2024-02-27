@@ -1,0 +1,79 @@
+{% load i18n admin_urls %}
+<div class="submit-row">
+{% block submit-row %}
+{% if show_save %}<input type="submit" value="{% translate 'Save' %}" class="default" name="_save">{% endif %}
+{% if show_save_as_new %}<input type="submit" value="{% translate 'Save as new' %}" name="_saveasnew">{% endif %}
+{% if show_save_and_add_another %}<input type="submit" value="{% translate 'Save and add another' %}" name="_addanother">{% endif %}
+{% if show_save_and_continue %}<input type="submit" value="{% if can_change %}{% translate 'Save and continue editing' %}{% else %}{% translate 'Save and view' %}{% endif %}" name="_continue">{% endif %}
+{% if show_close %}
+    {% url opts|admin_urlname:'changelist' as changelist_url %}
+    <a href="{% add_preserved_filters changelist_url %}" class="closelink">{% translate 'Close' %}</a>
+{% endif %}
+{% if show_delete_link and original %}
+    {% url opts|admin_urlname:'delete' original.pk|admin_urlquote as delete_url %}
+    <a href="{% add_preserved_filters delete_url %}" class="deletelink">{% translate "Delete" %}</a>
+{% endif %}
+<style>
+    .general_loader
+    {
+        padding: 10px 15px;
+        font-weight: bold;
+        display: none;
+    }
+</style>
+{% endblock %}
+</div>
+
+{% block related_widget_javascript %}
+
+<script>
+    (function($) {
+        /*
+        On click of generate summary button,
+        call AJAX to generate document summary using open ai and show it in text area.
+        */
+        $(function () {
+            if(typeof $("#change_id_company").attr("data-href-template") !='undefined')
+            {
+                $("#change_id_company").attr("data-href-template", $("#change_id_company").attr("data-href-template").replace("customuser", "customcompanyuser"));
+            }
+            if(typeof $("#change_id_company").attr("href") !='undefined')
+            {
+                $("#change_id_company").attr("href", $("#change_id_company").attr("href").replace("customuser", "customcompanyuser"));
+            }
+            if(typeof $("#change_id_company").attr("title") !='undefined')
+            {
+                $("#change_id_company").attr("title", "Change selected Company Admin");
+            }
+
+
+            if(typeof $("#add_id_company").attr("data-href-template") !='undefined')
+            {
+                $("#add_id_company").attr("data-href-template", $("#add_id_company").attr("data-href-template").replace("customuser", "customcompanyuser"));
+            }
+            if(typeof $("#add_id_company").attr("href") !='undefined')
+            {
+                $("#add_id_company").attr("href", $("#add_id_company").attr("href").replace("customuser", "customcompanyuser"));
+            }
+            if(typeof $("#add_id_company").attr("title") !='undefined')
+            {
+                $("#add_id_company").attr("title", "Add another Company Admin");
+            }
+
+
+            if(typeof $("#view_id_company").attr("data-href-template") !='undefined')
+            {
+                $("#view_id_company").attr("data-href-template", $("#view_id_company").attr("data-href-template").replace("customuser", "customcompanyuser"));
+            }
+            if(typeof $("#view_id_company").attr("href") !='undefined')
+            {
+                $("#view_id_company").attr("href", $("#view_id_company").attr("href").replace("customuser", "customcompanyuser"));
+            }
+            if(typeof $("#view_id_company").attr("title") !='undefined')
+            {
+                $("#view_id_company").attr("title", "View selected Company Admin");
+            }
+        })
+    })(django.jQuery);
+</script>
+{% endblock %}

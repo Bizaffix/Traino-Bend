@@ -1,0 +1,137 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n admin_urls static admin_modify %}
+{% load static %}
+
+
+{% block extrahead %}
+    {{ block.super }}
+
+    <link rel="stylesheet" href="{% static 'admin/css/forms.css'%}">
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js'%}"></script>
+    <script type="text/javascript">
+        
+        function validateForm()
+        {
+            var required_questions = 0;
+            $('.question_class').each(function(i) {
+                console.log(i+"==="+$(this).attr("for"));
+                if($("input:radio[name='"+$(this).attr("for")+"_options']").is(":checked") == false)
+                {
+                    $(this).closest(".question-row").addClass("required-question");
+                    required_questions +=1;
+                }
+                else
+                {
+                    $(this).closest(".question-row").removeClass("required-question");
+                }
+            });
+            if(required_questions > 0)
+            {
+                alert("You have not selected answers for some question(s).");
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        
+    </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+        {% if opts.app_config.verbose_name %}
+            &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+        {% endif %}
+        {% if opts.verbose_name_plural %}
+            &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+        {% endif %}
+        {% if object.name %}
+            &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}{{ object.id }}/change/">{{ object.name|capfirst }}</a>
+        {% endif %}
+        &rsaquo; ASSIGN TO TEAM(s)
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h1>ASSIGN TO TEAM(s){% if request.GET.cq %} {{ request.GET.cq }}  {% endif %}</h1>
+    <h2>{{ object.name|capfirst }}</h2>
+    
+    <div id="content-main">
+        <form action="/saveDocumentTeam/{{ object.id }}" onsubmit="return validateForm();" method="post" id="quiz_question_form" novalidate>{% csrf_token %}
+            <input type="hidden" name="doc_team_ids" value="{{ doc_team_ids }}">
+            <div class="">
+                <fieldset class="module aligned wide">
+                    {% for dept in departments %}
+                        {% if dept.team_users %}
+                            <h2 style="text-align: center; margin-top: 10px;">{{ dept.name }}</h2>
+                        {% endif %}
+                        {% for t_user in dept.team_users %}
+                            <div class="form-row">
+                                <div class="flex-container form-multiline">
+                                    <div >
+                                        <div class="flex-container fieldBox">
+                                            <span style="padding: 5px 6px;">{{ t_user.user.first_name }} {{ t_user.user.last_name }} [{{ t_user.user.email }}]</span>
+                                        </div>
+                                    </div>
+                                
+                                    <div >
+                                        <div class="flex-container fieldBox">
+                                            <input type="radio" id="option_1_{{ t_user.id }}" name="assigned_{{ t_user.id }}_options" {% if t_user.is_assigned %} checked="checked" {% endif %} value="True" ></label>&nbsp;&nbsp;&nbsp;<label for="option_1_{{ t_user.id }}">Assigned
+                                        </div>
+                                    </div>
+
+                                    <div >
+                                        <div class="flex-container fieldBox">
+                                            <input type="radio" id="option_2_{{ t_user.id }}" name="assigned_{{ t_user.id }}_options" {% if not t_user.is_assigned %} checked="checked" {% endif %} value="False" ></label>&nbsp;&nbsp;&nbsp;<label for="option_2_{{ t_user.id }}">Not Assigned
+                                                
+                                        </div>
+                                    </div>
+
+                                    <div >
+                                        <div class="flex-container fieldBox">
+                                            <select class="vTextField" name="frequency_{{ t_user.id }}">
+                                                <option value="">Select Frequency</option>
+                                                <option value="0" {% if t_user.notify_frequency == '0' %} selected="selected" {% endif %}>Once a day</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        {% endfor %}
+                    {% endfor %}
+                </fieldset>
+                {% if departments %}
+                    <div class="submit-row">
+                        <input type="submit" value="Assign Document to Team(s)" class="default" name="_assign_document_to_team">
+                    </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+    <style>
+        .form-row {
+        padding: 10px 0px 0px 0px;
+        margin: 10px 0 10px;
+        background: var(--darkened-bg);
+        border: 1px solid var(--hairline-color);
+        border-radius: 4px;
+        overflow: hidden;
+        
+        }        
+        fieldset h2 {
+            margin: 0;
+            margin-bottom: 20px;
+            padding: 8px;
+            font-weight: 400;
+            font-size: 0.75rem;
+            text-align: left;
+            background: var(--primary);
+            color: var(--header-link-color);
+        }
+    </style>
+    
+{% endblock %}

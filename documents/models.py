@@ -1,27 +1,40 @@
 from django.db import models
-from accounts.models import CustomUser
+from accounts.models import CustomUser, Departments
 
 
 class UserDocuments(models.Model):
     id = models.BigAutoField(primary_key = True)
     name = models.CharField(max_length = 100)
     file = models.FileField(upload_to='documents/',)
-    created_date = models.DateTimeField(auto_now_add=True)
-    #user_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='document_company', default=0)
+    department = models.ManyToManyField(Departments, related_name='document_departments')
+    published = models.BooleanField(default=False)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="document_added_by")
 
     def __str__(self):
         return self.name
     
     class Meta:
-        verbose_name = ("Document")
-        verbose_name_plural = ("Documents")
+        verbose_name = ("Company Document")
+        verbose_name_plural = ("Company Documents")
+
+class DocumentTeam(models.Model):
+    id = models.BigAutoField(primary_key= True)
+    document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE, related_name='assignee_document', default=0)
+    # company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assignee_company', default=0)
+    department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='assignee_department', default=0)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assignee_user', default=0)
+    is_assigned = models.BooleanField(default=False)
+    notify_frequency =models.CharField(max_length = 2, default = '0')
 
 class DocumentSummary(models.Model):
     id = models.BigAutoField(primary_key=True)
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.document.name
@@ -35,7 +48,7 @@ class DocumentKeyPoints(models.Model):
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.document.name
@@ -50,7 +63,7 @@ class DocumentQuiz(models.Model):
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -69,10 +82,10 @@ class QuizQuestions(models.Model):
     answer = models.CharField(max_length = 2, blank=True, null=True)
     quiz = models.ForeignKey(DocumentQuiz, on_delete=models.CASCADE)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     def __str__(self):
-        return self.question
+        return self.question or ''
     
     class Meta:
         verbose_name = ("Question")

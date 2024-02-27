@@ -15,11 +15,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from documents.views import generateDocumentSummary, generateDocumentKeypoints, generateDocumentQuiz, attemptQuiz
+from documents.views import generateDocumentSummary, generateDocumentKeypoints, generateDocumentQuiz, attemptQuiz, saveDocumentTeam, publishDocument, deleteQuizQuestion
+from accounts.views import DepartmentAutocompleteView, CompanyAutocompleteView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +28,12 @@ urlpatterns = [
     path('generateDocumentKeypoints/', generateDocumentKeypoints),
     path('generateDocumentQuiz/', generateDocumentQuiz),
     path('attemptQuiz/<int:quiz_id>', attemptQuiz),
+    path('deleteQuizQuestion/<int:question_id>', deleteQuizQuestion),
+    path('saveDocumentTeam/<int:document_id>', saveDocumentTeam),
+    path('publishDocument/', publishDocument),
+    path('department_autocomplete/', DepartmentAutocompleteView.as_view(), name='department_autocomplete'),
+    path('company_autocomplete/', CompanyAutocompleteView.as_view(), name='company_autocomplete'),
+    path('api/', include('accounts.urls')),
 ]
 
 

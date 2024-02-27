@@ -5,12 +5,12 @@
         <div class="description">{{ fieldset.description|safe }}</div>
     {% endif %}
     {% for line in fieldset %}
-        <div class="form-row{% if line.fields|length == 1 and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name == 'answer' %} hidden{% endif %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+        <div class="form-row{% if line.fields|length == 1 and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name == 'answer' or field.field.name == 'document' or field.field.name == 'quiz' %} hidden{% endif %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
             {% if line.fields|length == 1 %}{{ line.errors }}{% else %}<div class="flex-container form-multiline">{% endif %}
             {% for field in line %}
                 <div>
                     {% if not line.fields|length == 1 and not field.is_readonly %}{{ field.errors }}{% endif %}
-                        <div class="flex-container{% if not line.fields|length == 1 %} fieldBox{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.field.is_hidden %} hidden{% endif %}{% elif field.is_checkbox %} checkbox-row{% endif %}">
+                        <div class="{% if not line.fields|length == 1 %} fieldBox{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.field.is_hidden %} hidden{% endif %}{% elif field.is_checkbox %} checkbox-row{% endif %}">
                             {% if field.is_checkbox %}
                                 {{ field.field }}{{ field.label_tag }}
                             {% else %}
@@ -24,7 +24,7 @@
                                     <label for="{{ field.field.id_for_label }}">C:</label>
                                 {% elif field.field.name == 'option_4' %}
                                     <label for="{{ field.field.id_for_label }}">D:</label>
-                                {% elif field.field.name == 'answer' %}
+                                {% elif field.field.name == 'answer'  or field.field.name == 'document' or field.field.name == 'quiz' %}
                                 {% else %}
                                     {{ field.label_tag }}
                                 {% endif %}
@@ -45,6 +45,10 @@
                                         <input type="radio" onclick="javascript: updateAnswer(this.value, 'id_quizquestions_set-{{ forloop.parentloop.parentloop.parentloop.counter0 }}-answer');" id="{{ field.field.id_for_label }}_option" name="quizquestions_set-{{ forloop.parentloop.parentloop.parentloop.counter0 }}-answer_options" value="3" >&nbsp;&nbsp;&nbsp;&nbsp;{{ field.field }}
                                     {% elif field.field.name == 'answer1' %}
                                         <input type="hidden" class="correct-answer" name="quizquestions_set-{{ forloop.parentloop.parentloop.parentloop.counter0 }}-answer" value="{{ field.contents }}" id="id_quizquestions_set-{{ forloop.parentloop.parentloop.parentloop.counter0 }}-answer">
+                                    {% elif field.field.name == 'document' %}
+                                        <input type="hidden" name="quizquestions_set-{{ forloop.parentloop.parentloop.parentloop.counter0 }}-document" value="{{ original.document_id }}" id="id_quizquestions_set-{{ forloop.parentloop.parentloop.parentloop.counter0 }}-document">
+                                    {% elif field.field.name == 'quiz' %}
+                                        <input type="hidden" name="quizquestions_set-{{ forloop.parentloop.parentloop.parentloop.counter0 }}-quiz" value="{{ field.field.value }}" id="id_quizquestions_set-{{ forloop.parentloop.parentloop.parentloop.counter0 }}-quiz">
                                     {% else %}
                                         {{ field.field }}
                                     {% endif %}
