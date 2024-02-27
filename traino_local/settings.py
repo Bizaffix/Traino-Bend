@@ -181,7 +181,9 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS')
-EMAIL_USE_TLS = False
+EMAIL_DEFAULT_FROM = os.environ.get('EMAIL_USER')  # your sender email addreass
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 
 # DJOSER Settings
