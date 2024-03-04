@@ -12,7 +12,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
     def validate_name(self, value):
         if self.context['request'].method == 'POST':
             name_check = Departments.objects.filter(name=self.context['request'].data['name'], company=self.context['request'].user )
-            print(name_check)
+            # print(name_check)
             if name_check is not None and len(name_check) > 0:
                 raise serializers.ValidationError("That department name already exists.")
         elif self.context['request'].method == 'PUT' or self.context['request'].method == 'PATCH' and self.instance.id:
