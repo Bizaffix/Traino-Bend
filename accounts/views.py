@@ -67,7 +67,7 @@ class CompanyTeamViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['first_name']
+    search_fields = ['email', 'first_name', 'last_name']
 
     def get_queryset(self):
         return CompanyTeam.objects.filter(company_id=self.request.user.id)
