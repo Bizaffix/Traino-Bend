@@ -1,5 +1,5 @@
 from djoser.serializers import UserCreateSerializer
-from accounts.models import CustomUser, Departments
+from accounts.models import CustomUser, Departments, CompanyTeam
 from rest_framework import  serializers
 from django.db.models import Q
 
@@ -7,6 +7,16 @@ class UserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = CustomUser
         fields = ('id', 'email', 'first_name', 'last_name', 'role', 'password')
+
+class CompanyTeamSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        instance = CompanyTeam.objects.create_user(**validated_data)
+        return instance
+    class Meta:
+        model = CompanyTeam
+        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'company', 'department', 'password', 'created_at', 'updated_at', 'added_by')
+    
+    
 
 class DepartmentSerializer(serializers.ModelSerializer):
     def validate_name(self, value):
