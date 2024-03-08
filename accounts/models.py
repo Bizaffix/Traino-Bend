@@ -42,7 +42,7 @@ class Departments(models.Model):
         verbose_name_plural = ("Company Departments")
 
 class CompanyTeam(CustomUser):
-    company_team_id = models.BigAutoField(primary_key = True)
+    # company_team_id = models.BigAutoField(primary_key = True)
     company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='team_company')
     department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='team_department')
     CustomUser.role = 'User'
