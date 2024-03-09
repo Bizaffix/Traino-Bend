@@ -8,17 +8,9 @@ class UserCreateSerializer(UserCreateSerializer):
         model = CustomUser
         fields = ('id', 'email', 'first_name', 'last_name', 'role', 'password')
 
-class CompanyTeamSerializer(serializers.ModelSerializer):
-    def create(self, validated_data):
-        instance = CompanyTeam.objects.create_user(**validated_data)
-        return instance
-    class Meta:
-        model = CompanyTeam
-        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'company', 'department', 'password', 'created_at', 'updated_at', 'added_by')
-    
-    
-
 class DepartmentSerializer(serializers.ModelSerializer):
+    company = UserCreateSerializer()
+    added_by = UserCreateSerializer()
     def validate_name(self, value):
         if self.context['request'].method == 'POST':
             name_check = Departments.objects.filter(name=self.context['request'].data['name'], company=self.context['request'].user )
@@ -34,3 +26,14 @@ class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Departments
         fields = ['id', 'name', 'company', 'created_at', 'updated_at', 'added_by']
+
+class CompanyTeamSerializer(serializers.ModelSerializer):
+    department = DepartmentSerializer()
+    company = UserCreateSerializer()
+    added_by = UserCreateSerializer()
+    def create(self, validated_data):
+        instance = CompanyTeam.objects.create_user(**validated_data)
+        return instance
+    class Meta:
+        model = CompanyTeam
+        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'company', 'department', 'password', 'created_at', 'updated_at', 'added_by')
