@@ -1,6 +1,7 @@
 from rest_framework.response import Response
-from accounts.models import Departments, CompanyTeam
-from api.serializers import DepartmentSerializer, CompanyTeamSerializer, UserCreateSerializer
+from accounts.models import Departments, CompanyTeam 
+from documents.models import UserDocuments
+from api.serializers import DepartmentSerializer, CompanyTeamSerializer, UserCreateSerializer, DocumentSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -52,4 +53,24 @@ class CompanyTeamModelViewSet(viewsets.ModelViewSet):
         
         headers = self.get_success_headers(ret.data)
         return Response(ret.data, status=status.HTTP_201_CREATED, headers=headers)
-    
+
+class DocumentModelViewSet(viewsets.ModelViewSet):
+    queryset = UserDocuments.objects.all()
+    serializer_class = DocumentSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['name']
+
+
+    def get_queryset(self):
+        return UserDocuments.objects.filter(company_id=self.request.user.id)
+
+    def create(self, request, *args, **kwargs):
+        request.data['company'] = self.request.user.pk
+        request.data['added_by'] = self.request.user.pk
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)    

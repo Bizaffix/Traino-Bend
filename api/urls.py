@@ -7,6 +7,7 @@ router = DefaultRouter()
 
 router.register('departments', views.DepartmentModelViewSet, basename="department_api")
 router.register('myTeams', views.CompanyTeamModelViewSet, basename="company_team_api")
+router.register('myLearnings', views.DocumentModelViewSet, basename="company_document_api")
 
 urlpatterns = [
     path('auth/', include('djoser.urls')),
