@@ -1,12 +1,23 @@
 from rest_framework.response import Response
-from accounts.models import Departments, CompanyTeam 
-from documents.models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz
+from accounts.models import Departments, CompanyTeam, CustomUser 
+from documents.models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, DocumentTeam
 from api.serializers import DepartmentSerializer, CompanyTeamSerializer, UserCreateSerializer, DocumentSerializer, ReadOnlyDocumentSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
+
+def assignDocumentToUser(user, doc, department):
+    try:
+        das = DocumentTeam.objects.get(user_id = user.id, document_id = doc.id, department_id = department.id)
+    except DocumentTeam.DoesNotExist:
+        das = None
+
+
+    if das is None:
+        das = DocumentTeam(user_id = user.id, document_id = doc.id, department_id = department.id, is_assigned = False, notify_frequency = 0)
+        das.save()
     
 class DepartmentModelViewSet(viewsets.ModelViewSet):
     queryset = Departments.objects.all()
@@ -54,6 +65,10 @@ class CompanyTeamModelViewSet(viewsets.ModelViewSet):
         serializer.validated_data['is_staff'] = 1
         serializer.validated_data['department'] = Departments.objects.get(pk=request.data['department'])
         self.perform_create(serializer)
+
+        company_documents = UserDocuments.objects.filter(company_id = self.request.user.id, department = int(request.data['department']))
+        for company_document in company_documents:
+            assignDocumentToUser(CustomUser.objects.get(pk= int(serializer.data['id'])), company_document, Departments.objects.get(pk=request.data['department']))
         
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -73,6 +88,8 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # request.data['company'] = self.request.user.pk
         # request.data['added_by'] = self.request.user.pk
+        if request.data['published'] is not None:
+            request.data.pop('published')
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.validated_data['company'] = self.request.user
@@ -86,6 +103,9 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
         for department_id in department_ids:
             department_object = Departments.objects.get(pk= int(department_id))
             new_document.department.add(department_object)
+            user_teams = CompanyTeam.objects.filter(company_id = self.request.user.id, department_id = department_object.id ).order_by('first_name')
+            for user_team in user_teams:
+                assignDocumentToUser(user_team, new_document, department_object)
         
         serializer = ReadOnlyDocumentSerializer(new_document)
         headers = self.get_success_headers(serializer.data)
@@ -137,6 +157,10 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
             for department_id in department_ids:
                 department_object = Departments.objects.get(pk= int(department_id))
                 instance.department.add(department_object)
+                user_teams = CompanyTeam.objects.filter(company_id = self.request.user.id, department_id = department_object.id ).order_by('first_name')
+                for user_team in user_teams:
+                    assignDocumentToUser(user_team, instance, department_object)
+        
         serializer = ReadOnlyDocumentSerializer(instance)
 
         try:

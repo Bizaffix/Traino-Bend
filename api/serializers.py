@@ -1,6 +1,6 @@
 from djoser.serializers import UserCreateSerializer
 from accounts.models import CustomUser, Departments, CompanyTeam
-from documents.models import UserDocuments
+from documents.models import UserDocuments, DocumentKeyPoints, DocumentQuiz, DocumentSummary
 from rest_framework import  serializers
 from django.db.models import Q
 
@@ -43,11 +43,32 @@ class DocumentSerializer(serializers.ModelSerializer):
     company = UserCreateSerializer(many=False, read_only=True)
     added_by = UserCreateSerializer(many=False, read_only=True)
     department = serializers.CharField()
-    # def validate_department(self, value):
-    #     if self.context['request'].method == 'PUT' or self.context['request'].method == 'PATCH' or self.context['request'].method == 'POST':
-    #         if self.context['request'].data['name'] == '':
-    #             raise serializers.ValidationError("This field may not be blank.")
-    #     return value
+    published = serializers.IntegerField()
+    def validate_published(self, value):
+        if self.context['request'].method == 'PUT' or self.context['request'].method == 'PATCH' and self.instance.id:
+            if self.context['request'].data['published'] == '1':
+                try:
+                    dq = DocumentQuiz.objects.get(document_id=self.instance.id)
+                except DocumentQuiz.DoesNotExist:
+                    dq = None
+                
+                try:
+                    ds = DocumentSummary.objects.get(document_id=self.instance.id)
+                except DocumentSummary.DoesNotExist:
+                    ds = None
+                
+                try:
+                    dkp = DocumentKeyPoints.objects.get(document_id=self.instance.id)
+                except DocumentKeyPoints.DoesNotExist:
+                    dkp = None
+                
+                if ds is None or ds.content is None or ds.content == '':
+                    raise serializers.ValidationError("Looks like summary is not generated. Please first generate summary")
+                elif dkp is None or dkp.content is None or dkp.content == '':
+                    raise serializers.ValidationError("Looks like keypoints is not generated. Please first generate keypoints")
+                elif dq is None or dq.content is None or dq.content == '':
+                    raise serializers.ValidationError("Looks like quiz is not generated. Please first generate quiz")
+        return value
     def validate_name(self, value):
         if self.context['request'].method == 'POST':
             name_check = UserDocuments.objects.filter(name=self.context['request'].data['name'], company=self.context['request'].user )
