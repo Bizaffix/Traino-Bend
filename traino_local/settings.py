@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'corsheaders',
+    'django_filters',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -204,15 +206,15 @@ DJOSER = {
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'TOKEN_MODEL': None, # To delete user must set it to None
     'SERIALIZERS': {
-        'user_create': 'accounts.serializers.UserCreateSerializer',
-        'user': 'accounts.serializers.UserCreateSerializer',
+        'user_create': 'api.serializers.UserCreateSerializer',
+        'user': 'api.serializers.UserCreateSerializer',
         'user_delete': 'djoser.serializers.UserDeleteSerializer',
     },
     'EMAIL': {
-        'activation': 'accounts.email.ActivationEmail',
-        'confirmation': 'accounts.email.ConfirmationEmail',
-        'password_reset': 'accounts.email.PasswordResetEmail',
-        'password_changed_confirmation': 'accounts.email.PasswordChangedConfirmationEmail',
+        'activation': 'api.email.ActivationEmail',
+        'confirmation': 'api.email.ConfirmationEmail',
+        'password_reset': 'api.email.PasswordResetEmail',
+        'password_changed_confirmation': 'api.email.PasswordChangedConfirmationEmail',
     },
 }
 

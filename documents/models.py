@@ -6,12 +6,14 @@ class UserDocuments(models.Model):
     id = models.BigAutoField(primary_key = True)
     name = models.CharField(max_length = 100)
     file = models.FileField(upload_to='documents/',)
-    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='document_company', default=0)
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='document_company')
     department = models.ManyToManyField(Departments, related_name='document_departments')
     published = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="document_added_by")
+
+    REQUIRED_FIELDS = ['name', 'file', 'department']
 
     def __str__(self):
         return self.name

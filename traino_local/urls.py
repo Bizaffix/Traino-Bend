@@ -33,7 +33,7 @@ urlpatterns = [
     path('publishDocument/', publishDocument),
     path('department_autocomplete/', DepartmentAutocompleteView.as_view(), name='department_autocomplete'),
     path('company_autocomplete/', CompanyAutocompleteView.as_view(), name='company_autocomplete'),
-    path('api/', include('accounts.urls')),
+    path('api/', include('api.urls')),
 ]
 
 

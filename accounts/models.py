@@ -42,12 +42,12 @@ class Departments(models.Model):
         verbose_name_plural = ("Company Departments")
 
 class CompanyTeam(CustomUser):
-    company_team_id = models.BigAutoField(primary_key = True)
-    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='team_company', default=0)
-    department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='team_department', default=None)
+    # company_team_id = models.BigAutoField(primary_key = True)
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='team_company')
+    department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='team_department')
     CustomUser.role = 'User'
 
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'role', 'company', 'department']
 
     def __str__(self):
         return self.email
