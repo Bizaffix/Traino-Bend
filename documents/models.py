@@ -35,8 +35,11 @@ class DocumentSummary(models.Model):
     id = models.BigAutoField(primary_key=True)
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='summary_company')
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="summary_added_by")
 
     def __str__(self):
         return self.document.name
@@ -49,8 +52,11 @@ class DocumentKeyPoints(models.Model):
     id = models.BigAutoField(primary_key=True)
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='keypoint_company')
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="keypoint_added_by")
 
     def __str__(self):
         return self.document.name
@@ -64,8 +70,11 @@ class DocumentQuiz(models.Model):
     name = models.CharField(max_length = 255)
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='quiz_company')
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="quiz_added_by")
 
     def __str__(self):
         return self.name
@@ -82,9 +91,12 @@ class QuizQuestions(models.Model):
     option_3 = models.CharField(max_length = 255, blank=True, null=True)
     option_4 = models.CharField(max_length = 255, blank=True, null=True)    
     answer = models.CharField(max_length = 2, blank=True, null=True)
+    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='quiz_question_company')
     quiz = models.ForeignKey(DocumentQuiz, on_delete=models.CASCADE)
     document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+    added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="quiz_question_added_by")
 
     def __str__(self):
         return self.question or ''

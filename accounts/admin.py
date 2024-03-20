@@ -224,7 +224,7 @@ class CompanyTeamAdmin(UserAdmin):
         obj.save()
 
         company_documents = UserDocuments.objects.filter(company_id = obj.company_id, department = obj.department_id)
-        print(company_documents)
+        # print(company_documents)
         for company_document in company_documents:
             assignDocumentToUser(obj, company_document, obj.department)
 
