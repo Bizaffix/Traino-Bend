@@ -94,4 +94,11 @@ class ReadOnlyDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDocuments
         fields = ['id', 'name', 'file', 'company', 'department', 'published', 'created_date', 'updated_at', 'added_by']
-    
+
+class DocumentSummarySerializer(serializers.ModelSerializer):
+    document = ReadOnlyDocumentSerializer(many=False, read_only=True)
+    added_by = UserCreateSerializer(many=False, read_only=True)
+       
+    class Meta:
+        model = DocumentSummary
+        fields = ['id', 'content', 'prompt_text', 'document', 'created_date', 'updated_at', 'added_by']    

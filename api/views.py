@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from accounts.models import Departments, CompanyTeam, CustomUser 
 from documents.models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, DocumentTeam
-from api.serializers import DepartmentSerializer, CompanyTeamSerializer, UserCreateSerializer, DocumentSerializer, ReadOnlyDocumentSerializer
+from api.serializers import DepartmentSerializer, CompanyTeamSerializer, UserCreateSerializer, DocumentSerializer, ReadOnlyDocumentSerializer, DocumentSummarySerializer
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -88,7 +88,7 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # request.data['company'] = self.request.user.pk
         # request.data['added_by'] = self.request.user.pk
-        if request.data['published'] is not None:
+        if 'published' in request.data:
             request.data.pop('published')
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -126,13 +126,13 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
             dkp = None
 
         if dq is None:
-            dq = DocumentQuiz(name=str(new_document.name), prompt_text='25 multiple choice questions', content='', document_id= str(new_document.id))
+            dq = DocumentQuiz(name=str(new_document.name), prompt_text='25 multiple choice questions', company = self.request.user, content='', document_id= str(new_document.id))
             dq.save()
         if ds is None:
-            ds = DocumentSummary(content='', prompt_text='concise summary', document_id= str(new_document.id))
+            ds = DocumentSummary(content='', prompt_text='concise summary', company = self.request.user, document_id= str(new_document.id))
             ds.save()
         if dkp is None:
-            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', document_id= str(new_document.id))
+            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = self.request.user, document_id= str(new_document.id))
             dkp.save()
 
 
@@ -141,7 +141,7 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         department_ids = ''
-        if request.data['department'] is not None:
+        if 'department' in request.data:
             department_ids = request.data['department']
             request.data.pop('department')
         instance = self.get_object()
@@ -205,3 +205,25 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = ReadOnlyDocumentSerializer(instance)
         return Response(serializer.data) 
+
+class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
+    queryset = DocumentSummary.objects.all()
+    serializer_class = DocumentSummarySerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['content', 'prompt_text']
+
+
+    def get_queryset(self):
+        return DocumentSummary.objects.filter(company_id=self.request.user.id)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data['company'] = self.request.user
+        serializer.validated_data['added_by'] = self.request.user
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
