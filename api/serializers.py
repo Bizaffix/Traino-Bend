@@ -68,6 +68,8 @@ class DocumentSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Looks like keypoints is not generated. Please first generate keypoints")
                 elif dq is None or dq.content is None or dq.content == '':
                     raise serializers.ValidationError("Looks like quiz is not generated. Please first generate quiz")
+        elif self.context['request'].method == 'POST':
+            value = False
         return value
     def validate_name(self, value):
         if self.context['request'].method == 'POST':
@@ -84,7 +86,6 @@ class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDocuments
         fields = ['id', 'name', 'file', 'company', 'department', 'published', 'created_date', 'updated_at', 'added_by']
-    
 
 class ReadOnlyDocumentSerializer(serializers.ModelSerializer):
     company = UserCreateSerializer(many=False, read_only=True)
@@ -96,9 +97,43 @@ class ReadOnlyDocumentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'file', 'company', 'department', 'published', 'created_date', 'updated_at', 'added_by']
 
 class DocumentSummarySerializer(serializers.ModelSerializer):
+    document = serializers.CharField()
+    added_by = UserCreateSerializer(many=False, read_only=True)
+    def validate_prompt_text(self, value):
+        if self.context['request'].method == 'PUT' or self.context['request'].method == 'PATCH' or self.context['request'].method == 'POST':
+            if self.context['request'].data['prompt_text'] == '':
+                value = 'concise summary'
+        return value    
+       
+    class Meta:
+        model = DocumentSummary
+        fields = ['id', 'content', 'prompt_text', 'document', 'created_date', 'updated_at', 'added_by']
+
+class ReadOnlyDocumentSummarySerializer(serializers.ModelSerializer):
     document = ReadOnlyDocumentSerializer(many=False, read_only=True)
     added_by = UserCreateSerializer(many=False, read_only=True)
        
     class Meta:
         model = DocumentSummary
+        fields = ['id', 'content', 'prompt_text', 'document', 'created_date', 'updated_at', 'added_by']    
+
+class DocumentKeypointsSerializer(serializers.ModelSerializer):
+    document = serializers.CharField()
+    added_by = UserCreateSerializer(many=False, read_only=True)
+    def validate_prompt_text(self, value):
+        if self.context['request'].method == 'PUT' or self.context['request'].method == 'PATCH' or self.context['request'].method == 'POST':
+            if self.context['request'].data['prompt_text'] == '':
+                value = 'concise outline in numeric order list'
+        return value    
+       
+    class Meta:
+        model = DocumentKeyPoints
+        fields = ['id', 'content', 'prompt_text', 'document', 'created_date', 'updated_at', 'added_by']
+
+class ReadOnlyDocumentKeypointsSerializer(serializers.ModelSerializer):
+    document = ReadOnlyDocumentSerializer(many=False, read_only=True)
+    added_by = UserCreateSerializer(many=False, read_only=True)
+       
+    class Meta:
+        model = DocumentKeyPoints
         fields = ['id', 'content', 'prompt_text', 'document', 'created_date', 'updated_at', 'added_by']    
