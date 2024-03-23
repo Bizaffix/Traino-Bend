@@ -36,10 +36,12 @@ class DocumentSummary(models.Model):
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
     company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='summary_company')
-    document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
+    document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE, related_name='summary_document')
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="summary_added_by")
+
+    REQUIRED_FIELDS = ['prompt_text', 'document']
 
     def __str__(self):
         return self.document.name

@@ -1,12 +1,37 @@
 from rest_framework.response import Response
 from accounts.models import Departments, CompanyTeam, CustomUser 
 from documents.models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, DocumentTeam
-from api.serializers import DepartmentSerializer, CompanyTeamSerializer, UserCreateSerializer, DocumentSerializer, ReadOnlyDocumentSerializer, DocumentSummarySerializer
+from api.serializers import DepartmentSerializer, CompanyTeamSerializer, UserCreateSerializer, DocumentSerializer, ReadOnlyDocumentSerializer, DocumentSummarySerializer, ReadOnlyDocumentSummarySerializer, DocumentKeypointsSerializer, ReadOnlyDocumentKeypointsSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework import  serializers
+
+import os
+from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
+from langchain.docstore.document import Document
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.chains.summarize import load_summarize_chain
+from langchain.document_loaders import PyPDFLoader
+from PyPDF2 import PdfReader
+from langchain.prompts import PromptTemplate
+openai_api_key = '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'
+os.environ['OPENAI_API_KEY'] = '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'
+
+def readPDFFile(pdf_file_path):
+    pdf_reader = PdfReader(pdf_file_path)
+    text = ""
+    #pageno = 0
+    for page in pdf_reader.pages:
+        # pageNoinfo = "\t this page Number is :" + str(pageno)
+        #text += (page.extract_text() + pageNoinfo)
+        text += (page.extract_text())
+        #pageno = pageno + 1
+    return text
+
 
 def assignDocumentToUser(user, doc, department):
     try:
@@ -18,7 +43,146 @@ def assignDocumentToUser(user, doc, department):
     if das is None:
         das = DocumentTeam(user_id = user.id, document_id = doc.id, department_id = department.id, is_assigned = False, notify_frequency = 0)
         das.save()
-    
+
+def generateDocumentSummary(summary_id, document_id, prompt_text):
+    document_summary = 'Oops! Summary not generated please try with some other document.'
+    document = UserDocuments.objects.get(id=document_id)
+    if document.file.path is not None:
+        print("test: 1")
+        # Instantiate the LLM model
+        #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+        llm = ChatOpenAI(model_name='gpt-3.5-turbo')
+        print("test: 2")
+        print(document.file.path)
+
+        loader = PyPDFLoader(document.file.path)
+        #docs = loader.load_and_split()
+        
+        pages = loader.load()
+        text = ""
+        for page in pages:
+            text+=page.page_content
+        text= text.replace('\t', ' ')
+        text= text.replace('\xa0', '')
+
+        #print(len(text))
+
+        #splits a long document into smaller chunks that can fit into the LLM's 
+        #model's context window
+        
+        text_splitter = CharacterTextSplitter(
+                separator="\n",
+                chunk_size=1000,
+                chunk_overlap=100
+            )
+        # print(text_splitter)
+        
+        #create_documents() create documents froma list of texts
+        
+        text = text_splitter.create_documents([text])
+        # print(len(docs))
+        # print(docs)
+
+        print("test: 4")
+
+        # Define prompt
+        prompt_template = """You are required to generate """+prompt_text+""" based on the provided text:
+        {text}
+        CONCISE SUMMARY:"""
+
+        
+
+        prompt_template = PromptTemplate(template=prompt_template, input_variables=["text"])
+
+        # Text summarization
+        chain = load_summarize_chain(llm, chain_type='stuff', prompt=prompt_template)
+        print("test: 5")
+        document_summary = chain.run(text)
+        print("test: 6")
+        print(document_summary)
+
+    doc_summary = DocumentSummary.objects.get(pk = summary_id)
+    doc_summary.content = document_summary
+    doc_summary.prompt_text = prompt_text
+    doc_summary.save()
+
+def generateDocumentKeypoints(keypoint_id, document_id, prompt_text):
+    document_keypoints = 'Oops! Keypoints not generated please try with some other document.'
+    document = UserDocuments.objects.get(id=document_id)
+    if document.file.path is not None:
+        #print("test: 1")
+        # Instantiate the LLM model
+        #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+        llm = ChatOpenAI(model_name='gpt-3.5-turbo')
+        #print("test: 2")
+        print(document.file.path)
+        text = readPDFFile(document.file.path)
+        #print("test: 3")
+
+        loader = PyPDFLoader(document.file.path)
+        # text = loader.load_and_split()
+        # print(text)
+
+        pages = loader.load()
+        text = ""
+        for page in pages:
+            text+=page.page_content
+        text= text.replace('\t', ' ')
+        text= text.replace('\xa0', '')
+
+        #print(len(text))
+
+        #splits a long document into smaller chunks that can fit into the LLM's 
+        #model's context window
+        
+        text_splitter = CharacterTextSplitter(
+                separator="\n",
+                chunk_size=4000,
+                chunk_overlap=200
+            )
+        # print(text_splitter)
+        
+        #create_documents() create documents froma list of texts
+        
+        text = text_splitter.create_documents([text])
+
+        text_chunk_index = 0
+        for text_chunk in text:
+            # print(text_chunk.page_content)
+            # print('-----------------------')
+            text[text_chunk_index].page_content = text_chunk.page_content.replace('\n', '')
+            text_chunk_index += 1
+
+
+        #print(text)
+        #print("test: 4")
+
+        # Define prompt
+        prompt_template = """You are required to generate """+prompt_text+""" based on the provided text:
+        {text}
+        CONCISE OUTLINE:"""
+
+        # prompt_template = """You are required to generate 25 multiple choice questions having four options and correct answer in json format based on the provided text:
+        # {text}
+        # MCQ QUIZ:"""
+
+        prompt_template = PromptTemplate(template=prompt_template, input_variables=["text"])
+
+        
+
+        # Text summarization
+        chain = load_summarize_chain(llm, chain_type='stuff', prompt=prompt_template)
+        #print("test: 5")
+        document_keypoints = chain.run(text)
+        #print(len(data['document_keypoints']))
+        #print(data['document_keypoints'])
+        #print("test: 6")
+    doc_keypoints = DocumentKeyPoints.objects.get(pk = keypoint_id)
+    doc_keypoints.content = document_keypoints
+    doc_keypoints.prompt_text = prompt_text
+    doc_keypoints.save()
+
+
 class DepartmentModelViewSet(viewsets.ModelViewSet):
     queryset = Departments.objects.all()
     serializer_class = DepartmentSerializer
@@ -90,6 +254,7 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
         # request.data['added_by'] = self.request.user.pk
         if 'published' in request.data:
             request.data.pop('published')
+        request.data['published'] = 0
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.validated_data['company'] = self.request.user
@@ -126,13 +291,13 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
             dkp = None
 
         if dq is None:
-            dq = DocumentQuiz(name=str(new_document.name), prompt_text='25 multiple choice questions', company = self.request.user, content='', document_id= str(new_document.id))
+            dq = DocumentQuiz(name=str(new_document.name), prompt_text='25 multiple choice questions', company = self.request.user, content='', document_id= str(new_document.id), added_by_id= str(self.request.user.id))
             dq.save()
         if ds is None:
-            ds = DocumentSummary(content='', prompt_text='concise summary', company = self.request.user, document_id= str(new_document.id))
+            ds = DocumentSummary(content='', prompt_text='concise summary', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
             ds.save()
         if dkp is None:
-            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = self.request.user, document_id= str(new_document.id))
+            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
             dkp.save()
 
 
@@ -177,15 +342,15 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
             dkp = DocumentKeyPoints.objects.get(document_id=instance.id)
         except DocumentKeyPoints.DoesNotExist:
             dkp = None
-
+        
         if dq is None:
-            dq = DocumentQuiz(name=str(instance.name), prompt_text='25 multiple choice questions', content='', document_id= str(instance.id))
+            dq = DocumentQuiz(name=str(new_document.name), prompt_text='25 multiple choice questions', company = self.request.user, content='', document_id= str(new_document.id), added_by_id= str(self.request.user.id))
             dq.save()
         if ds is None:
-            ds = DocumentSummary(content='', prompt_text='concise summary', document_id= str(instance.id))
+            ds = DocumentSummary(content='', prompt_text='concise summary', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
             ds.save()
         if dkp is None:
-            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', document_id= str(instance.id))
+            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
             dkp.save()
 
         return Response(serializer.data)
@@ -221,9 +386,97 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.validated_data['company'] = self.request.user
-        serializer.validated_data['added_by'] = self.request.user
-        self.perform_create(serializer)
+        
+        document_id = int(request.data['document'])
+        document_summary = DocumentSummary.objects.get(document_id = document_id, company_id = self.request.user.id)
+        generateDocumentSummary(document_summary.id, document_id, serializer.validated_data['prompt_text'])
+        serializer = ReadOnlyDocumentSummarySerializer(document_summary)
+
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
 
+        self.perform_update(serializer)
+        
+        
+        serializer = ReadOnlyDocumentSummarySerializer(instance)
+
+        return Response(serializer.data)
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ReadOnlyDocumentSummarySerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ReadOnlyDocumentSummarySerializer(queryset, many=True)
+        return Response(serializer.data) 
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = ReadOnlyDocumentSummarySerializer(instance)
+        return Response(serializer.data) 
+
+    def destroy(self, request, *args, **kwargs):
+        raise serializers.ValidationError("You are not allowed to perform that action.")
+
+class DocumentKeypointsModelViewSet(viewsets.ModelViewSet):
+    queryset = DocumentKeyPoints.objects.all()
+    serializer_class = DocumentKeypointsSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['content', 'prompt_text']
+
+
+    def get_queryset(self):
+        return DocumentKeyPoints.objects.filter(company_id=self.request.user.id)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        document_id = int(request.data['document'])
+        document_keypoint = DocumentKeyPoints.objects.get(document_id = document_id, company_id = self.request.user.id)
+        generateDocumentKeypoints(document_keypoint.id, document_id, serializer.validated_data['prompt_text'])
+        serializer = ReadOnlyDocumentKeypointsSerializer(document_keypoint)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_update(serializer)
+        
+        
+        serializer = ReadOnlyDocumentKeypointsSerializer(instance)
+
+        return Response(serializer.data)
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = ReadOnlyDocumentKeypointsSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = ReadOnlyDocumentKeypointsSerializer(queryset, many=True)
+        return Response(serializer.data) 
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = ReadOnlyDocumentKeypointsSerializer(instance)
+        return Response(serializer.data) 
+
+    def destroy(self, request, *args, **kwargs):
+        raise serializers.ValidationError("You are not allowed to perform that action.")
