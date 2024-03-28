@@ -184,15 +184,17 @@ class CustomDocumentAdmin(ModelAdmin):
         except DocumentKeyPoints.DoesNotExist:
             dkp = None
 
+        cur_user = request.user
+        cur_user_id = request.user.id
 
         if dq is None:
-            dq = DocumentQuiz(name=str(obj.name), prompt_text='25 multiple choice questions', company = request.user, content='', document_id= str(obj.id), added_by_id= str(request.user.id))
+            dq = DocumentQuiz(name=str(obj.name), prompt_text='25 multiple choice questions', company = cur_user, content='', document_id= str(obj.id), added_by_id= str(cur_user_id))
             dq.save()
         if ds is None:
-            ds = DocumentSummary(content='', prompt_text='concise summary', company = request.user, document_id= str(obj.id), added_by_id= str(request.user.id))
+            ds = DocumentSummary(content='', prompt_text='concise summary', company = cur_user, document_id= str(obj.id), added_by_id= str(cur_user_id))
             ds.save()
         if dkp is None:
-            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = request.user, document_id= str(obj.id), added_by_id= str(request.user.id))
+            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = cur_user, document_id= str(obj.id), added_by_id= str(cur_user_id))
             dkp.save()
 
             
