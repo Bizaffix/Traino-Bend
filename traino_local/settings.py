@@ -231,3 +231,14 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
 }
+
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# uwsgi --socket /var/www/app.traino.ai/app.traino.ai.sock --module /var/www/app.traino.ai/traino_local.wsgi --chmod-socket=666 --uid www-data --gid www-data --master
+# uwsgi --emperor /var/www/app.traino.ai/vassals --uid www-data --gid www-data
+
+# uwsgi --socket ./app.traino.ai.sock --module ./traino_local.wsgi --chmod-socket=666 --uid www-data --gid www-data --master
+# uwsgi --socket /var/www/app.traino.ai/traino_sock/app.traino.ai.sock --module /var/www/app.traino.ai/traino_local.wsgi --chmod-socket=666 --uid www-data --gid www-data --master --thunder-lock
+
+# sudo uwsgi --socket traino_sock/app.traino.ai.sock --module traino_local.wsgi --chmod-socket=666 --uid www-data --gid www-data --master --thunder-lock --enable-threads
