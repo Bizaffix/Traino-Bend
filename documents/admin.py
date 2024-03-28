@@ -186,13 +186,13 @@ class CustomDocumentAdmin(ModelAdmin):
 
 
         if dq is None:
-            dq = DocumentQuiz(name=str(obj.name), prompt_text='25 multiple choice questions', company = self.request.user, content='', document_id= str(obj.id), added_by_id= str(self.request.user.id))
+            dq = DocumentQuiz(name=str(obj.name), prompt_text='25 multiple choice questions', company = request.user, content='', document_id= str(obj.id), added_by_id= str(request.user.id))
             dq.save()
         if ds is None:
-            ds = DocumentSummary(content='', prompt_text='concise summary', company = self.request.user, document_id= str(obj.id), added_by_id= str(self.request.user.id))
+            ds = DocumentSummary(content='', prompt_text='concise summary', company = request.user, document_id= str(obj.id), added_by_id= str(request.user.id))
             ds.save()
         if dkp is None:
-            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = self.request.user, document_id= str(obj.id), added_by_id= str(self.request.user.id))
+            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = request.user, document_id= str(obj.id), added_by_id= str(request.user.id))
             dkp.save()
 
             
