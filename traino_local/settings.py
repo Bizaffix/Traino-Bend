@@ -242,3 +242,7 @@ SIMPLE_JWT = {
 # uwsgi --socket /var/www/app.traino.ai/traino_sock/app.traino.ai.sock --module /var/www/app.traino.ai/traino_local.wsgi --chmod-socket=666 --uid www-data --gid www-data --master --thunder-lock
 
 # sudo uwsgi --socket traino_sock/app.traino.ai.sock --module traino_local.wsgi --chmod-socket=666 --uid www-data --gid www-data --master --thunder-lock --enable-threads
+
+# pgrep gunicorn
+# kill -TERM <PID>
+# gunicorn -c conf/gunicorn_config.py traino_local.wsgi &
