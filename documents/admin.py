@@ -155,6 +155,9 @@ class CustomDocumentAdmin(ModelAdmin):
         """
         Given a model instance save it to the database.
         """
+        cur_user = request.user
+        cur_user_id = request.user.id
+
         if obj.id is None:
             obj.added_by = request.user
         elif obj.added_by is None:    
@@ -183,9 +186,6 @@ class CustomDocumentAdmin(ModelAdmin):
             dkp = DocumentKeyPoints.objects.get(document_id=obj.id)
         except DocumentKeyPoints.DoesNotExist:
             dkp = None
-
-        cur_user = request.user
-        cur_user_id = request.user.id
 
         if dq is None:
             dq = DocumentQuiz(name=str(obj.name), prompt_text='25 multiple choice questions', company = cur_user, content='', document_id= str(obj.id), added_by_id= str(cur_user_id))
