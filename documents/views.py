@@ -376,6 +376,7 @@ def generateDocumentQuiz(request):
                     # print(document_quiz[0]['options'])
                     # print(document_quiz[0]['answer'])
                     data['document_quiz'] = json.dumps(document_quiz, indent=4)
-                except:
-                    data['msg'] = 'Your document content is too large, Please try with some other document.'
+                except Exception as error:
+                    data['msg'] = 'Your document content is too large, Please try with some other document. '
+                    print(error)
     return JsonResponse(data, status=200)
