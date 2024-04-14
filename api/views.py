@@ -48,139 +48,158 @@ def generateDocumentSummary(summary_id, document_id, prompt_text):
     document_summary = 'Oops! Summary not generated please try with some other document.'
     document = UserDocuments.objects.get(id=document_id)
     if document.file.path is not None:
-        print("test: 1")
-        # Instantiate the LLM model
-        #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
-        llm = ChatOpenAI(model_name='gpt-3.5-turbo')
-        print("test: 2")
-        print(document.file.path)
+        try:
+            # print("test: 1")
+            # Instantiate the LLM model
+            #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+            llm = ChatOpenAI(model_name='gpt-3.5-turbo')
+            # print("test: 2")
+            # print(document.file.path)
 
-        loader = PyPDFLoader(document.file.path)
-        #docs = loader.load_and_split()
-        
-        pages = loader.load()
-        text = ""
-        for page in pages:
-            text+=page.page_content
-        text= text.replace('\t', ' ')
-        text= text.replace('\xa0', '')
+            loader = PyPDFLoader(document.file.path)
+            #docs = loader.load_and_split()
+            
+            pages = loader.load()
+            text = ""
+            for page in pages:
+                text+=page.page_content
+            text= text.replace('\t', ' ')
+            text= text.replace('\xa0', '')
 
-        #print(len(text))
+            #print(len(text))
 
-        #splits a long document into smaller chunks that can fit into the LLM's 
-        #model's context window
-        
-        text_splitter = CharacterTextSplitter(
-                separator="\n",
-                chunk_size=1000,
-                chunk_overlap=100
-            )
-        # print(text_splitter)
-        
-        #create_documents() create documents froma list of texts
-        
-        text = text_splitter.create_documents([text])
-        # print(len(docs))
-        # print(docs)
+            #splits a long document into smaller chunks that can fit into the LLM's 
+            #model's context window
+            
+            text_splitter = CharacterTextSplitter(
+                    separator="\n",
+                    chunk_size=1000,
+                    chunk_overlap=100
+                )
+            # print(text_splitter)
+            
+            #create_documents() create documents froma list of texts
+            
+            text = text_splitter.create_documents([text])
+            # print(len(docs))
+            # print(docs)
 
-        print("test: 4")
+            # print("test: 4")
 
-        # Define prompt
-        prompt_template = """You are required to generate """+prompt_text+""" based on the provided text:
-        {text}
-        CONCISE SUMMARY:"""
+            # Define prompt
+            prompt_template = """You are required to generate """+prompt_text+""" based on the provided text:
+            {text}
+            CONCISE SUMMARY:"""
 
-        
+            
 
-        prompt_template = PromptTemplate(template=prompt_template, input_variables=["text"])
+            prompt_template = PromptTemplate(template=prompt_template, input_variables=["text"])
 
-        # Text summarization
-        chain = load_summarize_chain(llm, chain_type='stuff', prompt=prompt_template)
-        print("test: 5")
-        document_summary = chain.run(text)
-        print("test: 6")
-        print(document_summary)
+            # Text summarization
+            chain = load_summarize_chain(llm, chain_type='stuff', prompt=prompt_template)
+            # print("test: 5")
+            document_summary = chain.run(text)
+            # print("test: 6")
+            # print(document_summary)
 
-    doc_summary = DocumentSummary.objects.get(pk = summary_id)
-    doc_summary.content = document_summary
-    doc_summary.prompt_text = prompt_text
-    doc_summary.save()
+            doc_summary = DocumentSummary.objects.get(pk = summary_id)
+            doc_summary.content = document_summary
+            doc_summary.prompt_text = prompt_text
+            doc_summary.save()
+        except Exception as error:
+            if error.code == 'insufficient_quota':
+                raise serializers.ValidationError("You exceeded your current quota, please check your plan and billing details.")
+            else:
+                raise serializers.ValidationError("Your document content is too large, Please try with some other document.")
+            print(error)
+    else:
+        raise serializers.ValidationError("Invalide document file selected.")
+
 
 def generateDocumentKeypoints(keypoint_id, document_id, prompt_text):
     document_keypoints = 'Oops! Keypoints not generated please try with some other document.'
     document = UserDocuments.objects.get(id=document_id)
     if document.file.path is not None:
-        #print("test: 1")
-        # Instantiate the LLM model
-        #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
-        llm = ChatOpenAI(model_name='gpt-3.5-turbo')
-        #print("test: 2")
-        print(document.file.path)
-        text = readPDFFile(document.file.path)
-        #print("test: 3")
+        try:
+            #print("test: 1")
+            # Instantiate the LLM model
+            #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+            llm = ChatOpenAI(model_name='gpt-3.5-turbo')
+            #print("test: 2")
+            print(document.file.path)
+            text = readPDFFile(document.file.path)
+            #print("test: 3")
 
-        loader = PyPDFLoader(document.file.path)
-        # text = loader.load_and_split()
-        # print(text)
+            loader = PyPDFLoader(document.file.path)
+            # text = loader.load_and_split()
+            # print(text)
 
-        pages = loader.load()
-        text = ""
-        for page in pages:
-            text+=page.page_content
-        text= text.replace('\t', ' ')
-        text= text.replace('\xa0', '')
+            pages = loader.load()
+            text = ""
+            for page in pages:
+                text+=page.page_content
+            text= text.replace('\t', ' ')
+            text= text.replace('\xa0', '')
 
-        #print(len(text))
+            #print(len(text))
 
-        #splits a long document into smaller chunks that can fit into the LLM's 
-        #model's context window
-        
-        text_splitter = CharacterTextSplitter(
-                separator="\n",
-                chunk_size=4000,
-                chunk_overlap=200
-            )
-        # print(text_splitter)
-        
-        #create_documents() create documents froma list of texts
-        
-        text = text_splitter.create_documents([text])
+            #splits a long document into smaller chunks that can fit into the LLM's 
+            #model's context window
+            
+            text_splitter = CharacterTextSplitter(
+                    separator="\n",
+                    chunk_size=4000,
+                    chunk_overlap=200
+                )
+            # print(text_splitter)
+            
+            #create_documents() create documents froma list of texts
+            
+            text = text_splitter.create_documents([text])
 
-        text_chunk_index = 0
-        for text_chunk in text:
-            # print(text_chunk.page_content)
-            # print('-----------------------')
-            text[text_chunk_index].page_content = text_chunk.page_content.replace('\n', '')
-            text_chunk_index += 1
+            text_chunk_index = 0
+            for text_chunk in text:
+                # print(text_chunk.page_content)
+                # print('-----------------------')
+                text[text_chunk_index].page_content = text_chunk.page_content.replace('\n', '')
+                text_chunk_index += 1
 
 
-        #print(text)
-        #print("test: 4")
+            #print(text)
+            #print("test: 4")
 
-        # Define prompt
-        prompt_template = """You are required to generate """+prompt_text+""" based on the provided text:
-        {text}
-        CONCISE OUTLINE:"""
+            # Define prompt
+            prompt_template = """You are required to generate """+prompt_text+""" based on the provided text:
+            {text}
+            CONCISE OUTLINE:"""
 
-        # prompt_template = """You are required to generate 25 multiple choice questions having four options and correct answer in json format based on the provided text:
-        # {text}
-        # MCQ QUIZ:"""
+            # prompt_template = """You are required to generate 25 multiple choice questions having four options and correct answer in json format based on the provided text:
+            # {text}
+            # MCQ QUIZ:"""
 
-        prompt_template = PromptTemplate(template=prompt_template, input_variables=["text"])
+            prompt_template = PromptTemplate(template=prompt_template, input_variables=["text"])
 
-        
+            
 
-        # Text summarization
-        chain = load_summarize_chain(llm, chain_type='stuff', prompt=prompt_template)
-        #print("test: 5")
-        document_keypoints = chain.run(text)
-        #print(len(data['document_keypoints']))
-        #print(data['document_keypoints'])
-        #print("test: 6")
-    doc_keypoints = DocumentKeyPoints.objects.get(pk = keypoint_id)
-    doc_keypoints.content = document_keypoints
-    doc_keypoints.prompt_text = prompt_text
-    doc_keypoints.save()
+            # Text summarization
+            chain = load_summarize_chain(llm, chain_type='stuff', prompt=prompt_template)
+            #print("test: 5")
+            document_keypoints = chain.run(text)
+            #print(len(data['document_keypoints']))
+            #print(data['document_keypoints'])
+            #print("test: 6")
+            doc_keypoints = DocumentKeyPoints.objects.get(pk = keypoint_id)
+            doc_keypoints.content = document_keypoints
+            doc_keypoints.prompt_text = prompt_text
+            doc_keypoints.save()
+        except Exception as error:
+            if error.code == 'insufficient_quota':
+                raise serializers.ValidationError("You exceeded your current quota, please check your plan and billing details.")
+            else:
+                raise serializers.ValidationError("Your document content is too large, Please try with some other document.")
+            print(error)
+    else:
+        raise serializers.ValidationError("Invalide document file selected.")
 
 
 class DepartmentModelViewSet(viewsets.ModelViewSet):
