@@ -32,13 +32,15 @@ class CompanyTeamSerializer(serializers.ModelSerializer):
     department = DepartmentSerializer(many=False, read_only=True)
     company = UserCreateSerializer(many=False, read_only=True)
     added_by = UserCreateSerializer(many=False, read_only=True)
-    def create(self, validated_data):
-        instance = CompanyTeam.objects.create_user(**validated_data)
-        return instance
+
     class Meta:
         model = CompanyTeam
         fields = ('id', 'email', 'first_name', 'last_name', 'role', 'company', 'department', 'password', 'created_at', 'updated_at', 'added_by')
-
+    
+    def create(self, validated_data):
+        instance = CompanyTeam.objects.create_user(**validated_data)
+        return instance
+        
 class DocumentSerializer(serializers.ModelSerializer):
     company = UserCreateSerializer(many=False, read_only=True)
     added_by = UserCreateSerializer(many=False, read_only=True)

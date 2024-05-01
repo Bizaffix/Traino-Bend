@@ -1,8 +1,8 @@
 from rest_framework.response import Response
-from dal import autocomplete
+from dal.autocomplete import Select2QuerySetView 
 from .models import Departments, CustomCompanyUser
 
-class CompanyAutocompleteView(autocomplete.Select2QuerySetView):
+class CompanyAutocompleteView(Select2QuerySetView):
 
     def get_queryset(self):
         if not self.request.user.is_authenticated:
@@ -16,7 +16,7 @@ class CompanyAutocompleteView(autocomplete.Select2QuerySetView):
 
         return qs
 
-class DepartmentAutocompleteView(autocomplete.Select2QuerySetView):
+class DepartmentAutocompleteView(Select2QuerySetView):
 
     def get_queryset(self):
         if not self.request.user.is_authenticated:

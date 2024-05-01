@@ -235,11 +235,6 @@ class CompanyTeamModelViewSet(viewsets.ModelViewSet):
         return CompanyTeam.objects.filter(company_id=self.request.user.id)
     
     def create(self, request, *args, **kwargs):
-        # request.data['company'] = self.request.user.pk
-        # request.data['added_by'] = self.request.user.pk
-        # request.data['role'] = 'User'
-        # request.data['is_staff'] = 1
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.validated_data['company'] = self.request.user
@@ -407,7 +402,7 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         
         document_id = int(request.data['document'])
-        document_summary = DocumentSummary.objects.get(document_id = document_id, company_id = self.request.user.id)
+        document_summary = DocumentSummary.objects.get(id = document_id, company_id = self.request.user.id)
         generateDocumentSummary(document_summary.id, document_id, serializer.validated_data['prompt_text'])
         serializer = ReadOnlyDocumentSummarySerializer(document_summary)
 

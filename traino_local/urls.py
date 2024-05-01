@@ -34,6 +34,7 @@ urlpatterns = [
     path('department_autocomplete/', DepartmentAutocompleteView.as_view(), name='department_autocomplete'),
     path('company_autocomplete/', CompanyAutocompleteView.as_view(), name='company_autocomplete'),
     path('api/', include('api.urls')),
+    path('api/', include('company.api.urls')),
 ]
 
 

@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser, Departments, CompanyTeam, CustomCompanyUser
 from django import forms
-from dal import autocomplete
+from dal.autocomplete import ModelSelect2 
 import djhacker
 
 
@@ -32,13 +32,13 @@ class CompanyTeamCreationForm(UserCreationForm):
     company = djhacker.formfield(
         CompanyTeam.company,
         forms.ModelChoiceField,
-        widget=autocomplete.ModelSelect2(url='company_autocomplete')
+        widget=ModelSelect2(url='company_autocomplete')
     )
 
     department = djhacker.formfield(
         CompanyTeam.department,
         forms.ModelChoiceField,
-        widget=autocomplete.ModelSelect2(url='department_autocomplete', forward=['company'])
+        widget=ModelSelect2(url='department_autocomplete', forward=['company'])
     )
 
     class Meta:
@@ -50,13 +50,13 @@ class CompanyTeamChangeForm(UserChangeForm):
     company = djhacker.formfield(
         CompanyTeam.company,
         forms.ModelChoiceField,
-        widget=autocomplete.ModelSelect2(url='company_autocomplete')
+        widget=ModelSelect2(url='company_autocomplete')
     )
 
     department = djhacker.formfield(
         CompanyTeam.department,
         forms.ModelChoiceField,
-        widget=autocomplete.ModelSelect2(url='department_autocomplete', forward=['company'])
+        widget=ModelSelect2(url='department_autocomplete', forward=['company'])
     )
     
     class Meta:
@@ -67,7 +67,7 @@ class DepartmentForm(forms.ModelForm):
     company = djhacker.formfield(
         Departments.company,
         forms.ModelChoiceField,
-        widget=autocomplete.ModelSelect2(url='company_autocomplete')
+        widget=ModelSelect2(url='company_autocomplete')
     )
 
     

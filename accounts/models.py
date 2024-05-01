@@ -80,6 +80,7 @@ class MyAdminSite(AdminSite):
             "Summary": 6,
             "Keypoints": 7,
             "Quizes": 8,
+            "Companys":9,
         }
 
         app_dict = self._build_app_dict(request, app_label)
