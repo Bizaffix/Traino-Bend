@@ -35,6 +35,7 @@ urlpatterns = [
     path('company_autocomplete/', CompanyAutocompleteView.as_view(), name='company_autocomplete'),
     path('api/', include('api.urls')),
     path('api/', include('company.api.urls')),
+    path('api/', include('teams.api.urls')),
 ]
 
 

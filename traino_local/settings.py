@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'documents',
     'dal',
     'dal_select2',
+    'teams',
     'rest_framework',
     'djoser',
     'corsheaders',

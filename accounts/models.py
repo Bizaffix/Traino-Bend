@@ -2,8 +2,9 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from .managers import CustomUserManager
 from django.contrib.admin import AdminSite
+# from company.models import company
 original_get_app_list = AdminSite.get_app_list
-
+import uuid 
 
 class CustomUser(AbstractUser):
     username = None
@@ -44,6 +45,7 @@ class Departments(models.Model):
 class CompanyTeam(CustomUser):
     # company_team_id = models.BigAutoField(primary_key = True)
     company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='team_company')
+    # team_member = models.ForeignKey(CustomUser , on_delete=models.CASCADE , related_name='team_member')
     department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='team_department')
     CustomUser.role = 'User'
 
@@ -81,6 +83,7 @@ class MyAdminSite(AdminSite):
             "Keypoints": 7,
             "Quizes": 8,
             "Companys":9,
+            "Company Team Members":10,
         }
 
         app_dict = self._build_app_dict(request, app_label)

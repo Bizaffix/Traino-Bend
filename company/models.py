@@ -1,3 +1,4 @@
+from accounts.models import CustomUser
 from django.db import models
 import uuid
 from django_countries.fields import CountryField
@@ -38,6 +39,24 @@ class company(models.Model):
             resized_img.save(self.company_logo.path)
 
         super().save(*args, **kwargs)
+        
+class AdminUser(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
+    admin = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='team_admin' , null=True , blank=True)
+    company = models.ForeignKey(company, on_delete=models.CASCADE, related_name='company')
+    is_active = models.BooleanField(default=True)
+
+    REQUIRED_FIELDS = ['first_name', 'last_name', 'role', 'company', 'department']
+
+    def save(self, *args, **kwargs):
+        if not self.admin.role == 'Admin':
+            self.admin.role = 'Admin'  # Set the role to 'Admin' if it's not already set
+            self.admin.save()  # Save the associated admin user
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.admin.email} with role {self.admin.role}"
     
-    
-    
+    class Meta:
+        verbose_name = ("Company Admin")
+        verbose_name_plural = ("Company Admins")
