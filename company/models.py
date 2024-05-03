@@ -55,8 +55,11 @@ class AdminUser(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.admin.email} with role {self.admin.role}"
-    
+        if self.admin is not None:
+            return f"{self.admin.email} with role {self.admin.role}"
+        else:
+            return "Admin Data"
+        
     class Meta:
         verbose_name = ("Company Admin")
         verbose_name_plural = ("Company Admins")
