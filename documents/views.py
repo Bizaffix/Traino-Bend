@@ -1,3 +1,14 @@
+from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from departments.models import DepartmentsDocuments
+from .serializers import DepartmentsDocumentsSerializer, DepartmentsDocumentsCreateSerializer
+from teams.models import CompaniesTeam 
+from teams.api.permissions import IsAdminUserOrReadOnly
+from rest_framework_simplejwt.authentication import JWTAuthentication
+import base64
+from company.models import AdminUser
 from django.shortcuts import render
 from django.http import JsonResponse
 from langchain.llms import OpenAI
@@ -6,7 +17,8 @@ from langchain.docstore.document import Document
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from langchain.document_loaders import PyPDFLoader
-from .models import UserDocuments, QuizQuestions, DocumentQuiz, DocumentTeam
+from .models import QuizQuestions, DocumentQuiz, DocumentTeam
+from rest_framework.generics import *
 from PyPDF2 import PdfReader
 from langchain.prompts import PromptTemplate
 import os
@@ -14,7 +26,7 @@ import json
 from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.contrib import messages
-
+from departments.models import DepartmentsDocuments
 
 openai_api_key = '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'
 os.environ['OPENAI_API_KEY'] = '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'
@@ -45,7 +57,7 @@ def generateDocumentSummary(request):
         else:
             data['document_summary'] = 'Oops! Summary not generated please try with some other document.'
 
-            document = UserDocuments.objects.get(id=document_id)
+            document = DepartmentsDocuments.objects.get(id=document_id)
             if document.file.path is not None:
                 try:
                     print("test: 1")
@@ -121,7 +133,7 @@ def generateDocumentKeypoints(request):
         else:
             data['document_keypoints'] = 'Oops! Keypoints not generated please try with some other document.'
 
-            document = UserDocuments.objects.get(id=document_id)
+            document = DepartmentsDocuments.objects.get(id=document_id)
             if document.file.path is not None:
                 try:
                     #print("test: 1")
@@ -222,7 +234,7 @@ def publishDocument(request):
     data = {'label': '', 'msg': ''}
     if request.method == 'POST':
         document_id = request.POST.get('document_id')
-        company_document = UserDocuments.objects.get(id=document_id)
+        company_document = DepartmentsDocuments.objects.get(id=document_id)
         if company_document is not None and company_document.published is True:
             company_document.published = False
             company_document.save()
@@ -286,7 +298,7 @@ def generateDocumentQuiz(request):
         else:
             data['document_keypoints'] = 'Oops! Quiz not generated please try with some other document.'
 
-            document = UserDocuments.objects.get(id=document_id)
+            document = DepartmentsDocuments.objects.get(id=document_id)
             if document.file.path is not None:
                 try:
                     #print("test: 1")
@@ -397,3 +409,55 @@ def generateDocumentQuiz(request):
                         data['msg'] = 'Your document content is too large, Please try with some other document.'
                     print(error)
     return JsonResponse(data, status=200)
+
+
+class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
+    queryset = DepartmentsDocuments.objects.filter(is_active=True)
+    serializer_class = DepartmentsDocumentsCreateSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    authentication_classes = [JWTAuthentication]
+
+class DepartmentsDocumentsListAPIView(generics.ListAPIView):
+    serializer_class = DepartmentsDocumentsSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    authentication_classes = [JWTAuthentication]
+    queryset = DepartmentsDocuments.objects.filter(is_active=True)
+    
+
+class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = DepartmentsDocuments.objects.filter(is_active=True)
+    serializer_class = DepartmentsDocumentsCreateSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    authentication_classes = [JWTAuthentication]
+    lookup_field = 'id'
+    
+    def put(self , request , *args, **kwargs):
+        DepartmentsDocuments.objects.get(id=self.kwargs['id'])
+        return self.update(request, *args , **kwargs)
+    
+    def delete(self , request , *args , **kwargs):
+        instance = self.get_object()
+        instance.is_active=False
+        instance.save()
+        return Response({"Delete Status": "Successfully Removed the Documents"}, status=status.HTTP_202_ACCEPTED)
+    
+
+
+class AssignDocumentsToUsersAPIView(APIView):
+    def post(self, request, document_id):
+        try:
+            document = DepartmentsDocuments.objects.get(id=document_id)
+        except DepartmentsDocuments.DoesNotExist:
+            return Response({"message": "Document not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        users = request.data.get('users', [])
+        for user_id in users:
+            try:
+                user = CompaniesTeam.objects.get(id=user_id)
+                document.users.add(user)
+            except CompaniesTeam.DoesNotExist:
+                return Response({"message": "Users not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({"message": "Document assigned to users successfully."}, status=status.HTTP_200_OK)
+
+

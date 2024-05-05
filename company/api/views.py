@@ -16,16 +16,15 @@ class CompanyCreateApiView(CreateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
     
-    
 class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIView):
     serializer_class = CompanySerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
     queryset = company.objects.filter(is_active=True)
-    lookup_field = 'pk'
+    lookup_field = 'id'
      
     def put(self , request , *args, **kwargs):
-        company.objects.get(id=self.kwargs['pk'])
+        company.objects.get(id=self.kwargs['id'])
         return self.update(request, *args , **kwargs)
     
     def delete(self , request , *args , **kwargs):

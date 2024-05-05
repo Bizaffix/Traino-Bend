@@ -1,14 +1,16 @@
 from rest_framework.response import Response
-from accounts.models import Departments, CompanyTeam, CustomUser 
+from accounts.models import CompanyTeam, CustomUser 
+from departments.models import Departments
 from documents.models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, DocumentTeam
-from api.serializers import DepartmentSerializer, CompanyTeamSerializer, UserCreateSerializer, DocumentSerializer, ReadOnlyDocumentSerializer, DocumentSummarySerializer, ReadOnlyDocumentSummarySerializer, DocumentKeypointsSerializer, ReadOnlyDocumentKeypointsSerializer
+from api.serializers import DepartmentSerializers, DepartmentListSerializers ,DepartmentRUDSerializers,CompanyTeamSerializer, UserCreateSerializer, DocumentSerializer, ReadOnlyDocumentSerializer, DocumentSummarySerializer, ReadOnlyDocumentSummarySerializer, DocumentKeypointsSerializer, ReadOnlyDocumentKeypointsSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import  serializers
-
+from rest_framework.generics import *
+from teams.api.permissions import IsAdminUserOrReadOnly
 import os
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
@@ -201,27 +203,46 @@ def generateDocumentKeypoints(keypoint_id, document_id, prompt_text):
     else:
         raise serializers.ValidationError("Invalide document file selected.")
 
-
-class DepartmentModelViewSet(viewsets.ModelViewSet):
-    queryset = Departments.objects.all()
-    serializer_class = DepartmentSerializer
+class DepartmentCreateApiview(CreateAPIView):
+    serializer_class = DepartmentSerializers
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUserOrReadOnly]
+    
+class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView):
+    serializer_class = DepartmentRUDSerializers
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name']
+    queryset = Departments.objects.filter(is_active=True)
+    lookup_field = 'id'
 
+    def put(self , request , *args, **kwargs):
+        Departments.objects.get(id=self.kwargs['id'])
+        return self.update(request, *args , **kwargs)
+    
+    def delete(self , request , *args , **kwargs):
+        instance = self.get_object()
+        instance.is_active=False
+        instance.save()
+        return Response({"Delete Status": "Successfully Delete the Department"}, status=status.HTTP_202_ACCEPTED)
+    
+
+class DepartmentListApiView(ListAPIView):
+    serializer_class = DepartmentListSerializers
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    filter_backends = [SearchFilter, OrderingFilter]
+    queryset = Departments.objects.filter(is_active=True)
 
     def get_queryset(self):
-        return Departments.objects.filter(company_id=self.request.user.id)
+        queryset = Departments.objects.filter(is_active=True)
+        searched_data = self.request.query_params.get("q", None)
+        if searched_data:
+            searched_queryset = queryset.filter(name__icontains=searched_data)
+            return searched_queryset
+        else:
+            return queryset
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.validated_data['company'] = self.request.user
-        serializer.validated_data['added_by'] = self.request.user
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class CompanyTeamModelViewSet(viewsets.ModelViewSet):
     queryset = CompanyTeam.objects.all()

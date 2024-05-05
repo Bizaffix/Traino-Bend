@@ -20,7 +20,7 @@ class AdminUpdateDeleteSerializer(serializers.ModelSerializer):
         fields = ['admin' , 'company']
     
 class CompanySerializer(serializers.ModelSerializer):
-    email = serializers.SerializerMethodField(read_only=True)
+    admin = serializers.SerializerMethodField(read_only=True)
     id = serializers.SerializerMethodField(read_only=True)
     company_logo = serializers.SerializerMethodField()
     class Meta:
@@ -35,7 +35,7 @@ class CompanySerializer(serializers.ModelSerializer):
             return self.context['request'].build_absolute_uri(obj.company_logo.url)
         return None
     
-    def get_email(self, obj):
+    def get_admin(self, obj):
         admins = AdminUser.objects.prefetch_related('company').filter(company=obj)
         serializer = AdminSerializer(admins, many=True)
         return serializer.data
