@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from departments.models import DepartmentsDocuments
+from departments.models import DepartmentsDocuments , Departments
 from .serializers import DepartmentsDocumentsSerializer, DepartmentsDocumentsCreateSerializer
 from teams.models import CompaniesTeam 
 from teams.api.permissions import IsAdminUserOrReadOnly
@@ -430,6 +430,17 @@ class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDe
     permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
     lookup_field = 'id'
+    
+    def get(self, request, *args , **kwargs):
+        try:
+            department = Departments.objects.get(id=self.kwargs['id'])
+        except Departments.DoesNotExist:
+            return Response({'error': 'Department not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        documents = DepartmentsDocuments.objects.filter(department=department)
+        serializer = DepartmentsDocumentsSerializer(documents, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def put(self , request , *args, **kwargs):
         DepartmentsDocuments.objects.get(id=self.kwargs['id'])
