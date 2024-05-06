@@ -31,7 +31,7 @@ class CompanySerializer(serializers.ModelSerializer):
         return obj.id
     
     def get_company_logo(self , obj):
-        if obj.company_logo:
+        if obj.company_logo is not None:
             return self.context['request'].build_absolute_uri(obj.company_logo.url)
         return None
     

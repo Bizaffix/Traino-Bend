@@ -211,7 +211,7 @@ class DepartmentCreateApiview(CreateAPIView):
 class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView):
     serializer_class = DepartmentRUDSerializers
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAuthenticated , IsAdminUserOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
     queryset = Departments.objects.filter(is_active=True)
     lookup_field = 'id'
@@ -230,7 +230,7 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
 class DepartmentListApiView(ListAPIView):
     serializer_class = DepartmentListSerializers
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAuthenticated , IsAdminUserOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
     queryset = Departments.objects.filter(is_active=True)
 

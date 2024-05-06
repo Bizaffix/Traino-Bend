@@ -5,6 +5,7 @@ from rest_framework import status
 from departments.models import DepartmentsDocuments , Departments
 from .serializers import DepartmentsDocumentsSerializer, DepartmentsDocumentsCreateSerializer
 from teams.models import CompaniesTeam 
+from rest_framework.permissions import IsAuthenticated
 from teams.api.permissions import IsAdminUserOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import base64
@@ -414,12 +415,12 @@ def generateDocumentQuiz(request):
 class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     serializer_class = DepartmentsDocumentsCreateSerializer
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly , IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
 class DepartmentsDocumentsListAPIView(generics.ListAPIView):
     serializer_class = DepartmentsDocumentsSerializer
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly , IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     
@@ -427,7 +428,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
 class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     serializer_class = DepartmentsDocumentsCreateSerializer
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly , IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     lookup_field = 'id'
     
