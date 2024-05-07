@@ -451,7 +451,7 @@ class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDe
         instance = self.get_object()
         instance.is_active=False
         instance.save()
-        return Response({"Delete Status": "Successfully Removed the Documents"}, status=status.HTTP_202_ACCEPTED)
+        return Response({"Delete Status": "Successfully Removed the Documents", "Deleted Documnet's Id":instance.id}, status=status.HTTP_202_ACCEPTED)
     
 
 
