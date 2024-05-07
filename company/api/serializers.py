@@ -22,7 +22,7 @@ class AdminUpdateDeleteSerializer(serializers.ModelSerializer):
 class CompanySerializer(serializers.ModelSerializer):
     admin = serializers.SerializerMethodField(read_only=True)
     id = serializers.SerializerMethodField(read_only=True)
-    company_logo = serializers.SerializerMethodField()
+    logo = serializers.SerializerMethodField()
     class Meta:
         model = company
         fields = '__all__'
@@ -30,10 +30,20 @@ class CompanySerializer(serializers.ModelSerializer):
     def get_id(self , obj):
         return obj.id
     
-    def get_company_logo(self , obj):
-        if obj.company_logo is not None:
-            return self.context['request'].build_absolute_uri(obj.company_logo.url)
-        return None
+    
+    def get_logo(self, obj):
+        if obj.logo and hasattr(obj.logo, 'url'):
+            return obj.logo.url
+        else:
+            return "/public/static/company_logos/OneColumbia.jpeg"
+    # def get_logo(self, obj):
+    #     request = self.context.get('request')  # Ensure 'request' is defined by getting it from the context
+    #     print(obj.logo)
+    #     print(obj.logo.url)
+    #     if obj.logo and hasattr(obj.logo, 'url'):
+    #         if request is not None:
+    #             return request.build_absolute_uri(obj.logo.url)
+    #     return None
     
     def get_admin(self, obj):
         admins = AdminUser.objects.prefetch_related('company').filter(company=obj)
@@ -41,12 +51,12 @@ class CompanySerializer(serializers.ModelSerializer):
         return serializer.data
     
 class CompaniesListSerializer(serializers.ModelSerializer):
-    company_logo = serializers.SerializerMethodField()
+    logo = serializers.SerializerMethodField()
     class Meta:
         model = company
-        fields = ['company_name', 'company_logo']
+        fields = ['name', 'logo']
         
-    def get_company_logo(self , obj):
-        if obj.company_logo:
-            return self.context['request'].build_absolute_uri(obj.company_logo.url)
+    def get_logo(self , obj):
+        if obj.logo:
+            return self.context['request'].build_absolute_uri(obj.logo.url)
         return None

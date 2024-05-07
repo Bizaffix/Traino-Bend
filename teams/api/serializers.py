@@ -26,5 +26,5 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
         return obj.members.email
     
     def get_company(self , obj):
-        return obj.company.company_name
+        return obj.company.name
         

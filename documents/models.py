@@ -4,8 +4,8 @@ from accounts.models import CustomUser, Departments
 
 class UserDocuments(models.Model):
     id = models.BigAutoField(primary_key = True)
-    name = models.CharField(max_length = 100)
-    file = models.FileField(upload_to='documents/',)
+    name = models.CharField(max_length = 100, null=True)
+    file = models.FileField(upload_to='documents/', null=True , blank=True)
     company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='document_company')
     department = models.ManyToManyField(Departments, related_name='document_departments')
     published = models.BooleanField(default=False)

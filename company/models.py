@@ -8,9 +8,9 @@ from PIL import Image
 
 class company(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
-    company_name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
     company_id = models.CharField(max_length=50)
-    company_logo = models.ImageField(upload_to='company_logos/', null=True, blank=True)
+    logo = models.ImageField(upload_to='company_logos/', default="OneColumbia.jpeg", null=True, blank=True)
     country = CountryField()
     phone = PhoneNumberField()
     address = models.CharField(max_length=300)
@@ -22,13 +22,12 @@ class company(models.Model):
     is_active = models.BooleanField(default=True)
     
     def __str__(self):
-        return self.company_name
+        return self.name
     
     def save(self, *args, **kwargs):
-        if self.company_logo:
-            super().save(*args, **kwargs)
-
-            img = Image.open(self.company_logo.path)
+        if self.logo:
+            
+            img = Image.open(self.logo.path)
 
             # Resize the image
             desired_width = 500  # Set the desired width
@@ -36,7 +35,7 @@ class company(models.Model):
             resized_img = img.resize((desired_width, desired_height))
 
 
-            resized_img.save(self.company_logo.path)
+            resized_img.save(self.logo.path)
 
         super().save(*args, **kwargs)
         

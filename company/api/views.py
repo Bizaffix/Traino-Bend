@@ -10,6 +10,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.status import HTTP_201_CREATED , HTTP_202_ACCEPTED
+from django.db import transaction
 
 class CompanyCreateApiView(CreateAPIView):
     serializer_class = CompanySerializer
@@ -24,14 +25,14 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
     lookup_field = 'id'
      
     def put(self , request , *args, **kwargs):
-        company.objects.get(id=self.kwargs['id'])
+        company.objects.get(uuid=self.kwargs['id'])
         return self.update(request, *args , **kwargs)
     
     def delete(self , request , *args , **kwargs):
         instance = self.get_object()
         instance.is_active=False
         instance.save()
-        return Response({"Delete Status": "Successfully Delete the profile"}, status=HTTP_202_ACCEPTED)
+        return Response({"Delete Status": "Successfully Delete the Company"}, status=HTTP_202_ACCEPTED)
     
 class CompanyListApiView(ListAPIView):
     serializer_class = CompaniesListSerializer
