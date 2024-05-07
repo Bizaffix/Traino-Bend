@@ -48,7 +48,7 @@ class DepartmentRUDSerializers(serializers.ModelSerializer):
         return obj.id
 
     def get_company(self , obj):
-        return obj.company.company_name
+        return obj.company.name
     
     def get_added_by(self, obj):
         return obj.added_by.email.email
@@ -70,7 +70,7 @@ class DepartmentListSerializers(serializers.ModelSerializer):
         return obj.id
 
     def get_company(self , obj):
-        return obj.company.company_name
+        return obj.company.name
     
     def get_added_by(self, obj):
         return obj.added_by.email.email
