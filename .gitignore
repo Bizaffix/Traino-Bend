@@ -1,7 +1,6 @@
 vi .gitignore
 /db.sqlite3
 /requirements.txt
-public/static/documents/*
 accounts/__pycache__/*
 accounts/migrations/*
 documents/__pycache__/*

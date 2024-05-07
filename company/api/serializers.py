@@ -22,7 +22,7 @@ class AdminUpdateDeleteSerializer(serializers.ModelSerializer):
 class CompanySerializer(serializers.ModelSerializer):
     admin = serializers.SerializerMethodField(read_only=True)
     id = serializers.SerializerMethodField(read_only=True)
-    logo = serializers.SerializerMethodField()
+    # logo = serializers.SerializerMethodField()
     class Meta:
         model = company
         fields = '__all__'
@@ -31,11 +31,11 @@ class CompanySerializer(serializers.ModelSerializer):
         return obj.id
     
     
-    def get_logo(self, obj):
-        if obj.logo and hasattr(obj.logo, 'url'):
-            return obj.logo.url
-        else:
-            return "/public/static/company_logos/OneColumbia.jpeg"
+    # def get_logo(self, obj):
+    #     if obj.logo:
+    #         return obj.logo.url
+    #     else:
+    #         return "/public/static/company_logos/OneColumbia.jpeg"
     # def get_logo(self, obj):
     #     request = self.context.get('request')  # Ensure 'request' is defined by getting it from the context
     #     print(obj.logo)

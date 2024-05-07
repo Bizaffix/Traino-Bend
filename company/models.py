@@ -5,12 +5,13 @@ from django_countries.fields import CountryField
 from phonenumber_field.modelfields import PhoneNumberField
 from django.urls import reverse
 from PIL import Image
+import os
 
 class company(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
     name = models.CharField(max_length=50)
     company_id = models.CharField(max_length=50)
-    logo = models.ImageField(upload_to='company_logos/', default="OneColumbia.jpeg", null=True, blank=True)
+    logo = models.ImageField(upload_to='media/company_logos/', default="OneColumbia.jpeg", null=True, blank=True)
     country = CountryField()
     phone = PhoneNumberField()
     address = models.CharField(max_length=300)
@@ -27,15 +28,25 @@ class company(models.Model):
     def save(self, *args, **kwargs):
         if self.logo:
             
-            img = Image.open(self.logo.path)
-
-            # Resize the image
-            desired_width = 500  # Set the desired width
-            desired_height = int(img.height * (desired_width / img.width))
-            resized_img = img.resize((desired_width, desired_height))
+            img = Image.open(self.logo)
 
 
-            resized_img.save(self.logo.path)
+            max_width = 500
+            if img.width > max_width:
+                ratio = max_width / img.width
+                new_height = int(img.height * ratio)
+                img = img.resize((max_width, new_height))
+            
+            temp_file, temp_ext = os.path.splitext(self.logo.path)
+            temp_file += '_temp' + temp_ext.lower()
+            img.save(temp_file)
+
+            # Save the image back to the original file path
+            with open(temp_file, 'rb') as f:
+                self.logo.save(os.path.basename(self.logo.name), f, save=False)
+
+            # Delete the temporary file
+            os.remove(temp_file)
 
         super().save(*args, **kwargs)
         
