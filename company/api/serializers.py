@@ -9,15 +9,19 @@ class AdminSerializer(serializers.ModelSerializer):
         fields = ['id', 'admin' , 'company']
     
     def get_admin(self , obj):
-        return obj.admin.email
+        return obj.email.email
     
     def get_company(self , obj):
-        return obj.company.company_name
+        return obj.company.name
     
 class AdminUpdateDeleteSerializer(serializers.ModelSerializer):
+    admin = serializers.SerializerMethodField()
     class Meta:
         model = AdminUser
-        fields = ['admin' , 'company']
+        fields = ['id' , 'admin' , 'company']
+    
+    def get_admin(self , obj):
+        return obj.email.email
     
 class CompanySerializer(serializers.ModelSerializer):
     admin = serializers.SerializerMethodField(read_only=True)
@@ -54,7 +58,7 @@ class CompaniesListSerializer(serializers.ModelSerializer):
     logo = serializers.SerializerMethodField()
     class Meta:
         model = company
-        fields = ['name', 'logo']
+        fields = ['id','name', 'logo']
         
     def get_logo(self , obj):
         if obj.logo:

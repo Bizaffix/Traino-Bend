@@ -59,9 +59,9 @@ class AdminUser(models.Model):
     REQUIRED_FIELDS = ['first_name', 'last_name', 'role', 'company', 'department']
 
     def save(self, *args, **kwargs):
-        if not self.email.role == 'Admin':
+        if self.email.role != 'Admin':
             self.email.role = 'Admin'  # Set the role to 'Admin' if it's not already set
-            self.email.save()  # Save the associated admin user
+            self.email.save()
         super().save(*args, **kwargs)
 
     def __str__(self):
