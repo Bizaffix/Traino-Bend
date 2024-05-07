@@ -91,11 +91,9 @@ class AdminUserUpdateAndDeleteApiView(RetrieveAPIView,UpdateAPIView, DestroyAPIV
         instance = self.get_object()
         instance.is_active=False
         instance.save()
-        return Response({"Delete Status": "Successfully Delete the Admin" , "Deleted Admin id":instance.id}, status=HTTP_202_ACCEPTED)
-
+        return Response({"status": "Successfully Delete the Admin" , "id":instance.id}, status=HTTP_202_ACCEPTED)
 class AdminListApiView(ListAPIView):
     serializer_class = AdminUpdateDeleteSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminUser]
     queryset = AdminUser.objects.filter(is_active=True)
-    
