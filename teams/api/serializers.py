@@ -10,10 +10,13 @@ class UserCreateSerializer(UserCreateSerializer):
         fields = ('id', 'email', 'first_name', 'last_name', 'role', 'password')
 
 class CompaniesTeamSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = CompaniesTeam
-        fields = ['id', 'members', 'company', 'is_active']
+        fields = ['id', 'members', 'company']
 
+    def get_id(self , obj):
+        return obj.id
         
 class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     member_email = serializers.SerializerMethodField()

@@ -10,8 +10,9 @@ from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import  serializers
 from rest_framework.generics import *
-from teams.api.permissions import IsAdminUserOrReadOnly
+from .permissions import IsAdminUserOrReadOnly
 import os
+from rest_framework.views import APIView
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
 from langchain.docstore.document import Document
@@ -208,6 +209,9 @@ class DepartmentCreateApiview(CreateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
     
+    def perform_create(self, serializer):
+        serializer.save(added_by=self.request.user)
+    
 class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView):
     serializer_class = DepartmentRUDSerializers
     authentication_classes = [JWTAuthentication]
@@ -242,8 +246,27 @@ class DepartmentListApiView(ListAPIView):
             return searched_queryset
         else:
             return queryset
+        
+from .serializers import CompanyDepartmentsSerializers
 
-
+class CompanyDepartmentsListAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    filter_backends = [SearchFilter, OrderingFilter]
+    queryset = Departments.objects.filter(is_active=True)
+    lookup_field = 'id'
+    
+    def get(self, request, *args, **kwargs):
+        company_id = self.kwargs.get('id')  # Retrieve 'id' from query parameters
+        if company_id is None:
+            return Response({"error": "Company ID is required in the query parameters."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = CompanyDepartmentsSerializers(data={"company_id": company_id})
+        if serializer.is_valid():
+            departments = serializer.validated_data
+            return Response(departments, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
 class CompanyTeamModelViewSet(viewsets.ModelViewSet):
     queryset = CompanyTeam.objects.all()
     serializer_class = CompanyTeamSerializer

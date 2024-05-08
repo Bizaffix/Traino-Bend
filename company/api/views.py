@@ -5,6 +5,7 @@ from rest_framework.generics import (
     CreateAPIView , ListAPIView , RetrieveAPIView,
     UpdateAPIView, DestroyAPIView
 )
+from .permissions import IsAdminUserOrReadOnly
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
@@ -23,24 +24,26 @@ class CompanyCreateApiView(CreateAPIView):
 class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIView):
     serializer_class = CompanySerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUserOrReadOnly]
     queryset = company.objects.filter(is_active=True)
     lookup_field = 'id'
      
-    def put(self , request , *args, **kwargs):
-        company.objects.get(id=self.kwargs['id'])
-        return self.update(request, *args , **kwargs)
-    
-    def delete(self , request , *args , **kwargs):
+    def put(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.is_active=False
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_active = False
         instance.save()
-        return Response({"Delete Status": "Successfully Delete the Company", "Deleted Company id":instance.id}, status=HTTP_202_ACCEPTED)
-    
+        return Response({"Delete Status": "Successfully deleted the Company", "Deleted Company id": instance.id}, status=HTTP_202_ACCEPTED)
 class CompanyListApiView(ListAPIView):
     serializer_class = CompaniesListSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes =[IsAdminUser]
+    permission_classes =[IsAdminUserOrReadOnly]
     
     def get_queryset(self):
         queryset = company.objects.filter(is_active=True)
@@ -54,20 +57,29 @@ class CompanyListApiView(ListAPIView):
         
 class CreateAdminApiView(CreateAPIView):
     serializer_class = AdminSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes =[JWTAuthentication]
     
     def perform_create(self, serializer):
-        email_id = self.request.data.get('admin')
+        email_id = self.request.data.get('email')
         company_id = self.request.data.get('company')  
-        email_instance = CustomUser.objects.get(id=email_id)
-        company_instance = company.objects.get(id=company_id)
+        if email_id is None:
+            raise serializers.ValidationError("Admin field is required.")
+
+        email_instance = CustomUser.objects.filter(id=email_id).first()
+        if email_instance is None:
+            raise serializers.ValidationError("Invalid admin specified.")
+
+        company_instance = company.objects.filter(id=company_id).first()
+        if company_instance is None:
+            raise serializers.ValidationError("Invalid company specified.")
+
         serializer.save(email=email_instance, company=company_instance)
-    
+
 class AdminUserUpdateAndDeleteApiView(RetrieveAPIView,UpdateAPIView, DestroyAPIView):
     serializer_class = AdminUpdateDeleteSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUserOrReadOnly]
     queryset = AdminUser.objects.filter(is_active=True)
     lookup_field = 'id'
      
@@ -84,6 +96,6 @@ class AdminUserUpdateAndDeleteApiView(RetrieveAPIView,UpdateAPIView, DestroyAPIV
 class AdminListApiView(ListAPIView):
     serializer_class = AdminUpdateDeleteSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUserOrReadOnly]
     queryset = AdminUser.objects.filter(is_active=True)
     

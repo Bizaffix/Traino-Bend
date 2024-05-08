@@ -51,11 +51,31 @@ class DepartmentRUDSerializers(serializers.ModelSerializer):
         return obj.company.name
     
     def get_added_by(self, obj):
-        return obj.added_by.email.email
+        return obj.added_by.email
     
     def get_users(self, obj):
         return [user.members.email for user in obj.users.all()]
-    
+
+class CompanyDepartmentsListSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Departments
+        fields = '__all__'    
+
+class CompanyDepartmentsSerializers(serializers.ModelSerializer):
+    company_id = serializers.UUIDField()
+    class Meta:
+        model = Departments
+        fields = '__all__'    
+
+    def to_representation(self, instance):
+        company_id = instance['company_id']
+        try:
+            company_departments = Departments.objects.filter(company_id=company_id)
+            serializer = CompanyDepartmentsListSerializers(company_departments, many=True)
+            return serializer.data
+        except Departments.DoesNotExist:
+            raise serializers.ValidationError("Company with given ID does not exist.")
+
 
 class DepartmentListSerializers(serializers.ModelSerializer):
     id = serializers.SerializerMethodField(read_only=True)

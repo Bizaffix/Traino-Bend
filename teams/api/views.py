@@ -6,6 +6,7 @@ from .serializers import CompaniesTeamSerializer , CompaniesTeamDetailsSerialize
 from .permissions import IsAdminUserOrReadOnly
 from rest_framework.response import Response
 from rest_framework import status
+from .permissions import IsAdminUserOrReadOnly
 
 class AddMembersApiView(CreateAPIView):
     serializer_class = CompaniesTeamSerializer

@@ -7,6 +7,8 @@ original_get_app_list = AdminSite.get_app_list
 import uuid 
 
 class CustomUser(AbstractUser):
+    first_name = models.CharField(max_length=100, null=True, blank=True)
+    last_name = models.CharField(max_length=100, null=True, blank=True)
     username = None
     email = models.EmailField(('email address'), unique=True)
     role =models.CharField(max_length=20, choices=( ('Super Admin', 'Super Admin'), ('Admin', 'Admin'), ('User', 'User') ), default='Super Admin' )

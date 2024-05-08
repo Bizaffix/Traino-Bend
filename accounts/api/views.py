@@ -1,14 +1,55 @@
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveAPIView
-from .serializers import CustomUserDetailSerializer
+from rest_framework.generics import RetrieveAPIView , CreateAPIView , UpdateAPIView, DestroyAPIView
+from .serializers import CustomUserDetailSerializer , CustomUserSerializer
 from rest_framework.permissions import IsAuthenticated
 from accounts.models import CustomUser
 from rest_framework import status
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
+
+
+class CustomUserCreateAPIView(CreateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]  
+    def create(self, request, *args, **kwargs):
+        if request.user.role == 'Super Admin':
+            if request.data.get('role') != 'Admin':
+                return Response({"error": "Super Admin can only create Admins."},
+                                status=status.HTTP_403_FORBIDDEN)
+        elif request.user.role == 'Admin':
+            if request.data.get('role') != 'User':
+                return Response({"error": "Admin can only create Users."},
+                                status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response({"error": "You don't have permission to create users."},
+                            status=status.HTTP_403_FORBIDDEN)
+            
+        request.data['added_by'] = request.user.id
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class CustomUserUpdateAPIView(UpdateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if the authenticated user is the creator of the instance
+        if instance.added_by != request.user:
+            return Response({"error": "You don't have permission to update this Account Holder's Details."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        return super().update(request, *args, **kwargs)
 
 class LoginAPIView(APIView):
     def post(self, request):
