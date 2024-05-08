@@ -13,10 +13,10 @@ router.register('summary', views.DocumentSummaryModelViewSet, basename="company_
 router.register('keypoints', views.DocumentKeypointsModelViewSet, basename="company_document_keypoints_api")
 
 urlpatterns = [
-    path('create-departments/', DepartmentCreateApiview.as_view(), name='department-create'),
-    path('departments/<str:id>/', DepartmentRetrieveApiView.as_view(), name='department-RUD'),
-    path('departments/', DepartmentListApiView.as_view(), name='departments-List'),
-    path('company-departments/<str:id>/', CompanyDepartmentsListAPIView.as_view(), name='company-departments-List'),
+    path('create-department/', DepartmentCreateApiview.as_view(), name='department-create'),
+    path('department/<str:id>/', DepartmentRetrieveApiView.as_view(), name='department-RUD'),
+    path('department/', DepartmentListApiView.as_view(), name='departments-List'),
+    path('company-department/<str:id>/', CompanyDepartmentsListAPIView.as_view(), name='company-departments-List'),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
     path('', include(router.urls)),
