@@ -1,6 +1,4 @@
 vi .gitignore
-/db.sqlite3
-/requirements.txt
 accounts/__pycache__/*
 accounts/migrations/*
 documents/__pycache__/*
@@ -9,5 +7,3 @@ traino_env/__pycache__/*
 traino_local/__pycache__/*
 api/__pycache__/*
 api/migrations/*
-traino_env/*
-db/*

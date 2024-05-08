@@ -15,7 +15,7 @@ router.register('keypoints', views.DocumentKeypointsModelViewSet, basename="comp
 urlpatterns = [
     path('create-department/', DepartmentCreateApiview.as_view(), name='department-create'),
     path('department/<str:id>/', DepartmentRetrieveApiView.as_view(), name='department-RUD'),
-    path('department/', DepartmentListApiView.as_view(), name='departments-List'),
+    path('departments/', DepartmentListApiView.as_view(), name='departments-List'),
     path('company-department/<str:id>/', CompanyDepartmentsListAPIView.as_view(), name='company-departments-List'),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
