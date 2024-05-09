@@ -7,6 +7,7 @@ original_get_app_list = AdminSite.get_app_list
 import uuid 
 
 class CustomUser(AbstractUser):
+    # uuid = models.UUIDField(default=uuid.uuid4 , unique=True ,null=True, blank=True)
     first_name = models.CharField(max_length=100, null=True, blank=True)
     last_name = models.CharField(max_length=100, null=True, blank=True)
     username = None

@@ -6,8 +6,9 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
     """
     def has_permission(self, request, view):
         # Allow GET, HEAD, or OPTIONS requests (read-only)
-        if request.method in permissions.SAFE_METHODS:
-            return True
+        # if (request.user and request.user.is_authenticated and request.user.role == 'Super Admin'):#or (request.user and request.user.is_authenticated and request.user.role == 'User')
+        #     if request.method in permissions.SAFE_METHODS:
+        #         return True
         # This is custom permission on role bases
         return request.user and request.user.is_authenticated and request.user.role == 'Super Admin' 
 

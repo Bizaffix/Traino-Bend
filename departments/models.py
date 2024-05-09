@@ -8,7 +8,7 @@ class Departments(models.Model):
     id = models.UUIDField(default=uuid.uuid4 , primary_key=True , unique=True)
     name = models.CharField(max_length = 100)
     company = models.ForeignKey(company, on_delete=models.CASCADE, related_name='department_company')
-    users = models.ManyToManyField(CompaniesTeam, null=True , blank=True)
+    users = models.ManyToManyField(CompaniesTeam , blank=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="department_added_by_main")

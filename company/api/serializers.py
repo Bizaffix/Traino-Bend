@@ -45,15 +45,23 @@ class AdminSerializer(serializers.ModelSerializer):
         return obj.company.name
     
 class AdminUpdateDeleteSerializer(serializers.ModelSerializer):
-    admin = serializers.SerializerMethodField()
-    company = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField(read_only=True)
+    first_name = serializers.SerializerMethodField(read_only=True)
+    last_name = serializers.SerializerMethodField(read_only=True)
+    company = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = AdminUser
-        fields = ['id' , 'admin' , 'company']
+        fields = ['id' , 'first_name' , 'last_name', 'email' , 'company']
     
-    def get_admin(self , obj):
+    def get_email(self , obj):
         return obj.email.email
+
+    def get_first_name(self, obj):
+        return obj.email.first_name
     
+    def get_last_name(self, obj):
+        return obj.email.last_name
+
     def get_company(self , obj):
         return obj.company.name
     

@@ -92,8 +92,20 @@ class AdminUserUpdateAndDeleteApiView(RetrieveAPIView,UpdateAPIView, DestroyAPIV
         instance.is_active=False
         instance.save()
         return Response({"status": "Successfully Delete the Admin" , "id":instance.id}, status=HTTP_202_ACCEPTED)
+
 class AdminListApiView(ListAPIView):
     serializer_class = AdminUpdateDeleteSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUserOrReadOnly]
     queryset = AdminUser.objects.filter(is_active=True)
+
+    def get_queryset(self):
+        """
+        Optionally restricts the returned administrators to a given company,
+        by filtering against a `company_id` query parameter in the URL.
+        """
+        queryset = AdminUser.objects.filter(is_active=True)
+        company_id = self.request.query_params.get('company_id', None)
+        if company_id is not None:
+            queryset = queryset.filter(company__id=company_id)
+        return queryset

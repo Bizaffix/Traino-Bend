@@ -234,38 +234,62 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
 class DepartmentListApiView(ListAPIView):
     serializer_class = DepartmentListSerializers
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated , IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
     queryset = Departments.objects.filter(is_active=True)
 
     def get_queryset(self):
-        queryset = Departments.objects.filter(is_active=True)
-        searched_data = self.request.query_params.get("q", None)
-        if searched_data:
-            searched_queryset = queryset.filter(name__icontains=searched_data)
-            return searched_queryset
+        """
+        Optionally restricts the returned administrators to a given company,
+        by filtering against a `company_id` query parameter in the URL.
+        """
+        if self.request.user.role == "Admin":
+            queryset = Departments.objects.filter(is_active=True, added_by=self.request.user)
+            company_id = self.request.query_params.get('company_id', None)
+            if queryset:
+                if company_id is not None:
+                    queryset = queryset.filter(company__id=company_id)
+                return queryset
+            else:
+                raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of other companies"})
         else:
+            queryset = Departments.objects.filter(is_active=True)
+            company_id = self.request.query_params.get('company_id', None)
+            if company_id is not None:
+                queryset = queryset.filter(company__id=company_id)
             return queryset
-        
+            
 from .serializers import CompanyDepartmentsSerializers
 
-class CompanyDepartmentsListAPIView(APIView):
+class CompanyDepartmentsListAPIView(ListAPIView):
+    serializer_class = CompanyDepartmentsSerializers
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
     queryset = Departments.objects.filter(is_active=True)
-    lookup_field = 'id'
     
-    def get(self, request, *args, **kwargs):
-        company_id = self.kwargs.get('id')  # Retrieve 'id' from query parameters
-        if company_id is None:
-            return Response({"error": "Company ID is required in the query parameters."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        serializer = CompanyDepartmentsSerializers(data={"company_id": company_id})
-        if serializer.is_valid():
-            departments = serializer.validated_data
-            return Response(departments, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        """
+        This view returns a list of active departments for a given company,
+        filtered by the 'company_id' query parameter. Additionally, it ensures
+        that only the admins of the specified company can view the departments.
+        """
+        company_id = self.request.query_params.get('company_id')
+        if company_id is not None:
+            # Ensure the user is the admin of the company
+            if not self.request.user.is_admin_of(company_id):
+                return Departments.objects.none()  # Returns an empty queryset
+
+            return Departments.objects.filter(company=company_id, is_active=True)
+        return Departments.objects.filter(is_active=True)
+
+    def get_permissions(self):
+        """
+        Get the list of permissions that this view requires.
+        """
+        if self.request.method in ['GET']:
+            return [IsAdminUserOrReadOnly()]
+        return [permission() for permission in self.permission_classes]
         
 class CompanyTeamModelViewSet(viewsets.ModelViewSet):
     queryset = CompanyTeam.objects.all()

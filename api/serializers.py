@@ -93,7 +93,7 @@ class DepartmentListSerializers(serializers.ModelSerializer):
         return obj.company.name
     
     def get_added_by(self, obj):
-        return obj.added_by.email.email
+        return obj.added_by.email
     
     def get_users(self, obj):
         # Retrieve emails of users associated with the department
