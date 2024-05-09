@@ -243,7 +243,7 @@ class DepartmentListApiView(ListAPIView):
         Optionally restricts the returned administrators to a given company,
         by filtering against a `company_id` query parameter in the URL.
         """
-        if self.request.user.role == "Admin":
+        if (self.request.user.role == "Admin") or (self.request.user.role == "Super Admin"):
             queryset = Departments.objects.filter(is_active=True, added_by=self.request.user)
             company_id = self.request.query_params.get('company_id', None)
             if queryset:

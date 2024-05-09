@@ -26,7 +26,7 @@ class Departments(models.Model):
 class DepartmentsDocuments(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True , unique=True)
     name = models.CharField(max_length=100, null=True, blank=True)
-    file = models.FileField(upload_to='documents/', null=True, blank=True)
+    file = models.FileField(upload_to='media/documents/', null=True, blank=True)
     department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='document_departments', null=True, blank=True)
     published = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
