@@ -2,16 +2,17 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from .managers import CustomUserManager
 from django.contrib.admin import AdminSite
-# from company.models import company
+from phonenumber_field.modelfields import PhoneNumberField
 original_get_app_list = AdminSite.get_app_list
 import uuid 
 
 class CustomUser(AbstractUser):
-    # uuid = models.UUIDField(default=uuid.uuid4 , unique=True ,null=True, blank=True)
+    id = models.UUIDField(default=uuid.uuid4 , primary_key=True,unique=True)
     first_name = models.CharField(max_length=100, null=True, blank=True)
     last_name = models.CharField(max_length=100, null=True, blank=True)
     username = None
     email = models.EmailField(('email address'), unique=True)
+    phone = PhoneNumberField(null=True, blank=True)
     role =models.CharField(max_length=20, choices=( ('Super Admin', 'Super Admin'), ('Admin', 'Admin'), ('User', 'User') ), default='Super Admin' )
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)

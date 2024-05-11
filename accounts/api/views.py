@@ -9,6 +9,7 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
+from django.contrib.auth.hashers import make_password
 
 
 class CustomUserCreateAPIView(CreateAPIView):
@@ -29,8 +30,10 @@ class CustomUserCreateAPIView(CreateAPIView):
                             status=status.HTTP_403_FORBIDDEN)
             
         request.data['added_by'] = request.user.id
+        password = request.data.pop('password', None) 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        user = serializer.save(password=make_password(password))
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -40,9 +43,11 @@ class CustomUserUpdateAPIView(UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
 
-    def update(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         instance = self.get_object()
+        # instance = CustomUser.objects.filter(id=self.kwargs['id'])
 
         # Check if the authenticated user is the creator of the instance
         if instance.added_by != request.user:

@@ -52,22 +52,22 @@ class company(models.Model):
         
 class AdminUser(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
-    email = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='team_admin' , null=True , blank=True)
+    admin = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='team_admin' , null=True , blank=True)
     company = models.ForeignKey(company, on_delete=models.CASCADE, related_name='company')
     is_active = models.BooleanField(default=True)
 
     REQUIRED_FIELDS = ['first_name', 'last_name', 'role', 'company', 'department']
 
     def save(self, *args, **kwargs):
-        if self.email:
-            if self.email.role != 'Admin':
-                self.email.role = 'Admin'  # Set the role to 'Admin' if it's not already set
-                self.email.save()
+        if self.admin:
+            if self.admin.role != 'Admin':
+                self.admin.role = 'Admin'  # Set the role to 'Admin' if it's not already set
+                self.admin.save()
         super().save(*args, **kwargs)
 
     def __str__(self):
-        if self.email is not None:
-            return f"{self.email.email} with role {self.email.role} in company {self.company.name}"
+        if self.admin is not None:
+            return f"{self.admin.email} with role {self.admin.role} in company {self.company.name}"
         else:
             return "Admin Data"
         

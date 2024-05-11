@@ -20,6 +20,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from langchain.document_loaders import PyPDFLoader
 from PyPDF2 import PdfReader
+from company.models import AdminUser
 from langchain.prompts import PromptTemplate
 openai_api_key = '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'
 os.environ['OPENAI_API_KEY'] = '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'
@@ -204,32 +205,56 @@ def generateDocumentKeypoints(keypoint_id, document_id, prompt_text):
     else:
         raise serializers.ValidationError("Invalide document file selected.")
 
+from rest_framework import serializers
+
+
 class DepartmentCreateApiview(CreateAPIView):
     serializer_class = DepartmentSerializers
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
     
     def perform_create(self, serializer):
+        
+        company_id_from_request = self.request.data.get('company')
+        # Get the admin user associated with the company
+        admin_user = AdminUser.objects.get(admin=self.request.user, is_active=True)
+        
+        # Check if the company ID from the request matches the company associated with the admin user
+        if str(admin_user.company.id) != company_id_from_request:
+            raise serializers.ValidationError({"Access Denied":"You are not allowed to create departments in this company"})
         serializer.save(added_by=self.request.user)
     
 class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView):
     serializer_class = DepartmentRUDSerializers
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated , IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
     queryset = Departments.objects.filter(is_active=True)
     lookup_field = 'id'
 
-    def put(self , request , *args, **kwargs):
-        Departments.objects.get(id=self.kwargs['id'])
-        return self.update(request, *args , **kwargs)
-    
-    def delete(self , request , *args , **kwargs):
+    def get(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.is_active=False
-        instance.save()
-        return Response({"Delete Status": "Successfully Delete the Department"}, status=status.HTTP_202_ACCEPTED)
-    
+        admin = AdminUser.objects.get(admin=self.request.user)
+        if instance.added_by == self.request.user and admin.is_active==True:
+            return super().retrieve(request, *args, **kwargs)
+        return Response({"Access Denied":"Department unaccessible to you"}, status=status.HTTP_403_FORBIDDEN)
+
+    def put(self , request , *args, **kwargs):
+        instance = self.get_object()
+        admin = AdminUser.objects.get(admin=self.request.user)
+        if instance.added_by == self.request.user and admin.is_active==True:
+            Departments.objects.get(id=self.kwargs['id'])
+            return self.update(request, *args , **kwargs)
+        return Response({"Account Error":"Account did not found"},status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        admin = AdminUser.objects.get(admin=self.request.user)
+        if instance.added_by == self.request.user and admin.is_active==True:
+            instance.is_active = False
+            instance.save()
+            return Response({"Delete Status": "Successfully deleted the department." , "Department_id":instance.id},status=status.HTTP_202_ACCEPTED)
+        return Response({"Account Error":"Account did not found"},status=status.HTTP_404_NOT_FOUND)
 
 class DepartmentListApiView(ListAPIView):
     serializer_class = DepartmentListSerializers
@@ -243,7 +268,7 @@ class DepartmentListApiView(ListAPIView):
         Optionally restricts the returned administrators to a given company,
         by filtering against a `company_id` query parameter in the URL.
         """
-        if (self.request.user.role == "Admin") or (self.request.user.role == "Super Admin"):
+        if (self.request.user.role == "Admin"):
             queryset = Departments.objects.filter(is_active=True, added_by=self.request.user)
             company_id = self.request.query_params.get('company_id', None)
             if queryset:

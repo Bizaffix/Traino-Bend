@@ -5,5 +5,5 @@ from .views import LoginAPIView , CustomUserCreateAPIView , CustomUserUpdateAPIV
 urlpatterns = [
     path("login/", LoginAPIView.as_view(), name="user-details"),
     path('create-account/', CustomUserCreateAPIView.as_view(), name='signup'),
-    path('update-account/<int:pk>/', CustomUserUpdateAPIView.as_view(), name="update"),
+    path('update-account/<str:id>/', CustomUserUpdateAPIView.as_view(), name="update"),
 ]

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.admin import ModelAdmin
-from .models import CustomUser, CustomCompanyUser, CompanyTeam, Departments
+from .models import CustomUser, CustomCompanyUser, CompanyTeam, Departments # CustomCompanyUser
 from .forms import CustomUserCreationForm, CustomUserChangeForm, CompanyTeamCreationForm, CompanyTeamChangeForm, CompanyUserCreationForm, CompanyUserChangeForm, DepartmentForm
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import Group
@@ -170,6 +170,67 @@ class CustomCompanyAdmin(UserAdmin):
         #return qs.filter(author=request.user)
         return qs.filter(is_superuser=False, role='Admin')
 
+# class CustomCompanyUser(UserAdmin):
+#     add_form = CompanyUserCreationForm
+#     form = CompanyUserChangeForm
+
+#     model = CustomCompanyUser
+#     list_display = ('id','email', 'first_name', 'last_name', 'is_active', 'role', 'created','updated','added_by',)
+#     list_filter = ('is_active',)
+#     fieldsets = (
+#         (None, {'fields': ('email', 'password', ('first_name', 'last_name'))}),
+#         ('Permissions', {'fields' : ('is_active',)}),
+#     )
+
+#     add_fieldsets = (
+#         (None, {
+#             'classes': ('wide',),
+#             'fields': ('email', 'password1', 'password2', ('first_name', 'last_name'))}
+#         ),
+#         ('Permissions', {'fields' : ('is_active',)}),
+#     )
+#     search_fields = ('email', 'first_name', 'last_name',)
+#     ordering = ('-id',)
+
+#     def updated(self, obj):
+#         if obj.updated_at:
+#             return day_hour_format_converter(obj.updated_at)
+#     updated.short_description = 'UPDATED AT' 
+
+#     def created(self, obj):
+#         if obj.created_at:
+#             return day_hour_format_converter(obj.created_at)
+#     created.short_description = 'CREATED AT' 
+
+
+#     def save_model(self, request, obj, form, change):
+#         """
+#         Given a model instance save it to the database.
+#         """
+        
+#         obj.is_staff = True
+#         obj.is_superuser = False
+#         obj.role = 'User'
+
+#         if obj.id is None:
+#             obj.added_by = request.user
+#         elif obj.added_by is None:    
+#             obj.added_by = request.user
+
+#         obj.save()
+
+#         permissions = Permission.objects.filter(pk__in =(28,32,36,40,44))
+#         obj.user_permissions.add(*permissions)
+        
+#     # default backend filter for list display
+#     def get_queryset(self, request):
+#         qs = super().get_queryset(request)
+#         # if request.user.is_superuser:
+#         #     return qs
+#         #return qs.filter(author=request.user)
+#         return qs.filter(is_superuser=False, role='User')
+
+
 class CompanyTeamAdmin(UserAdmin):
     add_form = CompanyTeamCreationForm
     form = CompanyTeamChangeForm
@@ -289,5 +350,6 @@ class CompanyDepartmentAdmin(ModelAdmin):
 admin.site.register(CustomUser, CustomUserAdmin,)
 admin.site.unregister(Group)
 admin.site.register(CustomCompanyUser, CustomCompanyAdmin)
+# admin.site.register(CustomCompanyUser, CustomCompanyUser)
 admin.site.register(CompanyTeam, CompanyTeamAdmin)
 admin.site.register(Departments, CompanyDepartmentAdmin)

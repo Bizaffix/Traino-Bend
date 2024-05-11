@@ -7,20 +7,41 @@ from accounts.models import CustomUser
 class UserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = CustomUser
-        fields = ('id', 'email', 'first_name', 'last_name', 'role', 'password')
+        fields = ('id', 'email', 'first_name', 'phone','last_name', 'role', 'password')
 
 class CompaniesTeamSerializer(serializers.ModelSerializer):
+    first_name = serializers.SerializerMethodField(read_only=True)
+    last_name = serializers.SerializerMethodField(read_only=True)
+    phone = serializers.SerializerMethodField(read_only=True)
+    user_update_key = serializers.SerializerMethodField(read_only=True)
     id = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = CompaniesTeam
-        fields = ['id', 'members', 'company']
+        fields = ['id', 'members', 'company' ,'first_name' , 'last_name','phone', 'user_update_key']
 
     def get_id(self , obj):
         return obj.id
         
+    def get_last_name(self , obj):
+        return obj.members.last_name
+    
+    def get_first_name(self , obj):
+        return obj.members.first_name
+        
+    def get_phone(self , obj):
+        return obj.members.phone
+    
+    def get_user_update_key(self , obj):
+        return obj.members.id
+    
+    
 class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     member_email = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
+    user_update_key = serializers.SerializerMethodField()
     class Meta:
         model = CompaniesTeam
         fields = "__all__"
@@ -30,4 +51,17 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     
     def get_company(self , obj):
         return obj.company.name
+    
+    def get_last_name(self , obj):
+        return obj.members.last_name
+    
+    def get_first_name(self , obj):
+        return obj.members.first_name
+    
+    def get_phone(self , obj):
+        return obj.members.phone
+    
+    def get_user_update_key(self , obj):
+        return obj.members.id
+    
         

@@ -61,7 +61,7 @@ class CreateAdminApiView(CreateAPIView):
     authentication_classes =[JWTAuthentication]
     
     def perform_create(self, serializer):
-        email_id = self.request.data.get('email')
+        email_id = self.request.data.get('admin')
         company_id = self.request.data.get('company')  
         if email_id is None:
             raise serializers.ValidationError("Admin field is required.")
@@ -74,7 +74,7 @@ class CreateAdminApiView(CreateAPIView):
         if company_instance is None:
             raise serializers.ValidationError("Invalid company specified.")
 
-        serializer.save(email=email_instance, company=company_instance)
+        serializer.save(admin=email_instance, company=company_instance)
 
 class AdminUserUpdateAndDeleteApiView(RetrieveAPIView,UpdateAPIView, DestroyAPIView):
     serializer_class = AdminUpdateDeleteSerializer

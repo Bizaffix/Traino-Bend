@@ -10,10 +10,13 @@ class CustomUserDetailSerializer(serializers.ModelSerializer):
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    password = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = CustomUser
-        fields = ['id','first_name' , 'last_name', 'email', 'role', 'added_by']
+        fields = ['id','first_name' , 'last_name', 'email', 'role', 'password','added_by']
 
+    def get_password(self , obj):
+        return obj.password
 
 
 class AdminCreationSerializer(serializers.ModelSerializer):
