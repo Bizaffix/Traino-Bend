@@ -63,15 +63,25 @@ class AdminUpdateDeleteSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField(read_only=True)
     last_name = serializers.SerializerMethodField(read_only=True)
     company = serializers.SerializerMethodField(read_only=True)
+    phone = serializers.SerializerMethodField(read_only=True)
+    password = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = AdminUser
-        fields = ['id' , 'first_name' , 'last_name', 'email' , 'company']
+        fields = ['id' , 'first_name' , 'last_name', 'email' , 'phone' , 'password' , 'company']
     
     def get_email(self , obj):
         return obj.admin.email
 
     def get_first_name(self, obj):
         return obj.admin.first_name
+    
+    
+    def get_password(self, obj):
+        return obj.admin.password
+    
+    
+    def get_phone(self, obj):
+        return str(obj.admin.phone)
     
     def get_last_name(self, obj):
         return obj.admin.last_name

@@ -37,12 +37,13 @@ class CustomUserCreateAPIView(CreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
+    
+from teams.api.permissions import IsActiveAdminPermission
 
 class CustomUserUpdateAPIView(UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    # permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly, IsActiveAdminPermission]
     lookup_field = 'id'
 
     def put(self, request, *args, **kwargs):
