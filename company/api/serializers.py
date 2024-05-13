@@ -40,7 +40,7 @@ class AdminSerializer(serializers.ModelSerializer):
     
     
     def get_phone(self , obj):
-        return obj.admin.phone
+        return str(obj.admin.phone)
     
     def get_update_url(self , obj):
         return f"https://127.0.0.1:8000/api/update-account/{obj.admin.id}"

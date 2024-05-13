@@ -6,14 +6,14 @@ from api.serializers import UserCreateSerializer
 class CustomUserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'role', 'created_at']
+        fields = ['id', 'first_name' , 'last_name', 'email', 'phone', 'role', 'created_at']
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
     password = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = CustomUser
-        fields = ['id','first_name' , 'last_name', 'email', 'role', 'password','added_by']
+        fields = ['id','first_name' , 'last_name', 'email', 'phone', 'role', 'password','added_by']
 
     def get_password(self , obj):
         return obj.password

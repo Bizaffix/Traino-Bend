@@ -31,7 +31,7 @@ class DepartmentsDocuments(models.Model):
     published = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
-    added_by = models.ForeignKey(AdminUser, on_delete=models.CASCADE, related_name="document_added_by", null=True, blank=True)
+    added_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="document_departments_added_by", null=True, blank=True)
     is_active= models.BooleanField(default=True)
 
 

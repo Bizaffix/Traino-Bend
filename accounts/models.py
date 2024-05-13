@@ -70,6 +70,15 @@ class CustomCompanyUser(CustomUser):
         verbose_name = ("Company Admin")
         verbose_name_plural = ("Company Admins")
 
+class CustomCompanyTeamUser(CustomUser):
+    CustomUser.role = 'User'
+    #objects = AdminUserTypeManager()
+    class Meta:
+        proxy = True
+        verbose_name = ("Company User")
+        verbose_name_plural = ("Company Users")
+
+
 class MyAdminSite(AdminSite):
     
     def get_app_list(self, request, app_label=None):
@@ -88,6 +97,7 @@ class MyAdminSite(AdminSite):
             "Quizes": 8,
             "Companys":9,
             "Company Team Members":10,
+            "Company Users":11,
         }
 
         app_dict = self._build_app_dict(request, app_label)

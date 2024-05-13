@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from django.contrib.auth.hashers import make_password
-
+from .permissions import IsAdminUserOrReadOnly
 
 class CustomUserCreateAPIView(CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -42,21 +42,20 @@ class CustomUserCreateAPIView(CreateAPIView):
 class CustomUserUpdateAPIView(UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAdminUserOrReadOnly]
     lookup_field = 'id'
 
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
-        # instance = CustomUser.objects.filter(id=self.kwargs['id'])
-
-        # Check if the authenticated user is the creator of the instance
         if instance.added_by != request.user:
-            return Response({"error": "You don't have permission to update this Account Holder's Details."},
+            return Response({"Account Access Errors": "You don't have permission to update this Account Holder's Details."},
                             status=status.HTTP_403_FORBIDDEN)
 
         return super().update(request, *args, **kwargs)
 
 class LoginAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
     def post(self, request):
         data = request.data
         email = data.get('email')
@@ -79,6 +78,9 @@ class LoginAPIView(APIView):
                 serializer = CustomUserDetailSerializer(user_data)  # Use CustomUserDetailSerializer
                 serialized_user = {
                     'id': serializer.data['id'],
+                    'first_name': serializer.data['first_name'],
+                    'last_name': serializer.data['last_name'],
+                    'phone': serializer.data['phone'],
                     'email': serializer.data['email'],
                     'role': serializer.data['role'],
                     'created_at': serializer.data['created_at'],
@@ -89,13 +91,3 @@ class LoginAPIView(APIView):
             return JsonResponse({'token': token, 'user': serialized_user}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-# class CustomUserDetailApiView(RetrieveAPIView):
-#     serializer_class = CustomUserDetailSerializer
-#     permission_classes = [IsAuthenticated]
-#     queryset = CustomUser.objects.all()
-#     # lookup_field = 'pk'
-    
-#     def get_object(self):
-#         # Return the authenticated user's instance
-#         return self.request.user

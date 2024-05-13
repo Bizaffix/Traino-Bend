@@ -1,4 +1,21 @@
 from rest_framework import permissions
+from rest_framework.exceptions import PermissionDenied
+from company.models import AdminUser
+class IsActiveAdminPermission(permissions.BasePermission):
+    """
+    Custom permission to allow adding members only if the requesting admin's account is active.
+    """
+
+    def has_permission(self, request, view):
+        user = request.user
+        if user.role == "Admin":
+            try:
+                admin_user = user.team_admin.get(admin=user)
+                if not admin_user.is_active:
+                    raise PermissionDenied("Your account is restricted. You cannot add members.")
+            except AdminUser.DoesNotExist:
+                raise PermissionDenied("AdminUser does not exist for the current user.")
+        return True
 
 class IsAdminUserOrReadOnly(permissions.BasePermission):
     """

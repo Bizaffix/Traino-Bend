@@ -47,7 +47,7 @@ class CompanyListApiView(ListAPIView):
     
     def get_queryset(self):
         queryset = company.objects.filter(is_active=True)
-        searched_data = self.request.query_params.get("q", None)
+        searched_data = self.request.query_params.get("company_name", None)
         if searched_data:
             searched_queryset = queryset.filter(company_name__icontains=searched_data)
             return searched_queryset

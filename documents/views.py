@@ -6,7 +6,7 @@ from departments.models import DepartmentsDocuments , Departments
 from .serializers import DepartmentsDocumentsSerializer, DepartmentsDocumentsCreateSerializer
 from teams.models import CompaniesTeam 
 from rest_framework.permissions import IsAuthenticated
-from teams.api.permissions import IsAdminUserOrReadOnly
+from .permissions import IsAdminUserOrReadOnly
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import base64
 from company.models import AdminUser
@@ -415,33 +415,82 @@ def generateDocumentQuiz(request):
 class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     serializer_class = DepartmentsDocumentsCreateSerializer
-    permission_classes = [IsAdminUserOrReadOnly , IsAuthenticated]
+    permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
+
+    def perform_create(self, serializer):
+        department_id = self.request.data.get('department')
+        # Check if the department exists and if it was created by the requesting admin
+        try:
+            # Check if the department exists and was created by the requesting admin
+            department = Departments.objects.get(id=department_id, added_by=self.request.user)
+        except Departments.DoesNotExist:
+            raise serializers.ValidationError({"Access Denied": "You do not have permission to create a document in this department."})
+        
+        # Check if the requesting admin is active
+        try:
+            admin_user = AdminUser.objects.get(admin=self.request.user)
+        except AdminUser.DoesNotExist:
+            raise serializers.ValidationError({"Access Denied": "You are not authorized to create documents."})
+
+        if not admin_user.is_active:
+            raise serializers.ValidationError({"Access Denied": "Your account is restricted. You cannot create documents."})
+        
+        # Associate the document with the department created by the requesting admin
+        serializer.save(added_by=self.request.user, department=department)
+        # department = Departments.objects.filter(id=department_id, added_by=self.request.user).first()
+        # if department:
+        #     # Associate the document with the department created by the requesting admin
+        #     serializer.save(added_by=self.request.user, department=department)
+        # else:
+        #     # Raise permission denied if the department does not exist or was not created by the requesting admin
+        #     raise serializers.ValidationError({"Access Denied":"You do not have permission to create a document in this department."})
+        
+from rest_framework import serializers
+
 
 class DepartmentsDocumentsListAPIView(generics.ListAPIView):
     serializer_class = DepartmentsDocumentsSerializer
-    permission_classes = [IsAdminUserOrReadOnly , IsAuthenticated]
+    permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
-    
 
+    def get_queryset(self):
+        user = self.request.user
+        department_id = self.request.query_params.get('department_id', None)
+
+        # Query based on the user role
+        if user.role in ["Super Admin", "Admin"]:
+            # Super Admin and Admin can view documents based on the department_id query parameter
+            queryset = DepartmentsDocuments.objects.filter(is_active=True)
+            if user.role == "Admin":
+                # Further filter for Admins to see only documents they added or their company's documents
+                queryset = queryset.filter(added_by=user)
+            if department_id:
+                queryset = queryset.filter(department__id=department_id)
+            return queryset
+
+        elif user.role == "User":
+            # Get the departments associated with the user through the CompaniesTeam relationship
+            user_teams = user.team_member.all()  # Use the correct related name
+            user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
+            
+            queryset = DepartmentsDocuments.objects.filter(department__in=user_departments, is_active=True)
+            if department_id:
+                queryset = queryset.filter(department__id=department_id)
+            if not queryset.exists():
+                raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."})
+            return queryset
+
+        else:
+            raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."})
+    
 class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     serializer_class = DepartmentsDocumentsCreateSerializer
-    permission_classes = [IsAdminUserOrReadOnly , IsAuthenticated]
+    permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
     lookup_field = 'id'
-    
-    def get(self, request, *args , **kwargs):
-        try:
-            department = Departments.objects.get(id=self.kwargs['id'])
-        except Departments.DoesNotExist:
-            return Response({'error': 'Department not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        documents = DepartmentsDocuments.objects.filter(department=department)
-        serializer = DepartmentsDocumentsSerializer(documents, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def put(self , request , *args, **kwargs):
         DepartmentsDocuments.objects.get(id=self.kwargs['id'])

@@ -1,6 +1,7 @@
 from djoser.serializers import UserCreateSerializer
 from accounts.models import CustomUser, CompanyTeam
-from departments.models import Departments
+from departments.models import Departments , DepartmentsDocuments
+from documents.serializers import DepartmentsDocumentsSerializer
 from documents.models import UserDocuments, DocumentKeyPoints, DocumentQuiz, DocumentSummary
 from rest_framework import  serializers
 from django.db.models import Q
@@ -10,31 +11,36 @@ class UserCreateSerializer(UserCreateSerializer):
         model = CustomUser
         fields = ('id', 'email', 'first_name', 'last_name', 'role', 'password')
 
-# class DepartmentSerializer(serializers.ModelSerializer):
-#     company = UserCreateSerializer(many=False, read_only=True)
-#     added_by = UserCreateSerializer(many=False, read_only=True)
-#     def validate_name(self, value):
-#         if self.context['request'].method == 'POST':
-#             name_check = Departments.objects.filter(name=self.context['request'].data['name'], company=self.context['request'].user )
-#             # print(name_check)
-#             if name_check is not None and len(name_check) > 0:
-#                 raise serializers.ValidationError("That department name already exists.")
-#         elif self.context['request'].method == 'PUT' or self.context['request'].method == 'PATCH' and self.instance.id:
-#             name_check = Departments.objects.filter(~Q(id=self.instance.id), name=self.context['request'].data['name'], company=self.context['request'].user)
-#             if name_check is not None and len(name_check) > 0:
-#                 raise serializers.ValidationError("That department name already exists.")
-        
-#         return value    
-#     class Meta:
-#         model = Departments
-#         fields = ['id', 'name', 'company', 'users', 'created_at', 'updated_at', 'added_by']
-
-
 class DepartmentSerializers(serializers.ModelSerializer):
+    user_email = serializers.SerializerMethodField(read_only=True)
+    user_update_key = serializers.SerializerMethodField(read_only=True)
+    user_first_name = serializers.SerializerMethodField(read_only=True)
+    user_last_name = serializers.SerializerMethodField(read_only=True)
+    user_phone = serializers.SerializerMethodField(read_only=True)
+    # documents = serializers.SerializerMethodField(read_only=True)
+    user_added_by = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Departments
         fields ='__all__'
 
+    def get_user_email(self , obj):
+        return [user.members.email for user in obj.users.all()]
+    
+    def get_user_update_key(self , obj):
+        return [user.members.id for user in obj.users.all()]
+
+    def get_user_first_name(self , obj):
+        return [user.members.first_name for user in obj.users.all()]
+    
+    def get_user_last_name(self , obj):
+        return [user.members.last_name for user in obj.users.all()]
+    
+    def get_user_phone(self , obj):
+        return [str(user.members.phone) for user in obj.users.all()]
+    
+    def get_user_added_by(self , obj):
+        return [str(user.members.added_by) for user in obj.users.all()]
+        
 class DepartmentRUDSerializers(serializers.ModelSerializer):
     id = serializers.SerializerMethodField(read_only=True)
     company = serializers.SerializerMethodField()
@@ -82,6 +88,7 @@ class DepartmentListSerializers(serializers.ModelSerializer):
     company = serializers.SerializerMethodField()
     added_by = serializers.SerializerMethodField()
     users = serializers.SerializerMethodField()
+    documents = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Departments
         fields ='__all__'
@@ -100,7 +107,11 @@ class DepartmentListSerializers(serializers.ModelSerializer):
         # users_emails = [user.email for user in obj.customuser_set.all()]  
         return [user.members.email for user in obj.users.all()]
 
-
+    def get_documents(self, obj):
+        admins = DepartmentsDocuments.objects.prefetch_related('department').filter(department=obj, is_active=True)
+        serializer = DepartmentsDocumentsSerializer(admins, many=True)
+        return serializer.data    
+    
 class CompanyTeamSerializer(serializers.ModelSerializer):
     department = DepartmentSerializers(many=False, read_only=True)
     company = UserCreateSerializer(many=False, read_only=True)

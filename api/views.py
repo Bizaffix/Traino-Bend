@@ -214,14 +214,20 @@ class DepartmentCreateApiview(CreateAPIView):
     permission_classes = [IsAdminUserOrReadOnly]
     
     def perform_create(self, serializer):
-        
+        # Extract company ID from the request data
         company_id_from_request = self.request.data.get('company')
-        # Get the admin user associated with the company
-        admin_user = AdminUser.objects.get(admin=self.request.user, is_active=True)
-        
+
+        # Get the admin user associated with the request user
+        try:
+            admin_user = AdminUser.objects.get(admin=self.request.user, is_active=True)
+        except AdminUser.DoesNotExist:
+            raise serializers.ValidationError({"Error": "Your account is deleted as Admin by Super Admin. You can no Longer access this feature"})
+
         # Check if the company ID from the request matches the company associated with the admin user
         if str(admin_user.company.id) != company_id_from_request:
-            raise serializers.ValidationError({"Access Denied":"You are not allowed to create departments in this company"})
+            raise serializers.ValidationError({"Access Denied": "You are not allowed to create departments in this company."})
+
+        # Save the department with the associated admin user
         serializer.save(added_by=self.request.user)
     
 class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView):
@@ -268,15 +274,16 @@ class DepartmentListApiView(ListAPIView):
         Optionally restricts the returned administrators to a given company,
         by filtering against a `company_id` query parameter in the URL.
         """
+        admin = AdminUser.objects.get(admin=self.request.user)
         if (self.request.user.role == "Admin"):
             queryset = Departments.objects.filter(is_active=True, added_by=self.request.user)
             company_id = self.request.query_params.get('company_id', None)
-            if queryset:
+            if queryset and admin.is_active==True:
                 if company_id is not None:
                     queryset = queryset.filter(company__id=company_id)
                 return queryset
             else:
-                raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of other companies"})
+                raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments"})
         else:
             queryset = Departments.objects.filter(is_active=True)
             company_id = self.request.query_params.get('company_id', None)

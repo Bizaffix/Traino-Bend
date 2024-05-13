@@ -29,7 +29,7 @@ class CompaniesTeamSerializer(serializers.ModelSerializer):
         return obj.members.first_name
         
     def get_phone(self , obj):
-        return obj.members.phone
+        return str(obj.members.phone)
     
     def get_user_update_key(self , obj):
         return obj.members.id
@@ -59,7 +59,7 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
         return obj.members.first_name
     
     def get_phone(self , obj):
-        return obj.members.phone
+        return str(obj.members.phone)
     
     def get_user_update_key(self , obj):
         return obj.members.id
