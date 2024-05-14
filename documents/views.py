@@ -12,12 +12,12 @@ import base64
 from company.models import AdminUser
 from django.shortcuts import render
 from django.http import JsonResponse
-from langchain.llms import OpenAI
-from langchain.chat_models import ChatOpenAI
-from langchain.docstore.document import Document
+from langchain_community.llms import OpenAI
+from langchain_community.chat_models import ChatOpenAI
+from langchain_community.docstore.document import Document
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from .models import QuizQuestions, DocumentQuiz, DocumentTeam
 from rest_framework.generics import *
 from PyPDF2 import PdfReader

@@ -13,12 +13,12 @@ from rest_framework.generics import *
 from .permissions import IsAdminUserOrReadOnly
 import os
 from rest_framework.views import APIView
-from langchain.llms import OpenAI
-from langchain.chat_models import ChatOpenAI
-from langchain.docstore.document import Document
+from langchain_community.llms import OpenAI
+from langchain_community.chat_models import ChatOpenAI
+from langchain_community.docstore.document import Document
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
-from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import PyPDFLoader
 from PyPDF2 import PdfReader
 from company.models import AdminUser
 from langchain.prompts import PromptTemplate
