@@ -183,17 +183,32 @@ class ReadOnlyDocumentSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'file', 'company', 'department', 'published', 'created_date', 'updated_at', 'added_by']
 
 class DocumentSummarySerializer(serializers.ModelSerializer):
-    document = serializers.CharField()
     added_by = UserCreateSerializer(many=False, read_only=True)
+
     def validate_prompt_text(self, value):
-        if self.context['request'].method == 'PUT' or self.context['request'].method == 'PATCH' or self.context['request'].method == 'POST':
-            if self.context['request'].data['prompt_text'] == '':
+        # Check if the request method is PUT, PATCH, or POST
+        if self.context['request'].method in ['PUT', 'PATCH', 'POST']:
+            # Check if prompt_text is empty
+            if not value.strip():
+                # If prompt_text is empty, set default value
                 value = 'concise summary'
         return value    
-       
+    
+    document = serializers.UUIDField(write_only=True)
     class Meta:
         model = DocumentSummary
-        fields = ['id', 'content', 'prompt_text', 'document', 'created_date', 'updated_at', 'added_by']
+        fields = ['id', 'content', 'company','prompt_text', 'document', 'created_date', 'updated_at', 'added_by']
+
+    def create(self, validated_data):
+        document_id = validated_data.pop('document', None)
+        if document_id is None:
+            raise serializers.ValidationError("document_id is required.")
+
+        document_summary = DocumentSummary.objects.create(document_id=document_id, **validated_data)
+        return document_summary
+
+    def get_document(self, obj):
+        return obj.document.id
 
 class ReadOnlyDocumentSummarySerializer(serializers.ModelSerializer):
     document = ReadOnlyDocumentSerializer(many=False, read_only=True)

@@ -21,4 +21,21 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         #     return True
         
         # # Write permissions are only allowed if the user is an admin and the object's company is the same as the user's
-        return request.user.role == 'Admin' and obj.added_by == request.user
+        return request.user.role == 'Admin'
+    
+from company.models import AdminUser
+from departments.models import Departments
+class IsAdminUserOfCompany(permissions.BasePermission):
+    """
+    Custom permission to only allow admins of the same company to edit it.
+    """
+    def has_permission(self, request, view):
+        department_id = request.data.get('department')
+        if department_id:
+            try:
+                department = Departments.objects.get(id=department_id)
+                # Check if the user is an admin of the same company as the department
+                return AdminUser.objects.filter(admin=request.user, is_active=True, company=department.company).exists()
+            except Departments.DoesNotExist:
+                return False
+        return False

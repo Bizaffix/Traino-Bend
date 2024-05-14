@@ -216,7 +216,7 @@ class DocumentSummaryAdmin(ModelAdmin):
     list_display = ('document', 'prompt_text')
     list_filter = ('document',)
     search_fields = ('prompt_text','content')
-    #readonly_fields = ('id',)
+    readonly_fields = ('id',)
 
     
     fieldsets = (

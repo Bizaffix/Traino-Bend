@@ -17,6 +17,41 @@ class IsActiveAdminPermission(permissions.BasePermission):
                 raise PermissionDenied("AdminUser does not exist for the current user.")
         return True
 
+from teams.models import CompaniesTeam
+
+class IsActiveAdminUsersPermission(permissions.BasePermission):
+    message = "You are not authorized to perform this action."
+
+    def has_permission(self, request, view):
+        # Check if the requesting user is authenticated
+        if not request.user.is_authenticated:
+            return False
+        
+        # Check if the requesting user is an admin
+        try:
+            admin = AdminUser.objects.get(admin=request.user, is_active=True)
+        except AdminUser.DoesNotExist:
+            return False
+        
+        # Check if the admin is associated with a company
+        if not admin.company:
+            return False
+        
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        # Check if the requesting user is associated with the same company as the admin
+        try:
+            admin = AdminUser.objects.get(admin=request.user, is_active=True)
+        except AdminUser.DoesNotExist:
+            return False
+
+        # Check if the user to be deleted belongs to the same company as the admin
+        if isinstance(obj, CompaniesTeam):
+            return obj.company == admin.company
+
+        return False
+
 class IsAdminUserOrReadOnly(permissions.BasePermission):
     """
     Custom permission to only allow admin users to add team members.
@@ -29,13 +64,14 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         return request.user and request.user.is_authenticated and request.user.role == 'Admin' 
 
     def has_object_permission(self, request, view, obj):
-        """
-        Custom permission to only allow admin users to update or view items that are related to their own company.
-        """
-        # Read permissions are allowed for any request,
-        # so we'll always allow GET, HEAD, or OPTIONS requests
-        # if request.method in permissions.SAFE_METHODS:
-        #     return True
-        
-        # # Write permissions are only allowed if the user is an admin and the object's company is the same as the user's
-        return request.user.role == 'Admin' and obj.company == request.user.adminuser.company
+        # Check if the requesting user is associated with the same company as the admin
+        try:
+            admin = AdminUser.objects.get(admin=request.user, is_active=True)
+        except AdminUser.DoesNotExist:
+            return False
+
+        # Check if the user to be deleted belongs to the same company as the admin
+        if isinstance(obj, CompaniesTeam):
+            return obj.company == admin.company
+
+        return request.user and request.user.is_authenticated and request.user.role == 'Admin' and obj.company == admin.company

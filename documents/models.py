@@ -1,6 +1,6 @@
 from django.db import models
 from accounts.models import CustomUser, Departments
-
+import uuid
 
 class UserDocuments(models.Model):
     id = models.BigAutoField(primary_key = True)
@@ -30,16 +30,18 @@ class DocumentTeam(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assignee_user', default=0)
     is_assigned = models.BooleanField(default=False)
     notify_frequency =models.CharField(max_length = 2, default = '0')
-
+from company.models import company
+from departments.models import DepartmentsDocuments
 class DocumentSummary(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True , unique=True)
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
-    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='summary_company')
-    document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE, related_name='summary_document')
+    company = models.ForeignKey(company, on_delete=models.CASCADE, related_name='summary_company')
+    document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE, related_name='summary_document')
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="summary_added_by")
+    is_active= models.BooleanField(default=True)
 
     REQUIRED_FIELDS = ['prompt_text', 'document']
 
@@ -51,11 +53,11 @@ class DocumentSummary(models.Model):
         verbose_name_plural = ("Summary")
     
 class DocumentKeyPoints(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
-    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='keypoint_company')
-    document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
+    company = models.ForeignKey(company, on_delete=models.CASCADE, related_name='keypoint_company')
+    document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="keypoint_added_by")
@@ -68,12 +70,12 @@ class DocumentKeyPoints(models.Model):
         verbose_name_plural = ("Keypoints")
 
 class DocumentQuiz(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
     name = models.CharField(max_length = 255)
     content = models.TextField(blank=True, null=True)
     prompt_text = models.CharField(max_length = 255, blank=True, null=True)
-    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='quiz_company')
-    document = models.ForeignKey(UserDocuments, on_delete=models.CASCADE)
+    company = models.ForeignKey(company, on_delete=models.CASCADE, related_name='quiz_company')
+    document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="quiz_added_by")
@@ -86,7 +88,7 @@ class DocumentQuiz(models.Model):
         verbose_name_plural = ("Quizes")
 
 class QuizQuestions(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
     question = models.CharField(max_length = 255, blank=True, null=True)
     option_1 = models.CharField(max_length = 255, blank=True, null=True)
     option_2 = models.CharField(max_length = 255, blank=True, null=True)

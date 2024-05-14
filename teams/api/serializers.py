@@ -42,6 +42,7 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     last_name = serializers.SerializerMethodField()
     phone = serializers.SerializerMethodField()
     user_update_key = serializers.SerializerMethodField()
+    department = serializers.SerializerMethodField()
     class Meta:
         model = CompaniesTeam
         fields = "__all__"
@@ -64,4 +65,10 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     def get_user_update_key(self , obj):
         return obj.members.id
     
-        
+    def get_department(self, obj):
+        # Assuming a reverse relation from CompaniesTeam to Departments
+        department = obj.departments_set.first()  # Assuming each user belongs to only one department
+        if department:
+            return department.name
+        else:
+            return None

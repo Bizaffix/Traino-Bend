@@ -34,9 +34,9 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         """
         # Read permissions are allowed for any request,
         # so we'll always allow GET, HEAD, or OPTIONS requests
-        if request.user.role == 'Admin' and obj.added_by == request.user:
+        if (request.user.role == 'User') and (request.user.role == 'Super Admin'):
             if request.method in permissions.SAFE_METHODS:
                 return True
         
         # # Write permissions are only allowed if the user is an admin and the object's company is the same as the user's
-        return request.user.role == 'Admin' and obj.added_by == request.user
+        return request.user.role == 'Admin'

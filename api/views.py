@@ -21,9 +21,12 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.document_loaders import PyPDFLoader
 from PyPDF2 import PdfReader
 from company.models import AdminUser
+from teams.models import CompaniesTeam
 from langchain.prompts import PromptTemplate
 openai_api_key = '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'
 os.environ['OPENAI_API_KEY'] = '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'
+from departments.models import DepartmentsDocuments
+
 
 def readPDFFile(pdf_file_path):
     pdf_reader = PdfReader(pdf_file_path)
@@ -48,9 +51,12 @@ def assignDocumentToUser(user, doc, department):
         das = DocumentTeam(user_id = user.id, document_id = doc.id, department_id = department.id, is_assigned = False, notify_frequency = 0)
         das.save()
 
-def generateDocumentSummary(summary_id, document_id, prompt_text):
+def generateDocumentSummary(request):
+    summary_id = request.data.get("summary_id")
+    document_id = request.data.get("document_id")
+    prompt_text = request.data.get("prompt_text")
     document_summary = 'Oops! Summary not generated please try with some other document.'
-    document = UserDocuments.objects.get(id=document_id)
+    document = DepartmentsDocuments.objects.get(id=document_id)
     if document.file.path is not None:
         try:
             # print("test: 1")
@@ -70,7 +76,7 @@ def generateDocumentSummary(summary_id, document_id, prompt_text):
             text= text.replace('\t', ' ')
             text= text.replace('\xa0', '')
 
-            #print(len(text))
+            # print(len(text))
 
             #splits a long document into smaller chunks that can fit into the LLM's 
             #model's context window
@@ -106,7 +112,7 @@ def generateDocumentSummary(summary_id, document_id, prompt_text):
             # print("test: 6")
             # print(document_summary)
 
-            doc_summary = DocumentSummary.objects.get(pk = summary_id)
+            doc_summary = DocumentSummary.objects.get(id = summary_id)
             doc_summary.content = document_summary
             doc_summary.prompt_text = prompt_text
             doc_summary.save()
@@ -114,8 +120,9 @@ def generateDocumentSummary(summary_id, document_id, prompt_text):
             if error.code == 'insufficient_quota':
                 raise serializers.ValidationError("You exceeded your current quota, please check your plan and billing details.")
             else:
+                print(error)
                 raise serializers.ValidationError("Your document content is too large, Please try with some other document.")
-            print(error)
+            
     else:
         raise serializers.ValidationError("Invalide document file selected.")
 
@@ -224,8 +231,8 @@ class DepartmentCreateApiview(CreateAPIView):
             raise serializers.ValidationError({"Error": "Your account is deleted as Admin by Super Admin. You can no Longer access this feature"})
 
         # Check if the company ID from the request matches the company associated with the admin user
-        if str(admin_user.company.id) != company_id_from_request:
-            raise serializers.ValidationError({"Access Denied": "You are not allowed to create departments in this company."})
+        # if str(admin_user.company.id) != company_id_from_request:
+        #     raise serializers.ValidationError({"Access Denied": "You are not allowed to create departments in this company."})
 
         # Save the department with the associated admin user
         serializer.save(added_by=self.request.user)
@@ -241,17 +248,17 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
         admin = AdminUser.objects.get(admin=self.request.user)
-        if instance.added_by == self.request.user and admin.is_active==True:
+        if admin.is_active==True:
             return super().retrieve(request, *args, **kwargs)
-        return Response({"Access Denied":"Department unaccessible to you"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"}, status=status.HTTP_403_FORBIDDEN)
 
     def put(self , request , *args, **kwargs):
         instance = self.get_object()
         admin = AdminUser.objects.get(admin=self.request.user)
-        if instance.added_by == self.request.user and admin.is_active==True:
+        if admin.is_active==True:
             Departments.objects.get(id=self.kwargs['id'])
             return self.update(request, *args , **kwargs)
-        return Response({"Account Error":"Account did not found"},status=status.HTTP_404_NOT_FOUND)
+        return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"},status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -274,16 +281,30 @@ class DepartmentListApiView(ListAPIView):
         Optionally restricts the returned administrators to a given company,
         by filtering against a `company_id` query parameter in the URL.
         """
-        admin = AdminUser.objects.get(admin=self.request.user)
         if (self.request.user.role == "Admin"):
-            queryset = Departments.objects.filter(is_active=True, added_by=self.request.user)
             company_id = self.request.query_params.get('company_id', None)
-            if queryset and admin.is_active==True:
-                if company_id is not None:
-                    queryset = queryset.filter(company__id=company_id)
+            admin = AdminUser.objects.get(admin=self.request.user, company=company_id)
+            queryset = Departments.objects.filter(is_active=True)
+            if admin:
+                if queryset and admin.is_active==True:
+                    if company_id is not None:
+                        queryset = queryset.filter(company__id=company_id)
+                    return queryset
+                else:
+                    raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"}, status=status.HTTP_403_FORBIDDEN)
+            else:
+                raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"}, status=status.HTTP_403_FORBIDDEN)
+        elif (self.request.user.role == "User"):
+            user = self.request.user
+            company_id = self.request.query_params.get('company_id', None)
+            user_teams = user.team_member.all()
+            user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
+            queryset = Departments.objects.filter(id__in=user_departments)
+            if company_id:
+                queryset = queryset.filter(company__id=company_id)
                 return queryset
             else:
-                raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments"})
+                raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments"}, status=status.HTTP_403_FORBIDDEN)
         else:
             queryset = Departments.objects.filter(is_active=True)
             company_id = self.request.query_params.get('company_id', None)
@@ -485,60 +506,200 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
         serializer = ReadOnlyDocumentSerializer(instance)
         return Response(serializer.data) 
 
+# class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
+#     queryset = DocumentSummary.objects.all()
+#     serializer_class = DocumentSummarySerializer
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAuthenticated]
+#     filter_backends = [SearchFilter, OrderingFilter]
+#     search_fields = ['content', 'prompt_text']
+
+
+#     def get_queryset(self):
+#         return DocumentSummary.objects.filter(company_id=self.request.user.id)
+
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+        
+#         document_id = int(request.data['document'])
+#         document_summary = DocumentSummary.objects.get(id = document_id, company_id = self.request.user.id)
+#         generateDocumentSummary(document_summary.id, document_id, serializer.validated_data['prompt_text'])
+#         serializer = ReadOnlyDocumentSummarySerializer(document_summary)
+
+#         headers = self.get_success_headers(serializer.data)
+#         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+#     def update(self, request, *args, **kwargs):
+#         partial = kwargs.pop('partial', False)
+#         instance = self.get_object()
+#         serializer = self.get_serializer(instance, data=request.data, partial=partial)
+#         serializer.is_valid(raise_exception=True)
+
+#         self.perform_update(serializer)
+        
+        
+#         serializer = ReadOnlyDocumentSummarySerializer(instance)
+
+#         return Response(serializer.data)
+    
+#     def list(self, request, *args, **kwargs):
+#         queryset = self.filter_queryset(self.get_queryset())
+
+#         page = self.paginate_queryset(queryset)
+#         if page is not None:
+#             serializer = ReadOnlyDocumentSummarySerializer(page, many=True)
+#             return self.get_paginated_response(serializer.data)
+
+#         serializer = ReadOnlyDocumentSummarySerializer(queryset, many=True)
+#         return Response(serializer.data) 
+
+#     def retrieve(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         serializer = ReadOnlyDocumentSummarySerializer(instance)
+#         return Response(serializer.data) 
+
+#     def destroy(self, request, *args, **kwargs):
+#         raise serializers.ValidationError("You are not allowed to perform that action.")
+
+
 class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
-    queryset = DocumentSummary.objects.all()
+    queryset = DocumentSummary.objects.filter(is_active=True)
     serializer_class = DocumentSummarySerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-    filter_backends = [SearchFilter, OrderingFilter]
+    permission_classes = [IsAdminUserOrReadOnly]
+    # filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['content', 'prompt_text']
 
-
     def get_queryset(self):
-        return DocumentSummary.objects.filter(company_id=self.request.user.id)
+        user = self.request.user
+        if user.role == "Super Admin":
+            return DocumentSummary.objects.filter(is_active=True)
+        elif user.role == "Admin":
+            admin = AdminUser.objects.get(admin = user, is_active=True)
+            if admin:
+                company = admin.company_id
+                return DocumentSummary.objects.filter(company=company)
+            else:
+                raise serializers.ValidationError({"Access Denied":"Your Account is Restricted"})
+        elif user.role == "User":
+                # Retrieve the user's teams
+            user_teams = CompaniesTeam.objects.get(members=user, is_active=True)
+            if user_teams:
+                company = user_teams.company_id
+                return DocumentSummary.objects.filter(company=company)
+            else:
+                raise serializers.ValidationError({"Access Denied":"Your Account is Restricted"})
+            # Get the departments associated with the user's teams
+        else:
+            return Response({"Access Denied":"You are not authorized for this request"})
+
+    def perform_create(self, serializer):
+        # Ensure the company of the user creating matches the document's company
+        admin = self.request.user
+        try:
+            admin_user = AdminUser.objects.get(admin=admin, is_active=True)
+            requested_company_id = serializer.validated_data.get('company')
+            serializer.save(added_by=self.request.user)
+        except AdminUser.DoesNotExist:
+            raise serializers.ValidationError("Admin user not found.")
+
+    def perform_update(self, serializer):
+        # Ensure the company of the user updating matches the document's company
+        admin = self.request.user
+        company = AdminUser.objects.filter(admin=admin, is_active=True)
+        if company and serializer.validated_data.get('company') == company.company:
+            serializer.save()
+        else:
+            raise serializers.ValidationError("You are not allowed to perform that action.")
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        document_id = int(request.data['document'])
-        document_summary = DocumentSummary.objects.get(id = document_id, company_id = self.request.user.id)
-        generateDocumentSummary(document_summary.id, document_id, serializer.validated_data['prompt_text'])
-        serializer = ReadOnlyDocumentSummarySerializer(document_summary)
+        # Ensure the company of the user creating matches the document's company
+        admin = self.request.user
+        try:
+            admin_user = AdminUser.objects.get(admin=admin, is_active=True)
+            company = admin_user.company_id
+            requested_company_id = serializer.validated_data.get('company')
+            # if requested_company_id == company:
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except AdminUser.DoesNotExist:
+            pass
+        
+        print("requested company id", requested_company_id)
+        print("admin id ", company)
+        raise serializers.ValidationError("You are not allowed to perform that action.")
 
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
 
-        self.perform_update(serializer)
-        
-        
-        serializer = ReadOnlyDocumentSummarySerializer(instance)
-
-        return Response(serializer.data)
-    
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = ReadOnlyDocumentSummarySerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = ReadOnlyDocumentSummarySerializer(queryset, many=True)
-        return Response(serializer.data) 
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = ReadOnlyDocumentSummarySerializer(instance)
-        return Response(serializer.data) 
+        # Ensure the company of the user updating matches the document's company
+        admin = self.request.user
+        company = AdminUser.objects.filter(admin=admin, is_active=True)
+        if company and serializer.validated_data.get('company') == company.company:
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        else:
+            raise serializers.ValidationError("You are not allowed to perform that action.")
 
     def destroy(self, request, *args, **kwargs):
-        raise serializers.ValidationError("You are not allowed to perform that action.")
+        instance = self.get_object()
+        user = self.request.user
+        if user.role == "Admin":
+            admin = AdminUser.objects.filter(admin=user, is_active=True).first()
+            if admin and instance.company == admin.company:
+                instance.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                raise serializers.ValidationError("You are not allowed to perform that action.")
+        else:
+            raise serializers.ValidationError("You are not allowed to perform that action.")
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        if user.role == "Admin":
+            admin = AdminUser.objects.filter(admin=user, is_active=True).first()
+            print(instance.company)
+            print(admin.company)
+            if admin and instance.company == admin.company:
+                instance.delete()
+            else:
+                raise serializers.ValidationError("You are not allowed to perform that action.")
+        else:
+            raise serializers.ValidationError("You are not allowed to perform that action.")
+
+
+
+    def retrieve(self, request, *args, **kwargs):
+        user = self.request.user
+        if user.role == "Super Admin":
+            return DocumentSummary.objects.filter(is_active=True)
+        elif user.role == "Admin":
+            admin = AdminUser.objects.get(admin = user, is_active=True)
+            if admin:
+                company = admin.company_id
+                return DocumentSummary.objects.filter(company=company)
+            else:
+                raise serializers.ValidationError({"Access Denied":"Your Account is Restricted"})
+        elif user.role == "User":
+                # Retrieve the user's teams
+            user_teams = CompaniesTeam.objects.get(members=user, is_active=True)
+            if user_teams:
+                company = user_teams.company_id
+                return DocumentSummary.objects.filter(company=company)
+            else:
+                raise serializers.ValidationError({"Access Denied":"Your Account is Restricted"})
+        
+        else:
+            return Response({"Access Denied":"You are not authorized for this request"})
+
 
 class DocumentKeypointsModelViewSet(viewsets.ModelViewSet):
     queryset = DocumentKeyPoints.objects.all()

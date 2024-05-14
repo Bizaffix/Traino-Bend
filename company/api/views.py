@@ -5,6 +5,7 @@ from rest_framework.generics import (
     CreateAPIView , ListAPIView , RetrieveAPIView,
     UpdateAPIView, DestroyAPIView
 )
+from rest_framework.views import APIView
 from .permissions import IsAdminUserOrReadOnly
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -109,3 +110,26 @@ class AdminListApiView(ListAPIView):
         if company_id is not None:
             queryset = queryset.filter(company__id=company_id)
         return queryset
+    
+class BulkAdminDeleteAPIView(APIView):
+    permission_classes = [IsAdminUserOrReadOnly]
+    authentication_classes = [JWTAuthentication]
+    
+    def post(self, request, format=None):
+        # Extract the list of admin IDs from the request data
+        admin_ids = request.data.get('admin_ids', [])
+
+        # Validate that admin IDs are provided
+        if not admin_ids:
+            return Response({"message": "Admin IDs are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the is_active field of each admin
+        for admin_id in admin_ids:
+            try:
+                admin = AdminUser.objects.get(id=admin_id)
+                admin.is_active = False
+                admin.save()
+            except AdminUser.DoesNotExist:
+                return Response({"message": f"Admin with ID {admin_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({"message": "Admins deactivated successfully"}, status=status.HTTP_200_OK)

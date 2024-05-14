@@ -15,7 +15,7 @@ from .permissions import IsAdminUserOrReadOnly
 class CustomUserCreateAPIView(CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [IsAuthenticated]  
+    permission_classes = [IsAdminUserOrReadOnly]  
     def create(self, request, *args, **kwargs):
         if request.user.role == 'Super Admin':
             if request.data.get('role') != 'Admin':
