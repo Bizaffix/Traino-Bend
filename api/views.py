@@ -231,8 +231,8 @@ class DepartmentCreateApiview(CreateAPIView):
             raise serializers.ValidationError({"Error": "Your account is deleted as Admin by Super Admin. You can no Longer access this feature"})
 
         # Check if the company ID from the request matches the company associated with the admin user
-        # if str(admin_user.company.id) != company_id_from_request:
-        #     raise serializers.ValidationError({"Access Denied": "You are not allowed to create departments in this company."})
+        if str(admin_user.company.id) != company_id_from_request:
+            raise serializers.ValidationError({"Access Denied": "You are not allowed to create departments in this company."})
 
         # Save the department with the associated admin user
         serializer.save(added_by=self.request.user)
@@ -248,26 +248,33 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
         admin = AdminUser.objects.get(admin=self.request.user)
-        if admin.is_active==True:
-            return super().retrieve(request, *args, **kwargs)
-        return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"}, status=status.HTTP_403_FORBIDDEN)
+        if str(instance.company.id) == str(admin.company.id):
+            if admin.is_active==True:
+                return super().retrieve(request, *args, **kwargs)
+            return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
+
 
     def put(self , request , *args, **kwargs):
         instance = self.get_object()
         admin = AdminUser.objects.get(admin=self.request.user)
-        if admin.is_active==True:
-            Departments.objects.get(id=self.kwargs['id'])
-            return self.update(request, *args , **kwargs)
-        return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"},status=status.HTTP_404_NOT_FOUND)
+        if str(instance.company.id) == str(admin.company.id):
+            if admin.is_active==True:
+                Departments.objects.get(id=self.kwargs['id'])
+                return self.update(request, *args , **kwargs)
+            return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"},status=status.HTTP_404_NOT_FOUND)
+        return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         admin = AdminUser.objects.get(admin=self.request.user)
-        if instance.added_by == self.request.user and admin.is_active==True:
-            instance.is_active = False
-            instance.save()
-            return Response({"Delete Status": "Successfully deleted the department." , "Department_id":instance.id},status=status.HTTP_202_ACCEPTED)
-        return Response({"Account Error":"Account did not found"},status=status.HTTP_404_NOT_FOUND)
+        if str(instance.company.id) == str(admin.company.id):
+            if admin.is_active==True:
+                instance.is_active = False
+                instance.save()
+                return Response({"Delete Status": "Successfully deleted the department." , "Department_id":instance.id},status=status.HTTP_202_ACCEPTED)
+            return Response({"Account Error":"Account did not found"},status=status.HTTP_404_NOT_FOUND)
+        return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
 
 class DepartmentListApiView(ListAPIView):
     serializer_class = DepartmentListSerializers
@@ -283,17 +290,20 @@ class DepartmentListApiView(ListAPIView):
         """
         if (self.request.user.role == "Admin"):
             company_id = self.request.query_params.get('company_id', None)
-            admin = AdminUser.objects.get(admin=self.request.user, company=company_id)
+            print(company_id)
+            admin = AdminUser.objects.get(admin=self.request.user, is_active=True)
             queryset = Departments.objects.filter(is_active=True)
-            if admin:
+            print(admin.company.id)
+            print(str(company_id) == str(admin.company.id))
+            if str(company_id) == str(admin.company.id):
                 if queryset and admin.is_active==True:
                     if company_id is not None:
                         queryset = queryset.filter(company__id=company_id)
                     return queryset
                 else:
-                    raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"}, status=status.HTTP_403_FORBIDDEN)
+                    raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"})
             else:
-                raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"}, status=status.HTTP_403_FORBIDDEN)
+                raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"})
         elif (self.request.user.role == "User"):
             user = self.request.user
             company_id = self.request.query_params.get('company_id', None)
