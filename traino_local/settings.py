@@ -34,6 +34,7 @@ ALLOWED_HOSTS = [
     'localhost',
     'app.traino.ai',
     'traino-ai-api.vercel.app',
+    'dashboard.traino.ai/',
 ]
 
 
@@ -176,6 +177,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://app.traino.ai:3000",
     "https://traino-ai-api.vercel.app",
+    "https://dashboard.traino.ai",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -183,16 +185,17 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://app.traino.ai:3000",
     "https://traino-ai-api.vercel.app",
+    "https://dashboard.traino.ai",
 ]
 
 
 # Email Configurations
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST = "mail.privateemail.com"
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'no-reply@traino.ai' #os.environ.get('EMAIL_USER')
-EMAIL_HOST_PASSWORD = 'hello123!@'#os.environ.get('EMAIL_PASS')
+EMAIL_HOST_PASSWORD = 'hello123!@' #os.environ.get('EMAIL_PASS')
 EMAIL_DEFAULT_FROM = 'no-reply@traino.ai' # os.environ.get('EMAIL_USER')  # your sender email addreass
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False

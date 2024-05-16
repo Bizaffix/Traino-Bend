@@ -1,6 +1,7 @@
 from rest_framework import permissions
-
-
+from company.models import AdminUser
+from teams.models import CompaniesTeam
+from departments.models import Departments
 class IsAdminUserAndSameCompany(permissions.BasePermission):
     """
     Custom permission to only allow admin users to view and manage data if it pertains to their own company.
@@ -34,9 +35,25 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         """
         # Read permissions are allowed for any request,
         # so we'll always allow GET, HEAD, or OPTIONS requests
-        if (request.user.role == 'User') and (request.user.role == 'Super Admin'):
+        if (request.user and request.user.is_authenticated and request.user.role == 'Super Admin'):
             if request.method in permissions.SAFE_METHODS:
                 return True
         
         # # Write permissions are only allowed if the user is an admin and the object's company is the same as the user's
-        return request.user.role == 'Admin'
+        if request.user.role == "Admin":
+            admin = AdminUser.objects.get(admin=request.user)
+            print(str(obj.company.id), str(admin.company.id))
+            if str(obj.company.id) == str(admin.company.id):
+                if admin.is_active==True: 
+                    return True
+            return False
+        
+        if request.user.role == "User":
+            user = request.user
+            team_member = user.team_member.all()
+            user_departments = Departments.objects.filter(users__in=team_member, is_active=True)
+            print(obj.company.id)
+            # print(user_departments.company.id)
+            if obj in user_departments:
+                return True
+            return False

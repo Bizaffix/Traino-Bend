@@ -245,14 +245,15 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
     queryset = Departments.objects.filter(is_active=True)
     lookup_field = 'id'
 
-    def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        admin = AdminUser.objects.get(admin=self.request.user)
-        if str(instance.company.id) == str(admin.company.id):
-            if admin.is_active==True:
-                return super().retrieve(request, *args, **kwargs)
-            return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"}, status=status.HTTP_403_FORBIDDEN)
-        return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
+    # def get(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     print(self.request.user.role)
+    #     admin = AdminUser.objects.get(admin=self.request.user)
+    #     if str(instance.company.id) == str(admin.company.id):
+    #         if admin.is_active==True:
+    #             return super().retrieve(request, *args, **kwargs)
+    #         return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"}, status=status.HTTP_403_FORBIDDEN)
+    #     return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
 
 
     def put(self , request , *args, **kwargs):
