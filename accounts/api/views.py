@@ -11,6 +11,8 @@ from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from django.contrib.auth.hashers import make_password
 from .permissions import IsAdminUserOrReadOnly
+from rest_framework import serializers
+
 
 class CustomUserCreateAPIView(CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -30,6 +32,16 @@ class CustomUserCreateAPIView(CreateAPIView):
                             status=status.HTTP_403_FORBIDDEN)
             
         request.data['added_by'] = request.user.id
+        new_user_role = request.data.get('role')
+        email = request.data.get('email')
+        try:
+            user_data = CustomUser.objects.get(email=email)
+            if user_data:
+                raise serializers.ValidationError(
+                    {"Account Exists": f"{new_user_role} with this email {email} already exists"})
+        except CustomUser.DoesNotExist:
+            # User does not exist, so continue with user creation
+            pass
         password = request.data.pop('password', None) 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

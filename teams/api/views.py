@@ -31,13 +31,19 @@ class MembersUpdateDestroyApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIVie
         instance = self.get_object()
         instance.is_active=False
         instance.save()
-        return Response({"Delete Status": "Successfully Removed the User" , "Deleted user_id":instance.id}, status=status.HTTP_202_ACCEPTED)
+        return Response({"Delete Status": "Successfully Removed the User" , "id":instance.id}, status=status.HTTP_202_ACCEPTED)
 
+
+from rest_framework.filters import SearchFilter, OrderingFilter
     
 class MembersListApiView(ListAPIView):
     serializer_class = CompaniesTeamDetailsSerializers
     permission_classes = [IsAdminUserOrReadOnly]#, IsActiveAdminUsersPermission
     authentication_classes = [JWTAuthentication]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['members__first_name']
+    ordering_fields = ['members__first_name']
+    ordering = ['members__first_name']  # Default ordering (A-Z by company_name)
     queryset = CompaniesTeam.objects.filter(is_active=True)
     
     def get_queryset(self):
@@ -104,4 +110,4 @@ class BulkUserDeleteAPIView(APIView):
             except CompaniesTeam.DoesNotExist:
                 return Response({"message": f"User with ID {user_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        return Response({"message": "Users deactivated successfully"}, status=status.HTTP_200_OK)
+        return Response({"message": "Users Deleted successfully"}, status=status.HTTP_200_OK)

@@ -420,17 +420,31 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         department_id = self.request.data.get('department')
+        name = self.request.data.get('name')
+        try:
+            company_name = DepartmentsDocuments.objects.get(name=name)
+            if company_name:
+                raise serializers.ValidationError(
+                    {"Document Exists": f"Document of this name {name} already exists"})
+        except DepartmentsDocuments.DoesNotExist:
+            # User does not exist, so continue with user creation
+            pass
         department = Departments.objects.get(id=department_id)
         serializer.save(added_by=self.request.user, department=department)
 
         
 from rest_framework import serializers
+from rest_framework.filters import SearchFilter, OrderingFilter 
 
 
 class DepartmentsDocumentsListAPIView(generics.ListAPIView):
     serializer_class = DepartmentsDocumentsSerializer
     permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['name']
+    ordering_fields = ['name']
+    ordering = ['name']  # Default ordering (A-Z by company_name)
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
 
     def get_queryset(self):
@@ -485,7 +499,7 @@ class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDe
         instance = self.get_object()
         instance.is_active = False
         instance.save()
-        return Response({"Delete Status": "Successfully Removed the Document", "Deleted document_id": instance.id}, status=status.HTTP_202_ACCEPTED)
+        return Response({"Delete Status": "Successfully Removed the Document", "id": instance.id}, status=status.HTTP_202_ACCEPTED)
 class AssignDocumentsToUsersAPIView(APIView):
     def post(self, request, document_id):
         try:

@@ -20,6 +20,15 @@ class CompanyCreateApiView(CreateAPIView):
     permission_classes = [IsAdminUser]
     
     def perform_create(self, serializer):
+        name = self.request.data.get('name')
+        try:
+            company_name = company.objects.get(name=name)
+            if company_name:
+                raise serializers.ValidationError(
+                    {"Company Exists": f"Company with this name {name} already exists"})
+        except company.DoesNotExist:
+            # User does not exist, so continue with user creation
+            pass
         serializer.save(is_active=True)
         
 class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIView):
@@ -40,11 +49,18 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
         instance = self.get_object()
         instance.is_active = False
         instance.save()
-        return Response({"Delete Status": "Successfully deleted the Company", "Deleted Company id": instance.id}, status=HTTP_202_ACCEPTED)
+        return Response({"Delete Status": "Successfully deleted the Company", "id": instance.id}, status=HTTP_202_ACCEPTED)
+
+from rest_framework.filters import SearchFilter, OrderingFilter
+
 class CompanyListApiView(ListAPIView):
     serializer_class = CompaniesListSerializer
     authentication_classes = [JWTAuthentication]
+    filter_backends = [SearchFilter, OrderingFilter]
     permission_classes =[IsAdminUserOrReadOnly]
+    search_fields = ['name']
+    ordering_fields = ['name']
+    ordering = ['name']  # Default ordering (A-Z by company_name)
     
     def get_queryset(self):
         queryset = company.objects.filter(is_active=True)
@@ -98,6 +114,10 @@ class AdminListApiView(ListAPIView):
     serializer_class = AdminUpdateDeleteSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['admin__first_name']
+    ordering_fields = ['admin__first_name']
+    ordering = ['admin__first_name']  # Default ordering (A-Z by company_name)
     queryset = AdminUser.objects.filter(is_active=True)
 
     def get_queryset(self):
@@ -132,4 +152,4 @@ class BulkAdminDeleteAPIView(APIView):
             except AdminUser.DoesNotExist:
                 return Response({"message": f"Admin with ID {admin_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        return Response({"message": "Admins deactivated successfully"}, status=status.HTTP_200_OK)
+        return Response({"message": "Admins Deleted successfully"}, status=status.HTTP_200_OK)

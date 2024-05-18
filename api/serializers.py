@@ -210,6 +210,35 @@ class DocumentSummarySerializer(serializers.ModelSerializer):
     def get_document(self, obj):
         return obj.document.id
 
+
+class DocumentKeyPointsSerializer(serializers.ModelSerializer):
+    added_by = UserCreateSerializer(many=False, read_only=True)
+
+    def validate_prompt_text(self, value):
+        # Check if the request method is PUT, PATCH, or POST
+        if self.context['request'].method in ['PUT', 'PATCH', 'POST']:
+            # Check if prompt_text is empty
+            if not value.strip():
+                # If prompt_text is empty, set default value
+                value = 'key points'
+        return value
+
+    document = serializers.UUIDField(write_only=True)
+
+    class Meta:
+        model = DocumentKeyPoints
+        fields = ['id', 'content', 'company', 'prompt_text', 'document', 'created_date', 'updated_at', 'added_by']
+
+    def create(self, validated_data):
+        document_id = validated_data.pop('document', None)
+        if document_id is None:
+            raise serializers.ValidationError("document_id is required.")
+
+        document_key_points = DocumentKeyPoints.objects.create(document_id=document_id, **validated_data)
+        return document_key_points
+
+    def get_document(self, obj):
+        return obj.document.id
 class ReadOnlyDocumentSummarySerializer(serializers.ModelSerializer):
     document = ReadOnlyDocumentSerializer(many=False, read_only=True)
     added_by = UserCreateSerializer(many=False, read_only=True)

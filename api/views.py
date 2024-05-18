@@ -223,7 +223,15 @@ class DepartmentCreateApiview(CreateAPIView):
     def perform_create(self, serializer):
         # Extract company ID from the request data
         company_id_from_request = self.request.data.get('company')
-
+        name = self.request.data.get('name')
+        try:
+            company_name = Departments.objects.get(name=name)
+            if company_name:
+                raise serializers.ValidationError(
+                    {"Department Exists": f"Department with this name {name} already exists"})
+        except Departments.DoesNotExist:
+            # User does not exist, so continue with user creation
+            pass
         # Get the admin user associated with the request user
         try:
             admin_user = AdminUser.objects.get(admin=self.request.user, is_active=True)
@@ -282,6 +290,9 @@ class DepartmentListApiView(ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ['name']
+    ordering_fields = ['name']
+    ordering = ['name']  # Default ordering (A-Z by company_name)
     queryset = Departments.objects.filter(is_active=True)
 
     def get_queryset(self):
@@ -390,6 +401,8 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['name']
+    ordering_fields = ['name']
+    ordering = ['name']  # Default ordering (A-Z by company_name)
 
 
     def get_queryset(self):
@@ -517,9 +530,183 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
         serializer = ReadOnlyDocumentSerializer(instance)
         return Response(serializer.data) 
 
-# class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
-#     queryset = DocumentSummary.objects.all()
-#     serializer_class = DocumentSummarySerializer
+
+# from openai import OpenAI
+import openai
+
+class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
+    queryset = DocumentSummary.objects.filter(is_active=True)
+    serializer_class = DocumentSummarySerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    search_fields = ['content', 'prompt_text']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == "Super Admin":
+            return DocumentSummary.objects.filter(is_active=True)
+        elif user.role == "Admin":
+            try:
+                admin = AdminUser.objects.get(admin=user, is_active=True)
+                company = admin.company_id
+                return DocumentSummary.objects.filter(company=company)
+            except AdminUser.DoesNotExist:
+                raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
+        elif user.role == "User":
+            try:
+                user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+                if user_teams.exists():
+                    company_ids = user_teams.values_list('company_id', flat=True)
+                    return DocumentSummary.objects.filter(company__in=company_ids)
+                else:
+                    raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
+            except CompaniesTeam.DoesNotExist:
+                raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
+        else:
+            return Response({"Access Denied": "You are not authorized for this request"})
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role == "Admin":
+            try:
+                admin_user = AdminUser.objects.get(admin=user, is_active=True)
+                company = admin_user.company_id
+                requested_company_id = serializer.validated_data.get('company')
+                print(company)
+                print(requested_company_id.id)
+                if requested_company_id.id != company:
+                    raise serializers.ValidationError("You can only create summaries for your own company.")
+                
+                # Use OpenAI to create summary
+                document_content = serializer.validated_data.get('content')
+                summary = self.generate_summary(document_content)
+                serializer.save(added_by=user, summary=summary)
+                
+            except AdminUser.DoesNotExist:
+                raise serializers.ValidationError("Admin user not found.")
+        else:
+            raise serializers.ValidationError("Only Admins can create document summaries.")
+    
+    def perform_update(self, serializer):
+        user = self.request.user
+        instance = self.get_object()
+        if (user.role == "Admin" and instance.added_by == user):
+            document_content = serializer.validated_data.get('content', instance.content)
+            summary = self.generate_summary(document_content)
+            serializer.save(summary=summary)
+            return serializer.data
+        else:
+            raise serializers.ValidationError("You do not have permission to update this summary.")
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        if (user.role == "Admin" and instance.added_by == user):
+            # instance.is_active = False
+            # instance.save()
+            obj_id = instance.id
+            instance.delete()
+            return Response({"Response":"Successfully Deleted the Summary.","id": obj_id})
+        else:
+            raise serializers.ValidationError("You do not have permission to delete this summary.")
+    
+    def generate_summary(self, content):
+        openai.api_key = openai_api_key
+        response = openai.Completion.create(
+            engine="gpt-3.5-turbo",
+            prompt=f"Summarize the following document:\n\n{content}",
+            max_tokens=150
+        )
+        summary = response.choices[0].text.strip()
+        return summary
+
+from .serializers import DocumentKeyPointsSerializer
+class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
+    queryset = DocumentKeyPoints.objects.filter(is_active=True)
+    serializer_class = DocumentKeyPointsSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    search_fields = ['content', 'prompt_text']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == "Super Admin":
+            return DocumentKeyPoints.objects.filter(is_active=True)
+        elif user.role == "Admin":
+            try:
+                admin = AdminUser.objects.get(admin=user, is_active=True)
+                company = admin.company_id
+                return DocumentKeyPoints.objects.filter(company=company)
+            except AdminUser.DoesNotExist:
+                raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
+        elif user.role == "User":
+            try:
+                user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+                if user_teams.exists():
+                    company_ids = user_teams.values_list('company_id', flat=True)
+                    return DocumentKeyPoints.objects.filter(company__in=company_ids)
+                else:
+                    raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
+            except CompaniesTeam.DoesNotExist:
+                raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
+        else:
+            return Response({"Access Denied": "You are not authorized for this request"})
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role == "Admin":
+            try:
+                admin_user = AdminUser.objects.get(admin=user, is_active=True)
+                company = admin_user.company_id
+                requested_company_id = serializer.validated_data.get('company')
+                if requested_company_id.id != company:
+                    raise serializers.ValidationError("You can only create key points for your own company.")
+                
+                # Use OpenAI to create key points
+                document_content = serializer.validated_data.get('content')
+                key_points = self.generate_key_points(document_content)
+                serializer.save(added_by=user, content=key_points)
+                
+            except AdminUser.DoesNotExist:
+                raise serializers.ValidationError("Admin user not found.")
+        else:
+            raise serializers.ValidationError("Only Admins can create document key points.")
+    
+    def perform_update(self, serializer):
+        user = self.request.user
+        instance = self.get_object()
+        if (user.role == "Admin" and instance.added_by == user):
+            document_content = serializer.validated_data.get('content', instance.content)
+            key_points = self.generate_key_points(document_content)
+            serializer.save(content=key_points)
+            return serializer.data
+        else:
+            raise serializers.ValidationError("You do not have permission to update these key points.")
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        if (user.role == "Admin" and instance.added_by == user):
+            # instance.is_active = False
+            # instance.save()
+            obj_id = instance.id
+            instance.delete()
+            return Response({"Response":"Successfully Deleted the KeyPoints.","id": obj_id})
+        else:
+            raise serializers.ValidationError("You do not have permission to delete these key points.")
+    
+    def generate_key_points(self, content):
+        openai.api_key = openai_api_key
+        response = openai.Completion.create(
+            engine="gpt-3.5-turbo",
+            prompt=f"Extract key points from the following document:\n\n{content}",
+            max_tokens=150
+        )
+        key_points = response.choices[0].text.strip()
+        return key_points
+
+
+# class DocumentKeypointsModelViewSet(viewsets.ModelViewSet):
+#     queryset = DocumentKeyPoints.objects.all()
+#     serializer_class = DocumentKeypointsSerializer
 #     authentication_classes = [JWTAuthentication]
 #     permission_classes = [IsAuthenticated]
 #     filter_backends = [SearchFilter, OrderingFilter]
@@ -527,16 +714,16 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
 
 
 #     def get_queryset(self):
-#         return DocumentSummary.objects.filter(company_id=self.request.user.id)
+#         return DocumentKeyPoints.objects.filter(company_id=self.request.user.id)
 
 #     def create(self, request, *args, **kwargs):
 #         serializer = self.get_serializer(data=request.data)
 #         serializer.is_valid(raise_exception=True)
         
 #         document_id = int(request.data['document'])
-#         document_summary = DocumentSummary.objects.get(id = document_id, company_id = self.request.user.id)
-#         generateDocumentSummary(document_summary.id, document_id, serializer.validated_data['prompt_text'])
-#         serializer = ReadOnlyDocumentSummarySerializer(document_summary)
+#         document_keypoint = DocumentKeyPoints.objects.get(document_id = document_id, company_id = self.request.user.id)
+#         generateDocumentKeypoints(document_keypoint.id, document_id, serializer.validated_data['prompt_text'])
+#         serializer = ReadOnlyDocumentKeypointsSerializer(document_keypoint)
 
 #         headers = self.get_success_headers(serializer.data)
 #         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -549,7 +736,7 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
 #         self.perform_update(serializer)
         
         
-#         serializer = ReadOnlyDocumentSummarySerializer(instance)
+#         serializer = ReadOnlyDocumentKeypointsSerializer(instance)
 
 #         return Response(serializer.data)
     
@@ -558,211 +745,16 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
 
 #         page = self.paginate_queryset(queryset)
 #         if page is not None:
-#             serializer = ReadOnlyDocumentSummarySerializer(page, many=True)
+#             serializer = ReadOnlyDocumentKeypointsSerializer(page, many=True)
 #             return self.get_paginated_response(serializer.data)
 
-#         serializer = ReadOnlyDocumentSummarySerializer(queryset, many=True)
+#         serializer = ReadOnlyDocumentKeypointsSerializer(queryset, many=True)
 #         return Response(serializer.data) 
 
 #     def retrieve(self, request, *args, **kwargs):
 #         instance = self.get_object()
-#         serializer = ReadOnlyDocumentSummarySerializer(instance)
+#         serializer = ReadOnlyDocumentKeypointsSerializer(instance)
 #         return Response(serializer.data) 
 
 #     def destroy(self, request, *args, **kwargs):
 #         raise serializers.ValidationError("You are not allowed to perform that action.")
-
-
-class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
-    queryset = DocumentSummary.objects.filter(is_active=True)
-    serializer_class = DocumentSummarySerializer
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUserOrReadOnly]
-    # filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['content', 'prompt_text']
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.role == "Super Admin":
-            return DocumentSummary.objects.filter(is_active=True)
-        elif user.role == "Admin":
-            admin = AdminUser.objects.get(admin = user, is_active=True)
-            if admin:
-                company = admin.company_id
-                return DocumentSummary.objects.filter(company=company)
-            else:
-                raise serializers.ValidationError({"Access Denied":"Your Account is Restricted"})
-        elif user.role == "User":
-                # Retrieve the user's teams
-            user_teams = CompaniesTeam.objects.get(members=user, is_active=True)
-            if user_teams:
-                company = user_teams.company_id
-                return DocumentSummary.objects.filter(company=company)
-            else:
-                raise serializers.ValidationError({"Access Denied":"Your Account is Restricted"})
-            # Get the departments associated with the user's teams
-        else:
-            return Response({"Access Denied":"You are not authorized for this request"})
-
-    def perform_create(self, serializer):
-        # Ensure the company of the user creating matches the document's company
-        admin = self.request.user
-        try:
-            admin_user = AdminUser.objects.get(admin=admin, is_active=True)
-            requested_company_id = serializer.validated_data.get('company')
-            serializer.save(added_by=self.request.user)
-        except AdminUser.DoesNotExist:
-            raise serializers.ValidationError("Admin user not found.")
-
-    def perform_update(self, serializer):
-        # Ensure the company of the user updating matches the document's company
-        admin = self.request.user
-        company = AdminUser.objects.filter(admin=admin, is_active=True)
-        if company and serializer.validated_data.get('company') == company.company:
-            serializer.save()
-        else:
-            raise serializers.ValidationError("You are not allowed to perform that action.")
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        # Ensure the company of the user creating matches the document's company
-        admin = self.request.user
-        try:
-            admin_user = AdminUser.objects.get(admin=admin, is_active=True)
-            company = admin_user.company_id
-            requested_company_id = serializer.validated_data.get('company')
-            # if requested_company_id == company:
-            self.perform_create(serializer)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except AdminUser.DoesNotExist:
-            pass
-        
-        print("requested company id", requested_company_id)
-        print("admin id ", company)
-        raise serializers.ValidationError("You are not allowed to perform that action.")
-
-
-
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-
-        # Ensure the company of the user updating matches the document's company
-        admin = self.request.user
-        company = AdminUser.objects.filter(admin=admin, is_active=True)
-        if company and serializer.validated_data.get('company') == company.company:
-            self.perform_update(serializer)
-            return Response(serializer.data)
-        else:
-            raise serializers.ValidationError("You are not allowed to perform that action.")
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        user = self.request.user
-        if user.role == "Admin":
-            admin = AdminUser.objects.filter(admin=user, is_active=True).first()
-            if admin and instance.company == admin.company:
-                instance.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            else:
-                raise serializers.ValidationError("You are not allowed to perform that action.")
-        else:
-            raise serializers.ValidationError("You are not allowed to perform that action.")
-
-    def perform_destroy(self, instance):
-        user = self.request.user
-        if user.role == "Admin":
-            admin = AdminUser.objects.filter(admin=user, is_active=True).first()
-            print(instance.company)
-            print(admin.company)
-            if admin and instance.company == admin.company:
-                instance.delete()
-            else:
-                raise serializers.ValidationError("You are not allowed to perform that action.")
-        else:
-            raise serializers.ValidationError("You are not allowed to perform that action.")
-
-
-
-    def retrieve(self, request, *args, **kwargs):
-        user = self.request.user
-        if user.role == "Super Admin":
-            return DocumentSummary.objects.filter(is_active=True)
-        elif user.role == "Admin":
-            admin = AdminUser.objects.get(admin = user, is_active=True)
-            if admin:
-                company = admin.company_id
-                return DocumentSummary.objects.filter(company=company)
-            else:
-                raise serializers.ValidationError({"Access Denied":"Your Account is Restricted"})
-        elif user.role == "User":
-                # Retrieve the user's teams
-            user_teams = CompaniesTeam.objects.get(members=user, is_active=True)
-            if user_teams:
-                company = user_teams.company_id
-                return DocumentSummary.objects.filter(company=company)
-            else:
-                raise serializers.ValidationError({"Access Denied":"Your Account is Restricted"})
-        
-        else:
-            return Response({"Access Denied":"You are not authorized for this request"})
-
-
-class DocumentKeypointsModelViewSet(viewsets.ModelViewSet):
-    queryset = DocumentKeyPoints.objects.all()
-    serializer_class = DocumentKeypointsSerializer
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-    filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['content', 'prompt_text']
-
-
-    def get_queryset(self):
-        return DocumentKeyPoints.objects.filter(company_id=self.request.user.id)
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        document_id = int(request.data['document'])
-        document_keypoint = DocumentKeyPoints.objects.get(document_id = document_id, company_id = self.request.user.id)
-        generateDocumentKeypoints(document_keypoint.id, document_id, serializer.validated_data['prompt_text'])
-        serializer = ReadOnlyDocumentKeypointsSerializer(document_keypoint)
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-
-        self.perform_update(serializer)
-        
-        
-        serializer = ReadOnlyDocumentKeypointsSerializer(instance)
-
-        return Response(serializer.data)
-    
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = ReadOnlyDocumentKeypointsSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = ReadOnlyDocumentKeypointsSerializer(queryset, many=True)
-        return Response(serializer.data) 
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = ReadOnlyDocumentKeypointsSerializer(instance)
-        return Response(serializer.data) 
-
-    def destroy(self, request, *args, **kwargs):
-        raise serializers.ValidationError("You are not allowed to perform that action.")

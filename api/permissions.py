@@ -35,7 +35,7 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         """
         # Read permissions are allowed for any request,
         # so we'll always allow GET, HEAD, or OPTIONS requests
-        if (request.user and request.user.is_authenticated and request.user.role == 'Super Admin'):
+        if (request.user and request.user.is_authenticated and request.user.role == 'Super Admin') or (request.user and request.user.is_authenticated and request.user.role == 'User'):
             if request.method in permissions.SAFE_METHODS:
                 return True
         

@@ -149,7 +149,7 @@ STATIC_DIR = {
 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'public/static/')
 MEDIA_ROOT = os.path.join(BASE_DIR, '')
-MEDIA_URL = '/media/'
+MEDIA_URL = '/'
 
 
 # Default primary key field type
@@ -199,7 +199,7 @@ EMAIL_HOST_PASSWORD = 'hello123!@' #os.environ.get('EMAIL_PASS')
 EMAIL_DEFAULT_FROM = 'no-reply@traino.ai' # os.environ.get('EMAIL_USER')  # your sender email addreass
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-
+DEFAULT_FROM_EMAIL = 'no-reply@traino.ai'
 
 # DJOSER Settings
 
