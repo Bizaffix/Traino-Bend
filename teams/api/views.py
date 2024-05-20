@@ -41,9 +41,9 @@ class MembersListApiView(ListAPIView):
     permission_classes = [IsAdminUserOrReadOnly]#, IsActiveAdminUsersPermission
     authentication_classes = [JWTAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['members__first_name']
-    ordering_fields = ['members__first_name']
-    ordering = ['members__first_name']  # Default ordering (A-Z by company_name)
+    search_fields = ['id','members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']
+    ordering_fields = ['id','members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']
+    ordering = ['id','members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']  # Default ordering (A-Z by company_name)
     queryset = CompaniesTeam.objects.filter(is_active=True)
     
     def get_queryset(self):

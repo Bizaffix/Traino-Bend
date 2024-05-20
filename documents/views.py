@@ -442,9 +442,9 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
     permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name']
-    ordering_fields = ['name']
-    ordering = ['name']  # Default ordering (A-Z by company_name)
+    search_fields = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']
+    ordering_fields = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']
+    ordering = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']  # Default ordering (A-Z by company_name)
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
 
     def get_queryset(self):

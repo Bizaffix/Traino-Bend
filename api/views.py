@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from accounts.models import CompanyTeam, CustomUser 
 from departments.models import Departments
+from rest_framework.generics import CreateAPIView, RetrieveAPIView , UpdateAPIView, DestroyAPIView, ListAPIView
 from documents.models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, DocumentTeam
 from api.serializers import DepartmentSerializers, DepartmentListSerializers ,DepartmentRUDSerializers,CompanyTeamSerializer, UserCreateSerializer, DocumentSerializer, ReadOnlyDocumentSerializer, DocumentSummarySerializer, ReadOnlyDocumentSummarySerializer, DocumentKeypointsSerializer, ReadOnlyDocumentKeypointsSerializer
 from rest_framework import viewsets
@@ -290,9 +291,9 @@ class DepartmentListApiView(ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name']
-    ordering_fields = ['name']
-    ordering = ['name']  # Default ordering (A-Z by company_name)
+    search_fields = ['name', 'id', 'company__name']
+    ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
+    ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
     queryset = Departments.objects.filter(is_active=True)
 
     def get_queryset(self):
@@ -400,9 +401,9 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name']
-    ordering_fields = ['name']
-    ordering = ['name']  # Default ordering (A-Z by company_name)
+    search_fields = ['name', 'id', 'company__name']
+    ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
+    ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
 
 
     def get_queryset(self):
@@ -539,7 +540,9 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSummarySerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
-    search_fields = ['content', 'prompt_text']
+    search_fields = ['id' ,'content', 'prompt_text','name', 'id', 'company__name', 'document__name']
+    ordering_fields = ['name' , 'id', 'company' , 'document' , 'created_at', 'updated_at']
+    ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']
 
     def get_queryset(self):
         user = self.request.user
@@ -625,7 +628,9 @@ class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentKeyPointsSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
-    search_fields = ['content', 'prompt_text']
+    search_fields = ['id' ,'content', 'prompt_text','name', 'id', 'company__name', 'document__name']
+    ordering_fields = ['name' , 'id', 'company' , 'document' , 'created_at', 'updated_at']
+    ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']
 
     def get_queryset(self):
         user = self.request.user
