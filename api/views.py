@@ -9,7 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import  serializers
-from rest_framework.generics import *
+from django.contrib.auth.models import User
 from .permissions import IsAdminUserOrReadOnly
 import os
 from rest_framework.views import APIView
