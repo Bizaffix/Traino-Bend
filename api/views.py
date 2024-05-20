@@ -535,7 +535,7 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
 import openai
 
 class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
-    queryset = DocumentSummary.objects.filter(is_active=True)
+    queryset = DocumentSummary.objects.all()
     serializer_class = DocumentSummarySerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
@@ -544,10 +544,10 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.role == "Super Admin":
-            return DocumentSummary.objects.filter(is_active=True)
+            return DocumentSummary.objects.all()
         elif user.role == "Admin":
             try:
-                admin = AdminUser.objects.get(admin=user, is_active=True)
+                admin = AdminUser.objects.get(admin=user)
                 company = admin.company_id
                 return DocumentSummary.objects.filter(company=company)
             except AdminUser.DoesNotExist:

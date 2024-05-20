@@ -42,7 +42,7 @@ class DocumentSummary(models.Model):
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="summary_added_by")
-    is_active= models.BooleanField(default=True)
+    # is_active= models.BooleanField(default=True)
 
     REQUIRED_FIELDS = ['prompt_text', 'document']
 
