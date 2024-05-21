@@ -5,6 +5,8 @@ from rest_framework.generics import RetrieveAPIView , CreateAPIView , UpdateAPIV
 from .serializers import CustomUserDetailSerializer , CustomUserSerializer
 from rest_framework.permissions import IsAuthenticated
 from accounts.models import CustomUser
+from teams.models import CompaniesTeam
+from company.models import company , AdminUser
 from rest_framework import status
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
@@ -89,15 +91,51 @@ class LoginAPIView(APIView):
             try:
                 user_data = CustomUser.objects.get(email=email)
                 serializer = CustomUserDetailSerializer(user_data)  # Use CustomUserDetailSerializer
-                serialized_user = {
-                    'id': serializer.data['id'],
-                    'first_name': serializer.data['first_name'],
-                    'last_name': serializer.data['last_name'],
-                    'phone': serializer.data['phone'],
-                    'email': serializer.data['email'],
-                    'role': serializer.data['role'],
-                    'created_at': serializer.data['created_at'],
-                }
+                if serializer.data['role'] == 'Admin':
+                    admin = AdminUser.objects.get(admin=serializer.data['id'])
+                    print(admin.company.id)
+                    print(admin.company.name)
+                    serialized_user = {
+                        'id': serializer.data['id'],
+                        'first_name': serializer.data['first_name'],
+                        'last_name': serializer.data['last_name'],
+                        'phone': serializer.data['phone'],
+                        'email': serializer.data['email'],
+                        'role': serializer.data['role'],
+                        'admin_id':str(admin.id),
+                        'company_id':str(admin.company.id),
+                        'company_name':str(admin.company.name),
+                        'created_at': serializer.data['created_at'],
+                    }
+                elif serializer.data['role'] == 'User':
+                    user = CompaniesTeam.objects.get(members=serializer.data['id'])
+                    print(user.company.id)
+                    print(user.company.name)
+                    serialized_user = {
+                        'id': serializer.data['id'],
+                        'first_name': serializer.data['first_name'],
+                        'last_name': serializer.data['last_name'],
+                        'phone': serializer.data['phone'],
+                        'email': serializer.data['email'],
+                        'role': serializer.data['role'],
+                        'company_id':str(user.company.id),
+                        'company_name':str(user.company.name),
+                        'created_at': serializer.data['created_at'],
+                    }
+                else:
+                    user_data = CustomUser.objects.get(email=email)
+                    serializer = CustomUserDetailSerializer(user_data)  # Use CustomUserDetailSerializer
+                    serialized_user = {
+                        'id': serializer.data['id'],
+                        'first_name': serializer.data['first_name'],
+                        'last_name': serializer.data['last_name'],
+                        'phone': serializer.data['phone'],
+                        'email': serializer.data['email'],
+                        'role': serializer.data['role'],
+                        # 'company_id':admin.company.id,
+                        # 'company_name':admin.company.name,
+                        'created_at': serializer.data['created_at'],
+                    }
             except CustomUser.DoesNotExist:
                 return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 

@@ -190,15 +190,14 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 # Email Configurations
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "mail.privateemail.com"
-EMAIL_PORT = 587
+EMAIL_PORT = 465
 EMAIL_HOST_USER = 'no-reply@traino.ai' #os.environ.get('EMAIL_USER')
 EMAIL_HOST_PASSWORD = 'hello123!@' #os.environ.get('EMAIL_PASS')
 EMAIL_DEFAULT_FROM = 'no-reply@traino.ai' # os.environ.get('EMAIL_USER')  # your sender email addreass
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = 'no-reply@traino.ai'
 
 # DJOSER Settings
