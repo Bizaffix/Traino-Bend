@@ -14,6 +14,7 @@ from django.forms.models import model_to_dict
 from django.contrib.auth.hashers import make_password
 from .permissions import IsAdminUserOrReadOnly
 from rest_framework import serializers
+from django.core.mail import send_mail
 
 
 class CustomUserCreateAPIView(CreateAPIView):
@@ -48,6 +49,25 @@ class CustomUserCreateAPIView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save(password=make_password(password))
+        send_mail(
+            subject="Welcome to Traino-ai",
+            message=f'''Welcome to Traino-ai.
+
+We're so excited to be working with you, and we want to be sure we start off on the right foot.
+Your email and password to access the Traino-ai portal is shown below.Please click here to sign-in.
+
+Username: {email}
+Password: {password}
+Role: {new_user_role}
+
+Please log in and complete your profile.
+
+Regards
+Traino-ai.''',
+            from_email="no-reply@traino.ai",
+            recipient_list=[email],
+            fail_silently=False,
+        )
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
