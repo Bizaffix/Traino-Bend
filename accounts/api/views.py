@@ -100,13 +100,6 @@ class LoginAPIView(APIView):
         user = authenticate(email=email, password=password)
 
         if user:
-            # Generate token
-            refresh = RefreshToken.for_user(user)
-            token = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
-
             # Additional data checking (e.g., existence in DB)
             try:
                 user_data = CustomUser.objects.get(email=email)
@@ -115,33 +108,50 @@ class LoginAPIView(APIView):
                     admin = AdminUser.objects.get(admin=serializer.data['id'])
                     # print(admin.company.id)
                     # print(admin.company.name)
-                    serialized_user = {
-                        'id': serializer.data['id'],
-                        'first_name': serializer.data['first_name'],
-                        'last_name': serializer.data['last_name'],
-                        'phone': serializer.data['phone'],
-                        'email': serializer.data['email'],
-                        'role': serializer.data['role'],
-                        'admin_id':str(admin.id),
-                        'company_id':str(admin.company.id),
-                        'company_name':str(admin.company.name),
-                        'created_at': serializer.data['created_at'],
-                    }
+                    # print(admin.is_active == True)
+                    if admin.is_active==True:
+                        refresh = RefreshToken.for_user(user)
+                        token = {
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token),
+                        }
+                        serialized_user = {
+                            'id': serializer.data['id'],
+                            'first_name': serializer.data['first_name'],
+                            'last_name': serializer.data['last_name'],
+                            'phone': serializer.data['phone'],
+                            'email': serializer.data['email'],
+                            'role': serializer.data['role'],
+                            'admin_id':str(admin.id),
+                            'company_id':str(admin.company.id),
+                            'company_name':str(admin.company.name),
+                            'created_at': serializer.data['created_at'],
+                        }
+                    else:
+                        return Response({"Not Found":"No Account Found against these credentials"})
                 elif serializer.data['role'] == 'User':
                     user = CompaniesTeam.objects.get(members=serializer.data['id'])
                     # print(user.company.id)
                     # print(user.company.name)
-                    serialized_user = {
-                        'id': serializer.data['id'],
-                        'first_name': serializer.data['first_name'],
-                        'last_name': serializer.data['last_name'],
-                        'phone': serializer.data['phone'],
-                        'email': serializer.data['email'],
-                        'role': serializer.data['role'],
-                        'company_id':str(user.company.id),
-                        'company_name':str(user.company.name),
-                        'created_at': serializer.data['created_at'],
-                    }
+                    if user.is_active==True:
+                        refresh = RefreshToken.for_user(user)
+                        token = {
+                            'refresh': str(refresh),
+                            'access': str(refresh.access_token),
+                        }
+                        serialized_user = {
+                            'id': serializer.data['id'],
+                            'first_name': serializer.data['first_name'],
+                            'last_name': serializer.data['last_name'],
+                            'phone': serializer.data['phone'],
+                            'email': serializer.data['email'],
+                            'role': serializer.data['role'],
+                            'company_id':str(user.company.id),
+                            'company_name':str(user.company.name),
+                            'created_at': serializer.data['created_at'],
+                        }
+                    else:
+                        return Response({"Not Found":"No Account Found Against These Credentials"})
                 else:
                     user_data = CustomUser.objects.get(email=email)
                     serializer = CustomUserDetailSerializer(user_data)  # Use CustomUserDetailSerializer
