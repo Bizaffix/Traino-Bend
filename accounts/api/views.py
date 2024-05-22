@@ -154,7 +154,12 @@ class LoginAPIView(APIView):
                         return Response({"Not Found":"No Account Found Against These Credentials"})
                 else:
                     user_data = CustomUser.objects.get(email=email)
-                    serializer = CustomUserDetailSerializer(user_data)  # Use CustomUserDetailSerializer
+                    serializer = CustomUserDetailSerializer(user_data)
+                    refresh = RefreshToken.for_user(user)
+                    token = {
+                            'refresh': str(refresh),
+                            'access': str(refresh.access_token),
+                    }
                     serialized_user = {
                         'id': serializer.data['id'],
                         'first_name': serializer.data['first_name'],
