@@ -113,8 +113,8 @@ class LoginAPIView(APIView):
                 serializer = CustomUserDetailSerializer(user_data)  # Use CustomUserDetailSerializer
                 if serializer.data['role'] == 'Admin':
                     admin = AdminUser.objects.get(admin=serializer.data['id'])
-                    print(admin.company.id)
-                    print(admin.company.name)
+                    # print(admin.company.id)
+                    # print(admin.company.name)
                     serialized_user = {
                         'id': serializer.data['id'],
                         'first_name': serializer.data['first_name'],
@@ -129,8 +129,8 @@ class LoginAPIView(APIView):
                     }
                 elif serializer.data['role'] == 'User':
                     user = CompaniesTeam.objects.get(members=serializer.data['id'])
-                    print(user.company.id)
-                    print(user.company.name)
+                    # print(user.company.id)
+                    # print(user.company.name)
                     serialized_user = {
                         'id': serializer.data['id'],
                         'first_name': serializer.data['first_name'],
