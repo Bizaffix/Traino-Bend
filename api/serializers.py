@@ -88,6 +88,7 @@ class DepartmentListSerializers(serializers.ModelSerializer):
     company = serializers.SerializerMethodField()
     added_by = serializers.SerializerMethodField()
     users = serializers.SerializerMethodField()
+    created_at = serializers.SerializerMethodField(read_only=True)
     documents = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Departments
@@ -95,6 +96,8 @@ class DepartmentListSerializers(serializers.ModelSerializer):
 
     def get_id(self , obj):
         return obj.id
+    
+    
 
     def get_company(self , obj):
         return obj.company.name
@@ -112,6 +115,8 @@ class DepartmentListSerializers(serializers.ModelSerializer):
         serializer = DepartmentsDocumentsSerializer(admins, many=True)
         return serializer.data    
     
+    def get_created_at(self ,obj):
+        return obj.created_at
 class CompanyTeamSerializer(serializers.ModelSerializer):
     department = DepartmentSerializers(many=False, read_only=True)
     company = UserCreateSerializer(many=False, read_only=True)

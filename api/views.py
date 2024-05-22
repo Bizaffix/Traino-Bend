@@ -246,10 +246,13 @@ class DepartmentCreateApiview(CreateAPIView):
         # Save the department with the associated admin user
         serializer.save(added_by=self.request.user)
     
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt    
+
 class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView):
     serializer_class = DepartmentRUDSerializers
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly, IsAuthenticated]
     filter_backends = [SearchFilter, OrderingFilter]
     queryset = Departments.objects.filter(is_active=True)
     lookup_field = 'id'
@@ -264,6 +267,9 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
     #         return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"}, status=status.HTTP_403_FORBIDDEN)
     #     return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
 
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def put(self , request , *args, **kwargs):
         instance = self.get_object()
@@ -274,7 +280,8 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
                 return self.update(request, *args , **kwargs)
             return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"},status=status.HTTP_404_NOT_FOUND)
         return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
-
+    
+    @method_decorator(csrf_exempt)
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         admin = AdminUser.objects.get(admin=self.request.user)
@@ -306,28 +313,35 @@ class DepartmentListApiView(ListAPIView):
             # print(company_id)
             admin = AdminUser.objects.get(admin=self.request.user)
             queryset = Departments.objects.filter(is_active=True)
-            # print(admin.company.id)
+            # print(admin.is_active)
             # print(str(company_id) == str(admin.company.id))
             if str(company_id) == str(admin.company.id):
-                if queryset and admin.is_active==True:
-                    if company_id is not None:
-                        queryset = queryset.filter(company__id=company_id)
-                    return queryset
+                if queryset is not None:
+                    print("in queryset",queryset)
+                    if admin.is_active==True:
+                        print("admin found")
+                        if company_id is not None:
+                            queryset = queryset.filter(company__id=company_id)
+                        return queryset
+                        print("data found")
+                    else:
+                        raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"})
                 else:
-                    raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"})
+                    raise serializers.ValidationError({"No Record Found":"No Data Found"})
             else:
                 raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"})
-        elif (self.request.user.role == "User"):
-            user = self.request.user
-            company_id = self.request.query_params.get('company_id', None)
-            user_teams = user.team_member.all()
-            user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
-            queryset = Departments.objects.filter(id__in=user_departments)
-            if company_id:
-                queryset = queryset.filter(company__id=company_id)
-                return queryset
-            else:
-                raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments"}, status=status.HTTP_403_FORBIDDEN)
+        # elif (self.request.user.role == "User"):
+        #     user = self.request.user
+        #     company_id = self.request.query_params.get('company_id', None)
+        #     print(company_id)
+        #     user_teams = CompaniesTeam.objects.get(members=user.id, is_active=True)
+        #     user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
+        #     queryset = Departments.objects.filter(id__in=user_departments)
+        #     if company_id:
+        #         queryset = queryset.filter(company__id=company_id)
+        #         return queryset
+        #     else:
+        #         raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments"}, status=status.HTTP_403_FORBIDDEN)
         else:
             queryset = Departments.objects.filter(is_active=True)
             company_id = self.request.query_params.get('company_id', None)

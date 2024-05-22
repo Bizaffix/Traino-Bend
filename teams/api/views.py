@@ -38,7 +38,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
     
 class MembersListApiView(ListAPIView):
     serializer_class = CompaniesTeamDetailsSerializers
-    permission_classes = [IsAdminUserOrReadOnly]#, IsActiveAdminUsersPermission
+    permission_classes = [IsAdminUserOrReadOnly, IsActiveAdminPermission]#, IsActiveAdminUsersPermission
     authentication_classes = [JWTAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['id','members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']

@@ -29,7 +29,7 @@ class DepartmentsDocuments(models.Model):
     file = models.FileField(upload_to='media/documents/', null=True, blank=True)
     department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='document_departments', null=True, blank=True)
     published = models.BooleanField(default=False)
-    created_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="document_departments_added_by", null=True, blank=True)
     is_active= models.BooleanField(default=True)

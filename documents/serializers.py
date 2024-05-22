@@ -6,6 +6,7 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     last_name = serializers.SerializerMethodField(read_only=True)
     email = serializers.SerializerMethodField(read_only=True)
     phone = serializers.SerializerMethodField(read_only=True)
+    created_at = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = DepartmentsDocuments
         fields = '__all__'
@@ -22,6 +23,8 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     def get_phone(self , obj):
         return str(obj.added_by.phone)
         
+    def get_created_at(self, obj):
+        return obj.created_at
     
 class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField(read_only=True)

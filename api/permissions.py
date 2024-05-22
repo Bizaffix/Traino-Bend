@@ -23,9 +23,8 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
     """
     def has_permission(self, request, view):
         # Allow GET, HEAD, or OPTIONS requests (read-only)
-        if (request.user and request.user.is_authenticated and request.user.role == 'Super Admin') or (request.user and request.user.is_authenticated and request.user.role == 'User'):
-            if request.method in permissions.SAFE_METHODS:
-                return True
+        if request.method in permissions.SAFE_METHODS:
+            return True
         # # This is custom permission on role bases
         return request.user and request.user.is_authenticated and request.user.role == 'Admin' 
 
@@ -35,12 +34,12 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         """
         # Read permissions are allowed for any request,
         # so we'll always allow GET, HEAD, or OPTIONS requests
-        if (request.user and request.user.is_authenticated and request.user.role == 'Super Admin') or (request.user and request.user.is_authenticated and request.user.role == 'User'):
-            if request.method in permissions.SAFE_METHODS:
-                return True
+        if request.method in permissions.SAFE_METHODS:
+            return True
         
         # # Write permissions are only allowed if the user is an admin and the object's company is the same as the user's
         if request.user.role == "Admin":
+            print(request.user)
             admin = AdminUser.objects.get(admin=request.user)
             print(str(obj.company.id), str(admin.company.id))
             if str(obj.company.id) == str(admin.company.id):
@@ -50,6 +49,7 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         
         if request.user.role == "User":
             user = request.user
+            print(user)
             team_member = user.team_member.all()
             user_departments = Departments.objects.filter(users__in=team_member, is_active=True)
             print(obj.company.id)
