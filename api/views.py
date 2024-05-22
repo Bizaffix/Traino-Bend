@@ -304,7 +304,7 @@ class DepartmentListApiView(ListAPIView):
         if (self.request.user.role == "Admin"):
             company_id = self.request.query_params.get('company_id', None)
             # print(company_id)
-            admin = AdminUser.objects.get(admin=self.request.user, is_active=True)
+            admin = AdminUser.objects.get(admin=self.request.user)
             queryset = Departments.objects.filter(is_active=True)
             # print(admin.company.id)
             # print(str(company_id) == str(admin.company.id))
