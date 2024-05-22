@@ -316,18 +316,12 @@ class DepartmentListApiView(ListAPIView):
             # print(admin.is_active)
             # print(str(company_id) == str(admin.company.id))
             if str(company_id) == str(admin.company.id):
-                if queryset is not None:
-                    print("in queryset",queryset)
-                    if admin.is_active==True:
-                        print("admin found")
-                        if company_id is not None:
-                            queryset = queryset.filter(company__id=company_id)
-                        return queryset
-                        print("data found")
-                    else:
-                        raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"})
+                if admin.is_active==True:
+                    if queryset is not None and company_id is not None:
+                        queryset = queryset.filter(company__id=company_id)
+                    return queryset
                 else:
-                    raise serializers.ValidationError({"No Record Found":"No Data Found"})
+                        raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"})
             else:
                 raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"})
         # elif (self.request.user.role == "User"):
