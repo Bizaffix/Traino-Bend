@@ -422,7 +422,7 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
         department_id = self.request.data.get('department')
         name = self.request.data.get('name')
         try:
-            company_name = DepartmentsDocuments.objects.get(name=name)
+            company_name = DepartmentsDocuments.objects.get(name=name, is_active=True)
             if company_name:
                 raise serializers.ValidationError(
                     {"Document Exists": f"Document of this name {name} already exists"})
@@ -435,11 +435,13 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
         
 from rest_framework import serializers
 from rest_framework.filters import SearchFilter, OrderingFilter 
+import logging
 
+logger = logging.getLogger(__name__)
 
 class DepartmentsDocumentsListAPIView(generics.ListAPIView):
     serializer_class = DepartmentsDocumentsSerializer
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']
@@ -449,37 +451,71 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        logger.debug(f"User: {user}, Role: {user.role}")
+        print(f"User: {user}, Role: {user.role}")
         department_id = self.request.query_params.get('department_id', None)
-
+        try:
         # Query based on the user role
-        if user.role in ["Super Admin", "Admin"]:
-            # Super Admin and Admin can view documents based on the department_id query parameter
-            queryset = DepartmentsDocuments.objects.filter(is_active=True)
-            if user.role == "Admin":
+            if user.role in ["Super Admin", "Admin"]:
+                # Super Admin and Admin can view documents based on the department_id query parameter
+                queryset = DepartmentsDocuments.objects.filter(is_active=True)
+                if user.role == "Admin":
+                    try:
+                        # Get the company associated with the admin
+                        admin_company = AdminUser.objects.get(admin=user, is_active=True).company
+                        # Filter documents by departments that are in the admin's company
+                        queryset = queryset.filter(department__company=admin_company)
+                    except AdminUser.DoesNotExist:
+                        raise serializers.ValidationError({"Account Error": "Your Account is Restricted. You cannot perform this request."})
+
+                return queryset
+
+            if user.role == "User":
                 try:
-                    # Get the company associated with the admin
-                    admin_company = AdminUser.objects.get(admin=user, is_active=True).company
-                    # Filter documents by departments that are in the admin's company
-                    queryset = queryset.filter(department__company=admin_company)
-                except AdminUser.DoesNotExist:
-                    raise serializers.ValidationError({"Account Error": "Your Account is Restricted. You cannot perform this request."})
+                    user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+                    user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
+                    queryset = DepartmentsDocuments.objects.filter(department__in=user_departments, is_active=True)
+                    if department_id:
+                        queryset = queryset.filter(department__id=department_id)
+                    if not queryset.exists():
+                        raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."}, code="data_not_found")
+                    return queryset
+                except CompaniesTeam.DoesNotExist:
+                    raise serializers.ValidationError({"Account Restriction": "You are not authorized to perform this task"}, code="account_restriction")
 
-            return queryset
-
-        elif user.role == "User":
-            # Get the departments associated with the user through the CompaniesTeam relationship
-            user_teams = user.team_member.all()  # Use the correct related name
-            user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
+            raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized")
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            raise
             
-            queryset = DepartmentsDocuments.objects.filter(department__in=user_departments, is_active=True)
-            if department_id:
-                queryset = queryset.filter(department__id=department_id)
-            if not queryset.exists():
-                raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."})
-            return queryset
+    def handle_exception(self, exc):
+        if isinstance(exc, serializers.ValidationError):
+            return Response({"detail": exc.detail, "code": exc.get_codes()}, status=status.HTTP_400_BAD_REQUEST)
+        return super().handle_exception(exc)
 
-        else:
-            raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."})
+        # if user.role == "User":
+        #     # Get the departments associated with the user through the CompaniesTeam relationship
+        #     user = CompaniesTeam.objects.filter(members=user, is_active=True)
+        #     if user and department_id is not None:
+        #         user_department = Departments.objects.filter(users__in=user, is_active=True)
+        #         queryset = DepartmentsDocuments.objects.filter(department__in=user_department, is_active=True)
+        #         queryset = queryset.filter(department__id=department_id)
+        #         if not queryset.exists():
+        #             raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."}, status=status.HTTP_404_NOT_FOUND)
+        #         return queryset
+        #     raise serializers.ValidationError({"Account Restriction": "You are not authorized to perform this task"})
+            # user_teams = user.team_member.all()  # Use the correct related name
+            # user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
+            
+            # queryset = DepartmentsDocuments.objects.filter(department__in=user_departments, is_active=True)
+            # if department_id:
+            #     queryset = queryset.filter(department__id=department_id)
+            # if not queryset.exists():
+            #     raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."})
+            # return queryset
+
+        # else:
+        #     raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."})
     
 class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)

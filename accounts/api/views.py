@@ -130,10 +130,10 @@ class LoginAPIView(APIView):
                     else:
                         return Response({"Not Found":"No Account Found against these credentials"})
                 elif serializer.data['role'] == 'User':
-                    user = CompaniesTeam.objects.get(members=serializer.data['id'])
+                    user_company = CompaniesTeam.objects.get(members=serializer.data['id'])
                     # print(user.company.id)
                     # print(user.company.name)
-                    if user.is_active==True:
+                    if user_company.is_active==True:
                         refresh = RefreshToken.for_user(user)
                         token = {
                             'refresh': str(refresh),
@@ -146,8 +146,8 @@ class LoginAPIView(APIView):
                             'phone': serializer.data['phone'],
                             'email': serializer.data['email'],
                             'role': serializer.data['role'],
-                            'company_id':str(user.company.id),
-                            'company_name':str(user.company.name),
+                            'company_id':str(user_company.company.id),
+                            'company_name':str(user_company.company.name),
                             'created_at': serializer.data['created_at'],
                         }
                     else:

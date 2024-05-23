@@ -22,7 +22,7 @@ class CompanyCreateApiView(CreateAPIView):
     def perform_create(self, serializer):
         name = self.request.data.get('name')
         try:
-            company_name = company.objects.filter(name=name)
+            company_name = company.objects.filter(name=name, is_active=True)
             if company_name:
                 raise serializers.ValidationError(
                     {"Company Exists": f"Company with this name {name} already exists"})

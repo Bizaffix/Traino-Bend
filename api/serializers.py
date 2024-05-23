@@ -272,3 +272,23 @@ class ReadOnlyDocumentKeypointsSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocumentKeyPoints
         fields = ['id', 'content', 'prompt_text', 'document', 'created_date', 'updated_at', 'added_by']    
+
+
+from teams.models import CompaniesTeam
+
+
+class AddUserToDepartmentSerializer(serializers.Serializer):
+    user_id = serializers.PrimaryKeyRelatedField(queryset=CompaniesTeam.objects.filter(is_active=True))
+    department_id = serializers.PrimaryKeyRelatedField(queryset=Departments.objects.filter(is_active=True))
+    
+    def validate(self, data):
+        user = data['user_id']
+        department = data['department_id']
+        if user in department.users.filter(is_active=True):
+            raise serializers.ValidationError("User is already in this department.")
+        return data
+
+    def update(self, instance, validated_data):
+        user = validated_data['user_id']
+        instance.users.add(user)
+        return instance

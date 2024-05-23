@@ -2,8 +2,7 @@ from django.urls import path, include
 from api import views
 from rest_framework.routers import DefaultRouter
 from djoser.views import UserViewSet
-from .views import DepartmentCreateApiview, DepartmentListApiView , DepartmentRetrieveApiView, CompanyDepartmentsListAPIView
-
+from .views import DepartmentCreateApiview, DepartmentListApiView , DepartmentRetrieveApiView, CompanyDepartmentsListAPIView , AddUserToDepartmentView
 
 router = DefaultRouter()
 
@@ -13,6 +12,7 @@ router.register('summary', views.DocumentSummaryModelViewSet, basename="company_
 router.register('keypoints', views.DocumentKeyPointsModelViewSet, basename="company_document_keypoints_api")
 
 urlpatterns = [
+    path('asign-user-department/', AddUserToDepartmentView.as_view(), name='add_user_to_department'),
     path('create-department/', DepartmentCreateApiview.as_view(), name='department-create'),
     path('department/<str:id>/', DepartmentRetrieveApiView.as_view(), name='department-RUD'),
     path('departments/', DepartmentListApiView.as_view(), name='departments-List'),

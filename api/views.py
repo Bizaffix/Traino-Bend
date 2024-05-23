@@ -226,7 +226,7 @@ class DepartmentCreateApiview(CreateAPIView):
         company_id_from_request = self.request.data.get('company')
         name = self.request.data.get('name')
         try:
-            company_name = Departments.objects.get(name=name)
+            company_name = Departments.objects.get(name=name, is_active=True)
             if company_name:
                 raise serializers.ValidationError(
                     {"Department Exists": f"Department with this name {name} already exists"})
@@ -324,18 +324,18 @@ class DepartmentListApiView(ListAPIView):
                         raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"})
             else:
                 raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"})
-        # elif (self.request.user.role == "User"):
-        #     user = self.request.user
-        #     company_id = self.request.query_params.get('company_id', None)
-        #     print(company_id)
-        #     user_teams = CompaniesTeam.objects.get(members=user.id, is_active=True)
-        #     user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
-        #     queryset = Departments.objects.filter(id__in=user_departments)
-        #     if company_id:
-        #         queryset = queryset.filter(company__id=company_id)
-        #         return queryset
-        #     else:
-        #         raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments"}, status=status.HTTP_403_FORBIDDEN)
+        elif self.request.user.role == "User":
+            user = self.request.user
+            company_id = self.request.query_params.get('company_id', None)
+            try:
+                user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+                user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
+                queryset = user_departments.distinct()
+                if company_id:
+                    queryset = queryset.filter(company__id=company_id)
+                return queryset
+            except CompaniesTeam.DoesNotExist:
+                raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
         else:
             queryset = Departments.objects.filter(is_active=True)
             company_id = self.request.query_params.get('company_id', None)
@@ -542,7 +542,27 @@ class DocumentModelViewSet(viewsets.ModelViewSet):
 
 # from openai import OpenAI
 import openai
+from .serializers import AddUserToDepartmentSerializer
+from .permissions import IsAdminUserAndSameCompany
 
+class AddUserToDepartmentView(APIView):
+    permission_classes =[IsAdminUserAndSameCompany]
+    
+    def post(self, request, *args, **kwargs):
+        request_user = self.request.user
+        admin = AdminUser.objects.get(admin=request_user)
+        if request_user.role == "Admin" and admin.is_active==True:
+            serializer = AddUserToDepartmentSerializer(data=request.data)
+            if serializer.is_valid():
+                department = serializer.validated_data['department_id']
+                user = serializer.validated_data['user_id']
+                department.users.add(user)
+                department.save()
+                return Response({"detail": "User added to department successfully."}, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"Account Restricted": "Your account is Restricted. You cannot perform this task"}, status=status.HTTP_401_UNAUTHORIZED)
+            
 class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
     queryset = DocumentSummary.objects.all()
     serializer_class = DocumentSummarySerializer
