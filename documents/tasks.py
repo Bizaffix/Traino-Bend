@@ -1,3 +1,5 @@
+# documents/tasks.py
+from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 from django.utils import timezone
 from departments.models import DepartmentsDocuments

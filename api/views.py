@@ -24,8 +24,8 @@ from PyPDF2 import PdfReader
 from company.models import AdminUser
 from teams.models import CompaniesTeam
 from langchain.prompts import PromptTemplate
-openai_api_key = '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'
-os.environ['OPENAI_API_KEY'] = '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'
+openai_api_key =  'sk-proj-5m3pZh3gAS9jirwIgprkT3BlbkFJZOesj9cbny2zc18nvQXo'#'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'
+os.environ['OPENAI_API_KEY'] = 'sk-proj-5m3pZh3gAS9jirwIgprkT3BlbkFJZOesj9cbny2zc18nvQXo'#'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'
 from departments.models import DepartmentsDocuments
 
 
@@ -567,7 +567,7 @@ from PyPDF2 import PdfReader
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from departments.models import DepartmentsDocuments
-
+from django.shortcuts import get_object_or_404
 
 class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
     queryset = DocumentSummary.objects.all()
@@ -606,19 +606,44 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.role == "Admin":
             try:
+                document_id = self.request.data.get('document')
+                prompt_text = self.request.data.get('prompt_text', "Summarize the following document:")
                 admin_user = AdminUser.objects.get(admin=user, is_active=True)
                 company = admin_user.company_id
-                requested_company_id = serializer.validated_data.get('company')
-                if requested_company_id.id != company:
+                requested_company_id = self.request.data.get('company')
+                print(company)
+                print(requested_company_id)
+                print(str(requested_company_id) != str(company))
+                if str(requested_company_id) != str(company):
                     raise serializers.ValidationError("You can only create summaries for your own company.")
                 
-                document_id = serializer.validated_data.get('document')
-                document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+                
+                # document_id = serializer.validated_data.get('document')
+                print(document_id)
+                document = get_object_or_404(DepartmentsDocuments, id=document_id)
                 document_content = self.extract_document_content(document)
-
+                max_input_tokens = 2048  # Example limit
+                truncated_content = self.truncate_content(document_content, max_input_tokens)
+                # Now you have the document content, use it to generate the summary
+                summary = self.generate_summary(truncated_content, prompt_text)
+                # file_data = document.file.read()
+                # print(file_data)
+                # document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+                
                 # Use OpenAI to create summary
-                summary = self.generate_summary(document_content)
-                serializer.save(added_by=user, content=document_content, summary=summary, document=document)
+                summary = self.generate_summary(truncated_content, prompt_text)
+                serializer = DocumentSummarySerializer(data={
+                    'content': summary,
+                    'company': requested_company_id,
+                    'document': document_id,
+                    'prompt_text': prompt_text
+                })
+                if serializer.is_valid():
+                    serializer.save(added_by=self.request.user)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
                 
             except AdminUser.DoesNotExist:
                 raise serializers.ValidationError("Admin user not found.")
@@ -641,15 +666,24 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
         else:
             raise serializers.ValidationError("You do not have permission to update this summary.")
 
+    def truncate_content(self, content, max_tokens):
+        # Implement your token counting logic here
+        # This is a simple example that cuts off the content at max_tokens characters
+        if len(content) > max_tokens:
+            return content[:max_tokens]
+        return content
 
-    def generate_summary(self, content):
+    def generate_summary(self, content, prompt_text):
         openai.api_key = openai_api_key
-        response = openai.Completion.create(
-            engine="gpt-3.5-turbo",
-            prompt=f"Summarize the following document:\n\n{content}",
-            max_tokens=150
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"{prompt_text}\n\n{content}"}
+            ],
+            max_tokens=150  # Adjust this as necessary
         )
-        summary = response.choices[0].text.strip()
+        summary = response.choices[0].message['content'].strip()
         return summary
 
     def extract_document_content(self, document):

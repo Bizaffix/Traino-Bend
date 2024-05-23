@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+# traino_local/settings.py
+from __future__ import absolute_import, unicode_literals
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -227,6 +228,15 @@ DJOSER = {
         'password_changed_confirmation': 'api.email.PasswordChangedConfirmationEmail',
     },
 }
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # or your broker URL
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # or your result backend URL
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
 
 # Simple JWT Settings
 

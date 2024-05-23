@@ -36,7 +36,7 @@ class CompaniesTeamSerializer(serializers.ModelSerializer):
     
     
 class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
-    member_email = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
     company = serializers.SerializerMethodField()
     first_name = serializers.SerializerMethodField()
     last_name = serializers.SerializerMethodField()
@@ -48,7 +48,7 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
         model = CompaniesTeam
         fields = "__all__"
         
-    def get_member_email(self , obj):
+    def get_email(self , obj):
         return obj.members.email
     
     def get_company(self , obj):

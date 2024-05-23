@@ -90,8 +90,8 @@ class AdminUpdateDeleteSerializer(serializers.ModelSerializer):
         return obj.company.name
     
 class CompanySerializer(serializers.ModelSerializer):
-    departments = serializers.SerializerMethodField(read_only=True)
-    admin = serializers.SerializerMethodField(read_only=True)
+    # departments = serializers.SerializerMethodField(read_only=True)
+    # admin = serializers.SerializerMethodField(read_only=True)
     id = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = company
@@ -100,15 +100,15 @@ class CompanySerializer(serializers.ModelSerializer):
     def get_id(self , obj):
         return obj.id
     
-    def get_admin(self, obj):
-        admins = AdminUser.objects.prefetch_related('company').filter(company=obj, is_active=True)
-        serializer = AdminSerializer(admins, many=True)
-        return serializer.data
+    # def get_admin(self, obj):
+    #     admins = AdminUser.objects.prefetch_related('company').filter(company=obj, is_active=True)
+    #     serializer = AdminSerializer(admins, many=True)
+    #     return serializer.data
     
-    def get_departments(self, obj):
-        admins = Departments.objects.prefetch_related('company').filter(company=obj)
-        serializer = DepartmentSerializers(admins, many=True)
-        return serializer.data
+    # def get_departments(self, obj):
+    #     admins = Departments.objects.prefetch_related('company').filter(company=obj)
+    #     serializer = DepartmentSerializers(admins, many=True)
+    #     return serializer.data
     
     
 class CompaniesListSerializer(serializers.ModelSerializer):

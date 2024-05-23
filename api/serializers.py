@@ -45,7 +45,7 @@ class DepartmentRUDSerializers(serializers.ModelSerializer):
     id = serializers.SerializerMethodField(read_only=True)
     company = serializers.SerializerMethodField()
     added_by = serializers.SerializerMethodField()
-    users = serializers.SerializerMethodField()
+    # users = serializers.SerializerMethodField()
     class Meta:
         model = Departments
         fields ='__all__'
@@ -59,8 +59,8 @@ class DepartmentRUDSerializers(serializers.ModelSerializer):
     def get_added_by(self, obj):
         return obj.added_by.email
     
-    def get_users(self, obj):
-        return [user.members.email for user in obj.users.all()]
+    # def get_users(self, obj):
+    #     return [user.members.email for user in obj.users.all()]
 
 class CompanyDepartmentsListSerializers(serializers.ModelSerializer):
     class Meta:
@@ -85,11 +85,10 @@ class CompanyDepartmentsSerializers(serializers.ModelSerializer):
 
 class DepartmentListSerializers(serializers.ModelSerializer):
     id = serializers.SerializerMethodField(read_only=True)
-    company = serializers.SerializerMethodField()
     added_by = serializers.SerializerMethodField()
-    users = serializers.SerializerMethodField()
+    # users = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField(read_only=True)
-    documents = serializers.SerializerMethodField(read_only=True)
+    # documents = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Departments
         fields ='__all__'
@@ -98,22 +97,18 @@ class DepartmentListSerializers(serializers.ModelSerializer):
         return obj.id
     
     
-
-    def get_company(self , obj):
-        return obj.company.name
-    
     def get_added_by(self, obj):
         return obj.added_by.email
     
-    def get_users(self, obj):
-        # Retrieve emails of users associated with the department
-        # users_emails = [user.email for user in obj.customuser_set.all()]  
-        return [user.members.email for user in obj.users.all()]
+    # def get_users(self, obj):
+    #     # Retrieve emails of users associated with the department
+    #     # users_emails = [user.email for user in obj.customuser_set.all()]  
+    #     return [user.members.email for user in obj.users.all()]
 
-    def get_documents(self, obj):
-        admins = DepartmentsDocuments.objects.prefetch_related('department').filter(department=obj, is_active=True)
-        serializer = DepartmentsDocumentsSerializer(admins, many=True)
-        return serializer.data    
+    # def get_documents(self, obj):
+    #     admins = DepartmentsDocuments.objects.prefetch_related('department').filter(department=obj, is_active=True)
+    #     serializer = DepartmentsDocumentsSerializer(admins, many=True)
+    #     return serializer.data    
     
     def get_created_at(self ,obj):
         return obj.created_at
@@ -195,13 +190,14 @@ class DocumentSummarySerializer(serializers.ModelSerializer):
     added_by = UserCreateSerializer(many=False, read_only=True)
     document = serializers.UUIDField(write_only=True)
     file = serializers.FileField(write_only=True)
-    created_at = serializers.SerializerMethodField(read_only=True)
+    # created_at = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = DocumentSummary
-        fields = ['id', 'content', 'company', 'prompt_text', 'document', 'created_at', 'updated_at', 'added_by', 'file']
+        fields = ['id', 'content', 'company', 'prompt_text', 'document', 'updated_at', 'added_by', 'file']
 
     def validate_prompt_text(self, value):
-        if self.context['request'].method in ['PUT', 'PATCH', 'POST'] and not value.strip():
+        request = self.context.get('request')
+        if request and request.method in ['PUT', 'PATCH', 'POST'] and not value.strip():
             value = 'concise summary'
         return value
     
@@ -238,8 +234,7 @@ class DocumentSummarySerializer(serializers.ModelSerializer):
     #     )
     #     summary = response.choices[0].text.strip()
     #     return summary
-    def get_created_at(self , obj):
-        return obj.created_at
+
 class DocumentKeyPointsSerializer(serializers.ModelSerializer):
     added_by = UserCreateSerializer(many=False, read_only=True)
 
