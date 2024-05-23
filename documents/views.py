@@ -412,25 +412,54 @@ def generateDocumentQuiz(request):
     return JsonResponse(data, status=200)
 
 
+from django.utils import timezone
+from .tasks import upload_document
+
 class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     serializer_class = DepartmentsDocumentsCreateSerializer
-    permission_classes = [IsAdminUserOrReadOnly, IsAdminUserOfCompany]
+    permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
 
     def perform_create(self, serializer):
-        department_id = self.request.data.get('department')
-        name = self.request.data.get('name')
-        try:
-            company_name = DepartmentsDocuments.objects.get(name=name, is_active=True)
-            if company_name:
-                raise serializers.ValidationError(
-                    {"Document Exists": f"Document of this name {name} already exists"})
-        except DepartmentsDocuments.DoesNotExist:
-            # User does not exist, so continue with user creation
-            pass
-        department = Departments.objects.get(id=department_id)
-        serializer.save(added_by=self.request.user, department=department)
+        documents = serializer.save(added_by=self.request.user)
+        schedule_time = serializer.validated_data.get('schedule_time', timezone.now())
+
+        for document in documents:
+            if schedule_time > timezone.now():
+                upload_document.apply_async((document.id,), eta=schedule_time)
+
+        return documents
+
+    def create(self, request, *args, **kwargs):
+        # print(request.data)  # Debugging line to check input data
+        name = request.data.get('name')
+        document = DepartmentsDocuments.objects.filter(name=name, is_active=True)
+        if document:
+            raise serializers.ValidationError({"Document Exists":f"Document with name {name} already exists"})
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        documents = self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        response_data = {
+            "message": "Documents created successfully.",
+            "documents": [doc.id for doc in documents]
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    # def perform_create(self, serializer):
+    #     department_id = self.request.data.get('department')
+    #     name = self.request.data.get('name')
+    #     try:
+    #         company_name = DepartmentsDocuments.objects.get(name=name, is_active=True)
+    #         if company_name:
+    #             raise serializers.ValidationError(
+    #                 {"Document Exists": f"Document of this name {name} already exists"})
+    #     except DepartmentsDocuments.DoesNotExist:
+    #         # User does not exist, so continue with user creation
+    #         pass
+    #     department = Departments.objects.get(id=department_id)
+    #     serializer.save(added_by=self.request.user, department=department)
 
         
 from rest_framework import serializers
@@ -492,30 +521,6 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
         if isinstance(exc, serializers.ValidationError):
             return Response({"detail": exc.detail, "code": exc.get_codes()}, status=status.HTTP_400_BAD_REQUEST)
         return super().handle_exception(exc)
-
-        # if user.role == "User":
-        #     # Get the departments associated with the user through the CompaniesTeam relationship
-        #     user = CompaniesTeam.objects.filter(members=user, is_active=True)
-        #     if user and department_id is not None:
-        #         user_department = Departments.objects.filter(users__in=user, is_active=True)
-        #         queryset = DepartmentsDocuments.objects.filter(department__in=user_department, is_active=True)
-        #         queryset = queryset.filter(department__id=department_id)
-        #         if not queryset.exists():
-        #             raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."}, status=status.HTTP_404_NOT_FOUND)
-        #         return queryset
-        #     raise serializers.ValidationError({"Account Restriction": "You are not authorized to perform this task"})
-            # user_teams = user.team_member.all()  # Use the correct related name
-            # user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
-            
-            # queryset = DepartmentsDocuments.objects.filter(department__in=user_departments, is_active=True)
-            # if department_id:
-            #     queryset = queryset.filter(department__id=department_id)
-            # if not queryset.exists():
-            #     raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."})
-            # return queryset
-
-        # else:
-        #     raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."})
     
 class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)

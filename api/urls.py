@@ -7,7 +7,7 @@ from .views import DepartmentCreateApiview, DepartmentListApiView , DepartmentRe
 router = DefaultRouter()
 
 router.register('myTeams', views.CompanyTeamModelViewSet, basename="company_team_api")
-router.register('myLearnings', views.DocumentModelViewSet, basename="company_document_api")
+# router.register('myLearnings', views.DocumentModelViewSet, basename="company_document_api")
 router.register('summary', views.DocumentSummaryModelViewSet, basename="company_document_summary_api")
 router.register('keypoints', views.DocumentKeyPointsModelViewSet, basename="company_document_keypoints_api")
 

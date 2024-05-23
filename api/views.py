@@ -403,141 +403,141 @@ class CompanyTeamModelViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-class DocumentModelViewSet(viewsets.ModelViewSet):
-    queryset = UserDocuments.objects.all()
-    serializer_class = DocumentSerializer
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-    filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name', 'id', 'company__name']
-    ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
-    ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
+# class DocumentModelViewSet(viewsets.ModelViewSet):
+#     queryset = UserDocuments.objects.all()
+#     serializer_class = DocumentSerializer
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAuthenticated]
+#     filter_backends = [SearchFilter, OrderingFilter]
+#     search_fields = ['name', 'id', 'company__name']
+#     ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
+#     ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
 
 
-    def get_queryset(self):
-        return UserDocuments.objects.filter(company_id=self.request.user.id)
+#     def get_queryset(self):
+#         return UserDocuments.objects.filter(company_id=self.request.user.id)
 
-    def create(self, request, *args, **kwargs):
-        # request.data['company'] = self.request.user.pk
-        # request.data['added_by'] = self.request.user.pk
-        if 'published' in request.data:
-            request.data.pop('published')
-        request.data['published'] = 0
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.validated_data['company'] = self.request.user
-        serializer.validated_data['added_by'] = self.request.user
+#     def create(self, request, *args, **kwargs):
+#         # request.data['company'] = self.request.user.pk
+#         # request.data['added_by'] = self.request.user.pk
+#         if 'published' in request.data:
+#             request.data.pop('published')
+#         request.data['published'] = 0
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.validated_data['company'] = self.request.user
+#         serializer.validated_data['added_by'] = self.request.user
         
-        validated_data = serializer.validated_data
-        new_document = UserDocuments.objects.create(name = validated_data['name'], file = validated_data['file'], company_id = self.request.user.pk, added_by_id = self.request.user.pk)
-        new_document.save()
+#         validated_data = serializer.validated_data
+#         new_document = UserDocuments.objects.create(name = validated_data['name'], file = validated_data['file'], company_id = self.request.user.pk, added_by_id = self.request.user.pk)
+#         new_document.save()
         
-        department_ids = request.data['department'].split(',')
-        for department_id in department_ids:
-            department_object = Departments.objects.get(pk= int(department_id))
-            new_document.department.add(department_object)
-            user_teams = CompanyTeam.objects.filter(company_id = self.request.user.id, department_id = department_object.id ).order_by('first_name')
-            for user_team in user_teams:
-                assignDocumentToUser(user_team, new_document, department_object)
+#         department_ids = request.data['department'].split(',')
+#         for department_id in department_ids:
+#             department_object = Departments.objects.get(pk= int(department_id))
+#             new_document.department.add(department_object)
+#             user_teams = CompanyTeam.objects.filter(company_id = self.request.user.id, department_id = department_object.id ).order_by('first_name')
+#             for user_team in user_teams:
+#                 assignDocumentToUser(user_team, new_document, department_object)
         
-        serializer = ReadOnlyDocumentSerializer(new_document)
-        headers = self.get_success_headers(serializer.data)
+#         serializer = ReadOnlyDocumentSerializer(new_document)
+#         headers = self.get_success_headers(serializer.data)
 
-        try:
-            dq = DocumentQuiz.objects.get(document_id=new_document.id)
-        except DocumentQuiz.DoesNotExist:
-            dq = None
+#         try:
+#             dq = DocumentQuiz.objects.get(document_id=new_document.id)
+#         except DocumentQuiz.DoesNotExist:
+#             dq = None
         
-        try:
-            ds = DocumentSummary.objects.get(document_id=new_document.id)
-        except DocumentSummary.DoesNotExist:
-            ds = None
+#         try:
+#             ds = DocumentSummary.objects.get(document_id=new_document.id)
+#         except DocumentSummary.DoesNotExist:
+#             ds = None
         
-        try:
-            dkp = DocumentKeyPoints.objects.get(document_id=new_document.id)
-        except DocumentKeyPoints.DoesNotExist:
-            dkp = None
+#         try:
+#             dkp = DocumentKeyPoints.objects.get(document_id=new_document.id)
+#         except DocumentKeyPoints.DoesNotExist:
+#             dkp = None
 
-        if dq is None:
-            dq = DocumentQuiz(name=str(new_document.name), prompt_text='25 multiple choice questions', company = self.request.user, content='', document_id= str(new_document.id), added_by_id= str(self.request.user.id))
-            dq.save()
-        if ds is None:
-            ds = DocumentSummary(content='', prompt_text='concise summary', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
-            ds.save()
-        if dkp is None:
-            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
-            dkp.save()
+#         if dq is None:
+#             dq = DocumentQuiz(name=str(new_document.name), prompt_text='25 multiple choice questions', company = self.request.user, content='', document_id= str(new_document.id), added_by_id= str(self.request.user.id))
+#             dq.save()
+#         if ds is None:
+#             ds = DocumentSummary(content='', prompt_text='concise summary', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
+#             ds.save()
+#         if dkp is None:
+#             dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
+#             dkp.save()
 
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)  
+#         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)  
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        department_ids = ''
-        if 'department' in request.data:
-            department_ids = request.data['department']
-            request.data.pop('department')
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
+#     def update(self, request, *args, **kwargs):
+#         partial = kwargs.pop('partial', False)
+#         department_ids = ''
+#         if 'department' in request.data:
+#             department_ids = request.data['department']
+#             request.data.pop('department')
+#         instance = self.get_object()
+#         serializer = self.get_serializer(instance, data=request.data, partial=partial)
+#         serializer.is_valid(raise_exception=True)
 
-        self.perform_update(serializer)
+#         self.perform_update(serializer)
         
-        if department_ids is not None:
-            for doc_dept in instance.department.all():
-               instance.department.remove(doc_dept) 
-            department_ids = department_ids.split(',')
-            for department_id in department_ids:
-                department_object = Departments.objects.get(pk= int(department_id))
-                instance.department.add(department_object)
-                user_teams = CompanyTeam.objects.filter(company_id = self.request.user.id, department_id = department_object.id ).order_by('first_name')
-                for user_team in user_teams:
-                    assignDocumentToUser(user_team, instance, department_object)
+#         if department_ids is not None:
+#             for doc_dept in instance.department.all():
+#                instance.department.remove(doc_dept) 
+#             department_ids = department_ids.split(',')
+#             for department_id in department_ids:
+#                 department_object = Departments.objects.get(pk= int(department_id))
+#                 instance.department.add(department_object)
+#                 user_teams = CompanyTeam.objects.filter(company_id = self.request.user.id, department_id = department_object.id ).order_by('first_name')
+#                 for user_team in user_teams:
+#                     assignDocumentToUser(user_team, instance, department_object)
         
-        serializer = ReadOnlyDocumentSerializer(instance)
+#         serializer = ReadOnlyDocumentSerializer(instance)
 
-        try:
-            dq = DocumentQuiz.objects.get(document_id=instance.id)
-        except DocumentQuiz.DoesNotExist:
-            dq = None
+#         try:
+#             dq = DocumentQuiz.objects.get(document_id=instance.id)
+#         except DocumentQuiz.DoesNotExist:
+#             dq = None
         
-        try:
-            ds = DocumentSummary.objects.get(document_id=instance.id)
-        except DocumentSummary.DoesNotExist:
-            ds = None
+#         try:
+#             ds = DocumentSummary.objects.get(document_id=instance.id)
+#         except DocumentSummary.DoesNotExist:
+#             ds = None
         
-        try:
-            dkp = DocumentKeyPoints.objects.get(document_id=instance.id)
-        except DocumentKeyPoints.DoesNotExist:
-            dkp = None
+#         try:
+#             dkp = DocumentKeyPoints.objects.get(document_id=instance.id)
+#         except DocumentKeyPoints.DoesNotExist:
+#             dkp = None
         
-        if dq is None:
-            dq = DocumentQuiz(name=str(new_document.name), prompt_text='25 multiple choice questions', company = self.request.user, content='', document_id= str(new_document.id), added_by_id= str(self.request.user.id))
-            dq.save()
-        if ds is None:
-            ds = DocumentSummary(content='', prompt_text='concise summary', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
-            ds.save()
-        if dkp is None:
-            dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
-            dkp.save()
+#         if dq is None:
+#             dq = DocumentQuiz(name=str(new_document.name), prompt_text='25 multiple choice questions', company = self.request.user, content='', document_id= str(new_document.id), added_by_id= str(self.request.user.id))
+#             dq.save()
+#         if ds is None:
+#             ds = DocumentSummary(content='', prompt_text='concise summary', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
+#             ds.save()
+#         if dkp is None:
+#             dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company = self.request.user, document_id= str(new_document.id), added_by_id= str(self.request.user.id))
+#             dkp.save()
 
-        return Response(serializer.data)
+#         return Response(serializer.data)
     
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
+#     def list(self, request, *args, **kwargs):
+#         queryset = self.filter_queryset(self.get_queryset())
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = ReadOnlyDocumentSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+#         page = self.paginate_queryset(queryset)
+#         if page is not None:
+#             serializer = ReadOnlyDocumentSerializer(page, many=True)
+#             return self.get_paginated_response(serializer.data)
 
-        serializer = ReadOnlyDocumentSerializer(queryset, many=True)
-        return Response(serializer.data) 
+#         serializer = ReadOnlyDocumentSerializer(queryset, many=True)
+#         return Response(serializer.data) 
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = ReadOnlyDocumentSerializer(instance)
-        return Response(serializer.data) 
+#     def retrieve(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         serializer = ReadOnlyDocumentSerializer(instance)
+#         return Response(serializer.data) 
 
 
 # from openai import OpenAI
@@ -563,6 +563,12 @@ class AddUserToDepartmentView(APIView):
         else:
             return Response({"Account Restricted": "Your account is Restricted. You cannot perform this task"}, status=status.HTTP_401_UNAUTHORIZED)
             
+from PyPDF2 import PdfReader
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from departments.models import DepartmentsDocuments
+
+
 class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
     queryset = DocumentSummary.objects.all()
     serializer_class = DocumentSummarySerializer
@@ -603,43 +609,39 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
                 admin_user = AdminUser.objects.get(admin=user, is_active=True)
                 company = admin_user.company_id
                 requested_company_id = serializer.validated_data.get('company')
-                print(company)
-                print(requested_company_id.id)
                 if requested_company_id.id != company:
                     raise serializers.ValidationError("You can only create summaries for your own company.")
                 
+                document_id = serializer.validated_data.get('document')
+                document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+                document_content = self.extract_document_content(document)
+
                 # Use OpenAI to create summary
-                document_content = serializer.validated_data.get('content')
                 summary = self.generate_summary(document_content)
-                serializer.save(added_by=user, summary=summary)
+                serializer.save(added_by=user, content=document_content, summary=summary, document=document)
                 
             except AdminUser.DoesNotExist:
                 raise serializers.ValidationError("Admin user not found.")
+            except DepartmentsDocuments.DoesNotExist:
+                raise serializers.ValidationError("Document not found or is not active.")
         else:
             raise serializers.ValidationError("Only Admins can create document summaries.")
+
     
     def perform_update(self, serializer):
         user = self.request.user
         instance = self.get_object()
         if (user.role == "Admin" and instance.added_by == user):
-            document_content = serializer.validated_data.get('content', instance.content)
+            document_id = serializer.validated_data.get('document', instance.document.id)
+            document = DepartmentsDocuments.objects.get(id=document_id)
+            document_content = self.extract_document_content(document)
             summary = self.generate_summary(document_content)
-            serializer.save(summary=summary)
+            serializer.save(content=document_content, summary=summary)
             return serializer.data
         else:
             raise serializers.ValidationError("You do not have permission to update this summary.")
 
-    def perform_destroy(self, instance):
-        user = self.request.user
-        if (user.role == "Admin" and instance.added_by == user):
-            # instance.is_active = False
-            # instance.save()
-            obj_id = instance.id
-            instance.delete()
-            return Response({"Response":"Successfully Deleted the Summary.","id": obj_id})
-        else:
-            raise serializers.ValidationError("You do not have permission to delete this summary.")
-    
+
     def generate_summary(self, content):
         openai.api_key = openai_api_key
         response = openai.Completion.create(
@@ -650,15 +652,40 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
         summary = response.choices[0].text.strip()
         return summary
 
+    def extract_document_content(self, document):
+        if document.file.name.endswith('.pdf'):
+            with document.file.open('rb') as file:
+                reader = PdfReader(file)
+                content = ""
+                for page in reader.pages:
+                    content += page.extract_text()
+                return content
+        elif document.file.name.endswith('.txt'):
+            with document.file.open('r') as file:
+                return file.read()
+        else:
+            raise serializers.ValidationError("Unsupported file format.")
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        if (user.role == "Admin" and instance.added_by == user):
+            obj_id = instance.id
+            instance.delete()
+            return Response({"Response":"Successfully Deleted the Summary.","id": obj_id})
+        else:
+            raise serializers.ValidationError("You do not have permission to delete this summary.")
+    
+from PyPDF2 import PdfFileReader
+import os
 from .serializers import DocumentKeyPointsSerializer
 class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
     queryset = DocumentKeyPoints.objects.filter(is_active=True)
     serializer_class = DocumentKeyPointsSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
-    search_fields = ['id' ,'content', 'prompt_text','name', 'id', 'company__name', 'document__name']
-    ordering_fields = ['name' , 'id', 'company' , 'document' , 'created_at', 'updated_at']
-    ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']
+    search_fields = ['id', 'content', 'prompt_text', 'name', 'company__name', 'document__name']
+    ordering_fields = ['name', 'id', 'company', 'document', 'created_at', 'updated_at']
+    ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']
 
     def get_queryset(self):
         user = self.request.user
@@ -682,7 +709,7 @@ class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
             except CompaniesTeam.DoesNotExist:
                 raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
         else:
-            return Response({"Access Denied": "You are not authorized for this request"})
+            raise serializers.ValidationError({"Access Denied": "You are not authorized for this request"})
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -694,8 +721,10 @@ class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
                 if requested_company_id.id != company:
                     raise serializers.ValidationError("You can only create key points for your own company.")
                 
+                # Extract text from uploaded file
+                document_content = self.extract_text_from_file(serializer.validated_data.get('document'))
+                
                 # Use OpenAI to create key points
-                document_content = serializer.validated_data.get('content')
                 key_points = self.generate_key_points(document_content)
                 serializer.save(added_by=user, content=key_points)
                 
@@ -707,7 +736,7 @@ class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         user = self.request.user
         instance = self.get_object()
-        if (user.role == "Admin" and instance.added_by == user):
+        if user.role == "Admin" and instance.added_by == user:
             document_content = serializer.validated_data.get('content', instance.content)
             key_points = self.generate_key_points(document_content)
             serializer.save(content=key_points)
@@ -717,15 +746,48 @@ class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         user = self.request.user
-        if (user.role == "Admin" and instance.added_by == user):
-            # instance.is_active = False
-            # instance.save()
+        if user.role == "Admin" and instance.added_by == user:
             obj_id = instance.id
             instance.delete()
-            return Response({"Response":"Successfully Deleted the KeyPoints.","id": obj_id})
+            return Response({"Response": "Successfully Deleted the KeyPoints.", "id": obj_id})
         else:
             raise serializers.ValidationError("You do not have permission to delete these key points.")
     
+    def extract_text_from_file(self, file):
+        """
+        Extract text from the uploaded file (PDF or text file).
+        """
+        if file.name.endswith('.pdf'):
+            return self.extract_text_from_pdf(file)
+        elif file.name.endswith('.txt'):
+            return self.extract_text_from_text(file)
+        else:
+            raise serializers.ValidationError("Unsupported file format. Only PDF and text files are supported.")
+
+    def extract_text_from_pdf(self, file):
+        """
+        Extract text from a PDF file.
+        """
+        try:
+            with open(file.temporary_file_path(), 'rb') as f:
+                pdf_reader = PdfFileReader(f)
+                text = ''
+                for page_num in range(pdf_reader.numPages):
+                    text += pdf_reader.getPage(page_num).extractText()
+                return text
+        except Exception as e:
+            raise serializers.ValidationError("Failed to extract text from PDF file.")
+
+    def extract_text_from_text(self, file):
+        """
+        Extract text from a text file.
+        """
+        try:
+            with open(file.temporary_file_path(), 'r') as f:
+                return f.read()
+        except Exception as e:
+            raise serializers.ValidationError("Failed to read text from the text file.")
+
     def generate_key_points(self, content):
         openai.api_key = openai_api_key
         response = openai.Completion.create(
@@ -735,8 +797,6 @@ class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
         )
         key_points = response.choices[0].text.strip()
         return key_points
-
-
 # class DocumentKeypointsModelViewSet(viewsets.ModelViewSet):
 #     queryset = DocumentKeyPoints.objects.all()
 #     serializer_class = DocumentKeypointsSerializer

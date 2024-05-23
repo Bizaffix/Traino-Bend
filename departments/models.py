@@ -38,8 +38,9 @@ class DepartmentsDocuments(models.Model):
     REQUIRED_FIELDS = ['name', 'file', 'department']
 
     def __str__(self):
-        return self.name
-    
+        if self.name is not None:
+            return self.name
+        return "Data not found"
     class Meta:
         verbose_name = ("Company Document")
         verbose_name_plural = ("Company Documents")

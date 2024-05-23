@@ -6,7 +6,7 @@ from rest_framework.generics import (
     UpdateAPIView, DestroyAPIView
 )
 from rest_framework.views import APIView
-from .permissions import IsAdminUserOrReadOnly
+from .permissions import IsAdminUserOrReadOnly, IsAdminListOrReadOnly
 from rest_framework.permissions import IsAuthenticated , IsAdminUser
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
@@ -113,7 +113,7 @@ class AdminUserUpdateAndDeleteApiView(RetrieveAPIView,UpdateAPIView, DestroyAPIV
 class AdminListApiView(ListAPIView):
     serializer_class = AdminUpdateDeleteSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [IsAdminListOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['admin__first_name','admin__last_name', 'admin__email' , 'admin__role', 'admin__created_at', 'admin__updated_at', 'company__name']
     ordering_fields = ['admin__first_name','admin__last_name', 'admin__email' , 'admin__role', 'admin__created_at', 'admin__updated_at', 'company__name']
@@ -125,11 +125,25 @@ class AdminListApiView(ListAPIView):
         Optionally restricts the returned administrators to a given company,
         by filtering against a `company_id` query parameter in the URL.
         """
-        queryset = AdminUser.objects.filter(is_active=True)
-        company_id = self.request.query_params.get('company_id', None)
-        if company_id is not None:
-            queryset = queryset.filter(company__id=company_id)
-        return queryset
+        if self.request.user.role == 'Super Admin' or self.request.user.role == 'Admin': 
+            company_id = self.request.query_params.get('company_id', None)
+            if self.request.user.role == 'Admin':
+                admin = AdminUser.objects.get(admin=self.request.user, is_active=True)
+                if admin and str(company_id) == str(admin.company.id):
+                    queryset = AdminUser.objects.filter(is_active=True)
+                    if company_id:
+                        queryset = queryset.filter(company__id=company_id)
+                    return queryset
+                else:
+                    raise serializers.ValidationError({"Not Allowed":"You are not allowed"})
+            else:
+                queryset = AdminUser.objects.filter(is_active=True)
+                company_id = self.request.query_params.get('company_id', None)
+                if company_id is not None:
+                    queryset = queryset.filter(company__id=company_id)
+                return queryset    
+        else:
+            raise serializers.ValidationError({"Access Denied":"You are not allowed for this request"})
     
 class BulkAdminDeleteAPIView(APIView):
     permission_classes = [IsAdminUserOrReadOnly]

@@ -47,8 +47,9 @@ class DocumentSummary(models.Model):
     REQUIRED_FIELDS = ['prompt_text', 'document']
 
     def __str__(self):
-        return self.document.name
-    
+        if self.document.name is not None:
+            return self.document.name
+        return "Failed To load Name"
     class Meta:
         verbose_name = ("Summary")
         verbose_name_plural = ("Summary")

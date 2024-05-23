@@ -187,35 +187,59 @@ class ReadOnlyDocumentSerializer(serializers.ModelSerializer):
         model = UserDocuments
         fields = ['id', 'name', 'file', 'company', 'department', 'published', 'created_date', 'updated_at', 'added_by']
 
+import openai
+import PyPDF2
+from django.core.files.storage import default_storage
+openai_api_key = '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'
 class DocumentSummarySerializer(serializers.ModelSerializer):
     added_by = UserCreateSerializer(many=False, read_only=True)
-
-    def validate_prompt_text(self, value):
-        # Check if the request method is PUT, PATCH, or POST
-        if self.context['request'].method in ['PUT', 'PATCH', 'POST']:
-            # Check if prompt_text is empty
-            if not value.strip():
-                # If prompt_text is empty, set default value
-                value = 'concise summary'
-        return value    
-    
     document = serializers.UUIDField(write_only=True)
+    file = serializers.FileField(write_only=True)
+    created_at = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = DocumentSummary
-        fields = ['id', 'content', 'company','prompt_text', 'document', 'created_date', 'updated_at', 'added_by']
+        fields = ['id', 'content', 'company', 'prompt_text', 'document', 'created_at', 'updated_at', 'added_by', 'file']
 
+    def validate_prompt_text(self, value):
+        if self.context['request'].method in ['PUT', 'PATCH', 'POST'] and not value.strip():
+            value = 'concise summary'
+        return value
+    
     def create(self, validated_data):
         document_id = validated_data.pop('document', None)
         if document_id is None:
             raise serializers.ValidationError("document_id is required.")
 
-        document_summary = DocumentSummary.objects.create(document_id=document_id, **validated_data)
+        document_summary = DocumentSummary.objects.create(id=document_id, **validated_data)
         return document_summary
+    
+    # def extract_text(self, file):
+    #     if not file:
+    #         raise serializers.ValidationError("No file provided.")
 
-    def get_document(self, obj):
-        return obj.document.id
+    #     file_content = ""
+    #     if file.name.endswith('.pdf'):
+    #         reader = PyPDF2.PdfReader(file)
+    #         file_content = ''.join(page.extract_text() for page in reader.pages)
+    #     elif file.name.endswith('.txt'):
+    #         file_content = file.read().decode('utf-8')
+    #     else:
+    #         raise serializers.ValidationError("Unsupported file type. Please upload a PDF or TXT file.")
 
+    #     return file_content
 
+    # def generate_summary(self, content):
+    #     # This function assumes that you have imported openai and configured your API key
+    #     openai.api_key= openai_api_key
+    #     response = openai.Completion.create(
+    #         engine="gpt-3.5-turbo",
+    #         prompt=f"Summarize this document: {content}",
+    #         max_tokens=150
+    #     )
+    #     summary = response.choices[0].text.strip()
+    #     return summary
+    def get_created_at(self , obj):
+        return obj.created_at
 class DocumentKeyPointsSerializer(serializers.ModelSerializer):
     added_by = UserCreateSerializer(many=False, read_only=True)
 
