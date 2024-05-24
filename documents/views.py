@@ -426,8 +426,8 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
         schedule_time = serializer.validated_data.get('schedule_time', timezone.now())
 
         for document in documents:
-            if schedule_time > timezone.now():
-                upload_document.apply_async((document.id,), eta=schedule_time)
+            document.scheduled_time = schedule_time
+            document.save()
 
         return documents
 
@@ -437,6 +437,7 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
         document = DepartmentsDocuments.objects.filter(name=name, is_active=True)
         if document:
             raise serializers.ValidationError({"Document Exists":f"Document with name {name} already exists"})
+        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         documents = self.perform_create(serializer)

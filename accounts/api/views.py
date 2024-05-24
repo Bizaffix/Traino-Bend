@@ -14,8 +14,13 @@ from django.forms.models import model_to_dict
 from django.contrib.auth.hashers import make_password
 from .permissions import IsAdminUserOrReadOnly
 from rest_framework import serializers
+from company.api.serializers import AdminSerializer 
+from company.models import company
+from teams.api.serializers import CompaniesTeamSerializer
+from departments.models import Departments
+from django.urls import reverse
 from django.core.mail import send_mail
-
+from django.conf import settings
 
 class CustomUserCreateAPIView(CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -37,6 +42,7 @@ class CustomUserCreateAPIView(CreateAPIView):
         request.data['added_by'] = request.user.id
         new_user_role = request.data.get('role')
         email = request.data.get('email')
+        department_ids = request.data.get('department_ids', [])
         try:
             user_data = CustomUser.objects.get(email=email)
             if user_data:
@@ -49,9 +55,22 @@ class CustomUserCreateAPIView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save(password=make_password(password))
-        send_mail(
-            subject="Welcome to Traino-ai",
-            message=f'''Welcome to Traino-ai.
+        if new_user_role == 'Admin':
+            company_id = request.data.get('company')
+            if not company_id:
+                user.delete()
+                raise serializers.ValidationError({"Bad Request":"Company id is required"})
+            admin_data = {'email': email, 'company': company_id}
+            admin_create = AdminSerializer(data=admin_data)
+            if admin_create.is_valid(raise_exception=True):
+                admin_create.save()
+                if settings.DEBUG:
+                    login_url = 'http://127.0.0.1:8000/create-account/'
+                else:
+                    login_url = 'https://dashboard.traino.ai/signin'
+                send_mail(
+                subject="Welcome to Traino-ai",
+                message=f'''Welcome to Traino-ai.
 
 We're so excited to be working with you, and we want to be sure we start off on the right foot.
 Your email and password to access the Traino-ai portal is shown below.Please click here to sign-in.
@@ -60,14 +79,60 @@ Username: {email}
 Password: {password}
 Role: {new_user_role}
 
-Please log in and complete your profile.
+Please {login_url} and complete your profile.
+
+Regards
+Traino-ai.''',
+                from_email="no-reply@traino.ai",
+                recipient_list=[email],
+                fail_silently=False,
+                )
+            else:
+                user.delete()
+                return Response(admin_create.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif new_user_role == 'User':
+            company_id = request.data.get('company')
+            if not company_id:
+                user.delete()
+                raise serializers.ValidationError({"Bad Request":"Company id is required"})
+            member_data = {'members': user.id, 'company': company_id}
+            member = CompaniesTeamSerializer(data=member_data)
+            if member.is_valid(raise_exception=True):
+                member.save()
+            else:
+                user.delete()
+                return Response(admin_create.errors, status=status.HTTP_400_BAD_REQUEST)
+            team_member = CompaniesTeam.objects.get(members__email=email)
+            for department_id in department_ids:
+                department = Departments.objects.filter(id=department_id, is_active=True).first()
+                if department:
+                    department.users.add(team_member)
+                    department.save()
+                else:
+                    return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
+            if settings.DEBUG:
+                login_url = 'http://127.0.0.1:8000/create-account/'
+            else:
+                login_url = 'https://dashboard.traino.ai/signin'
+            send_mail(
+                subject="Welcome to Traino-ai",
+                message=f'''Welcome to Traino-ai.
+
+We're so excited to be working with you, and we want to be sure we start off on the right foot.
+Your email and password to access the Traino-ai portal is shown below.Please click here to sign-in.
+
+Username: {email}
+Password: {password}
+Role: {new_user_role}
+
+Please {login_url} and complete your profile.
 
 Regards
 Traino-ai.''',
             from_email="no-reply@traino.ai",
             recipient_list=[email],
             fail_silently=False,
-        )
+            )
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

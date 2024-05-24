@@ -11,11 +11,11 @@ class CompaniesTeam(models.Model):
 
     REQUIRED_FIELDS = ['first_name', 'last_name', 'role', 'company', 'department']
 
-    def save(self, *args, **kwargs):
-        if not self.members.role == 'User':
-            self.members.role = 'User'  # Set the role to 'User' if it's not already set
-            self.members.save()  # Save the associated to User
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if not self.members.role == 'User':
+    #         self.members.role = 'User'  # Set the role to 'User' if it's not already set
+    #         self.members.save()  # Save the associated to User
+    #     super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.members.email} with role {self.members.role}"

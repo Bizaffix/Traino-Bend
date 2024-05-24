@@ -58,12 +58,12 @@ class AdminUser(models.Model):
 
     REQUIRED_FIELDS = ['first_name', 'last_name', 'role', 'company', 'department']
 
-    def save(self, *args, **kwargs):
-        if self.admin:
-            if self.admin.role != 'Admin':
-                self.admin.role = 'Admin'  # Set the role to 'Admin' if it's not already set
-                self.admin.save()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if self.admin:
+    #         if self.admin.role != 'Admin':
+    #             self.admin.role = 'Admin'  # Set the role to 'Admin' if it's not already set
+    #             self.admin.save()
+        # super().save(*args, **kwargs)
 
     def __str__(self):
         if self.admin is not None:

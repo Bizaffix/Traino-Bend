@@ -9,6 +9,8 @@ class UserCreateSerializer(UserCreateSerializer):
         model = CustomUser
         fields = ('id', 'email', 'first_name', 'phone','last_name', 'role', 'password')
 
+
+from django.core.mail import send_mail
 class CompaniesTeamSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField(read_only=True)
     last_name = serializers.SerializerMethodField(read_only=True)
@@ -18,6 +20,25 @@ class CompaniesTeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompaniesTeam
         fields = ['id', 'members', 'company' ,'first_name' , 'last_name','phone', 'user_update_key']
+
+
+    def create(self, validated_data):
+        members = validated_data.pop('members')
+        company = validated_data.pop('company')
+        
+        # # Check if an admin with the same email exists in the same company
+        if CompaniesTeam.objects.filter(members=members, company=company).exists():
+            raise serializers.ValidationError("User with this email already exists in this company.")
+
+        # Check if the admin is already associated with another company
+        if CompaniesTeam.objects.filter(members=members).exclude(company=company).exists():
+            raise serializers.ValidationError("User is already associated with this or some another company.")
+
+        # Create the admin user
+        admin_user = CompaniesTeam.objects.create(members=members, company=company)
+        
+        
+        return admin_user
 
     def get_id(self , obj):
         return obj.id

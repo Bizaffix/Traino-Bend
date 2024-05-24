@@ -9,6 +9,7 @@ class UserDocuments(models.Model):
     file = models.FileField(upload_to='documents/', null=True , blank=True)
     company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='document_company')
     department = models.ManyToManyField(Departments, related_name='document_departments')
+    # scheduled_time = models.DateTimeField(null=True, blank=True)
     published = models.BooleanField(default=False)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
@@ -18,6 +19,11 @@ class UserDocuments(models.Model):
 
     def __str__(self):
         return self.name
+    
+    # def publish(self):
+    #     if timezone.now() >= self.scheduled_time:
+    #         self.is_published = True
+    #         self.save()
     
     class Meta:
         verbose_name = ("Company Document")

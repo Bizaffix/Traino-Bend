@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    # 'django_apscheduler',
     'documents',
     'dal',
     'dal_select2',

@@ -39,9 +39,9 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         
         # # Write permissions are only allowed if the user is an admin and the object's company is the same as the user's
         if request.user.role == "Admin":
-            print(request.user)
+            # print(request.user)
             admin = AdminUser.objects.get(admin=request.user)
-            print(str(obj.company.id), str(admin.company.id))
+            # print(str(obj.company.id), str(admin.company.id))
             if str(obj.company.id) == str(admin.company.id):
                 if admin.is_active==True: 
                     return True
@@ -49,10 +49,10 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         
         if request.user.role == "User":
             user = request.user
-            print(user)
+            # print(user)
             team_member = user.team_member.all()
             user_departments = Departments.objects.filter(users__in=team_member, is_active=True)
-            print(obj.company.id)
+            # print(obj.company.id)
             # print(user_departments.company.id)
             if obj in user_departments:
                 return True

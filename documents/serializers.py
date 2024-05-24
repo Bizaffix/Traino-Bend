@@ -48,6 +48,7 @@ class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
         department_ids = validated_data.pop('department_ids')
         schedule_time = validated_data.pop('schedule_time', timezone.now())
         added_by = validated_data.pop('added_by')
+        file = validated_data.pop('file')
         name = validated_data.pop('name')
 
         documents = []
@@ -56,6 +57,7 @@ class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
             document = DepartmentsDocuments.objects.create(
                 name=name,
                 added_by=added_by,
+                file=file,
                 department=department,
                 created_at=schedule_time if schedule_time > timezone.now() else timezone.now()
             )

@@ -3,6 +3,7 @@ from accounts.models import CustomUser
 from company.models import company , AdminUser
 from teams.models import CompaniesTeam
 import uuid
+from django.utils import timezone
 
 class Departments(models.Model):
     id = models.UUIDField(default=uuid.uuid4 , primary_key=True , unique=True)
@@ -28,6 +29,7 @@ class DepartmentsDocuments(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     file = models.FileField(upload_to='media/documents/', null=True, blank=True)
     department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='document_departments', null=True, blank=True)
+    scheduled_time  = models.DateTimeField(null=True, blank=True)
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
@@ -41,6 +43,12 @@ class DepartmentsDocuments(models.Model):
         if self.name is not None:
             return self.name
         return "Data not found"
+    
+    def publish(self):
+        if timezone.now() >= self.scheduled_time:
+            self.published = True
+            self.save()
+    
     class Meta:
         verbose_name = ("Company Document")
         verbose_name_plural = ("Company Documents")

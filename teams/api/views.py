@@ -16,6 +16,9 @@ class AddMembersApiView(CreateAPIView):
     serializer_class = CompaniesTeamSerializer
     permission_classes = [IsAdminUserOrReadOnly, IsActiveAdminPermission]
     authentication_classes = [JWTAuthentication]
+    
+    def perform_create(self , serializer):
+        serializer.save(is_active=True)
 
 class MembersUpdateDestroyApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIView):
     serializer_class = CompaniesTeamDetailsSerializers
