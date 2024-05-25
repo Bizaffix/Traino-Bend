@@ -65,9 +65,9 @@ class CustomUserCreateAPIView(CreateAPIView):
             if admin_create.is_valid(raise_exception=True):
                 admin_create.save()
                 if settings.DEBUG:
-                    login_url = 'http://127.0.0.1:8000/create-account/'
+                    login_url = 'https://dashboard.traino.ai/signin/'
                 else:
-                    login_url = 'https://dashboard.traino.ai/signin'
+                    login_url = 'https://dashboard.traino.ai/signin/'
                 send_mail(
                 subject="Welcome to Traino-ai",
                 message=f'''Welcome to Traino-ai.
@@ -111,9 +111,9 @@ Traino-ai.''',
                 else:
                     return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
             if settings.DEBUG:
-                login_url = 'http://127.0.0.1:8000/create-account/'
+                login_url = 'https://dashboard.traino.ai/signin/'
             else:
-                login_url = 'https://dashboard.traino.ai/signin'
+                login_url = 'https://dashboard.traino.ai/signin/'
             send_mail(
                 subject="Welcome to Traino-ai",
                 message=f'''Welcome to Traino-ai.
@@ -211,8 +211,9 @@ class LoginAPIView(APIView):
                             'phone': serializer.data['phone'],
                             'email': serializer.data['email'],
                             'role': serializer.data['role'],
-                            'company_id':str(user_company.company.id),
+                            'member_id':str(user_company.id),
                             'company_name':str(user_company.company.name),
+                            'company_id':str(user_company.company.id),
                             'created_at': serializer.data['created_at'],
                         }
                     else:

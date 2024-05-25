@@ -325,17 +325,37 @@ class DepartmentListApiView(ListAPIView):
             else:
                 raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"})
         elif self.request.user.role == "User":
-            user = self.request.user
-            company_id = self.request.query_params.get('company_id', None)
+            user_id = self.request.query_params.get('user_id', None)
+            if not user_id:
+                raise serializers.ValidationError({"user_id": "This query parameter is required for users."})
+            
             try:
-                user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
-                user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
-                queryset = user_departments.distinct()
-                if company_id:
-                    queryset = queryset.filter(company__id=company_id)
+                user_teams = CompaniesTeam.objects.filter(members=self.request.user, is_active=True)
+                user_departments = Departments.objects.filter(users__in=user_teams, is_active=True).distinct()
+                queryset = user_departments
+
+                if user_id:
+                    user_teams_filtered = CompaniesTeam.objects.filter(id=user_id, members=self.request.user, is_active=True)
+                    if user_teams_filtered.exists():
+                        queryset = queryset.filter(users__in=user_teams_filtered)
+                    else:
+                        raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments for this user_id."})
+                
                 return queryset
             except CompaniesTeam.DoesNotExist:
                 raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
+
+            # user = self.request.user
+            # company_id = self.request.query_params.get('company_id', None)
+            # try:
+            #     user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+            #     user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
+            #     queryset = user_departments.distinct()
+            #     if company_id:
+            #         queryset = queryset.filter(company__id=company_id)
+            #     return queryset
+            # except CompaniesTeam.DoesNotExist:
+            #     raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
         else:
             queryset = Departments.objects.filter(is_active=True)
             company_id = self.request.query_params.get('company_id', None)
