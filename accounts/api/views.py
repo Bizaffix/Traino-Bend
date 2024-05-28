@@ -19,6 +19,7 @@ from company.models import company
 from teams.api.serializers import CompaniesTeamSerializer
 from departments.models import Departments
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -303,3 +304,63 @@ class LoginAPIView(APIView):
             return JsonResponse({'token': token, 'user': serialized_user}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class UserDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        try:
+            user_data = CustomUser.objects.get(id=user.id)
+            serializer = CustomUserDetailSerializer(user_data)
+            
+            if serializer.data['role'] == 'Admin':
+                admin = get_object_or_404(AdminUser, admin=user.id)
+                if admin.is_active:
+                    serialized_user = {
+                        'id': serializer.data['id'],
+                        'first_name': serializer.data['first_name'],
+                        'last_name': serializer.data['last_name'],
+                        'phone': serializer.data['phone'],
+                        'email': serializer.data['email'],
+                        'role': serializer.data['role'],
+                        'admin_id': str(admin.id),
+                        'company_id': str(admin.company.id),
+                        'company_name': str(admin.company.name),
+                        'created_at': serializer.data['created_at'],
+                    }
+                else:
+                    return Response({"Not Found": "No account found against these credentials"}, status=status.HTTP_404_NOT_FOUND)
+            elif serializer.data['role'] == 'User':
+                user_company = get_object_or_404(CompaniesTeam, members=user.id)
+                if user_company.is_active:
+                    serialized_user = {
+                        'id': serializer.data['id'],
+                        'first_name': serializer.data['first_name'],
+                        'last_name': serializer.data['last_name'],
+                        'phone': serializer.data['phone'],
+                        'email': serializer.data['email'],
+                        'role': serializer.data['role'],
+                        'member_id': str(user_company.id),
+                        'company_name': str(user_company.company.name),
+                        'company_id': str(user_company.company.id),
+                        'created_at': serializer.data['created_at'],
+                    }
+                else:
+                    return Response({"Not Found": "No account found against these credentials"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                serialized_user = {
+                    'id': serializer.data['id'],
+                    'first_name': serializer.data['first_name'],
+                    'last_name': serializer.data['last_name'],
+                    'phone': serializer.data['phone'],
+                    'email': serializer.data['email'],
+                    'role': serializer.data['role'],
+                    'created_at': serializer.data['created_at'],
+                }
+            
+            return Response({'user': serialized_user}, status=status.HTTP_200_OK)
+        
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
