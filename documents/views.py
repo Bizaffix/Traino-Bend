@@ -489,13 +489,15 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
         if user.role in ["Super Admin", "Admin"]:
                 # Super Admin and Admin can view documents based on the department_id query parameter
             queryset = DepartmentsDocuments.objects.filter(is_active=True)
+            if department_id:
+                queryset = queryset.filter(department__id=department_id)
             if user.role == "Admin":
                 try:
                         # Get the company associated with the admin
                     admin_company = AdminUser.objects.get(admin=user, is_active=True).company
                         # Filter documents by departments that are in the admin's company
                     queryset = queryset.filter(department__company=admin_company)
-                    return queryset
+                    # return queryset
                 except AdminUser.DoesNotExist:
                     raise serializers.ValidationError({"Account Error": "Your Account is Restricted. You cannot perform this request."})
 
