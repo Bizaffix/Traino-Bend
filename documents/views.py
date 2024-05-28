@@ -495,6 +495,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                     admin_company = AdminUser.objects.get(admin=user, is_active=True).company
                         # Filter documents by departments that are in the admin's company
                     queryset = queryset.filter(department__company=admin_company)
+                    return queryset
                 except AdminUser.DoesNotExist:
                     raise serializers.ValidationError({"Account Error": "Your Account is Restricted. You cannot perform this request."})
 
@@ -507,6 +508,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                 queryset = DepartmentsDocuments.objects.filter(department__in=user_departments, is_active=True)
                 if department_id:
                     queryset = queryset.filter(department__id=department_id)
+                    return queryset
                 if not queryset.exists():
                     raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."}, code="data_not_found")
                 return queryset
