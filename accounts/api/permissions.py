@@ -33,6 +33,7 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
             return True
         
         # Write permissions require conditions
-        can_edit = obj.added_by == request.user or request.user.role == 'Super Admin'
-        logger.debug(f"Can edit: {can_edit}")
-        return can_edit
+        return request.user or request.user.role == 'Super Admin' or request.user or request.user.role == 'Admin'
+        # can_edit = obj.added_by == request.user or request.user.role == 'Super Admin'
+        # logger.debug(f"Can edit: {can_edit}")
+        # return can_edit

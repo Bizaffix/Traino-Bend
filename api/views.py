@@ -566,22 +566,30 @@ from .serializers import AddUserToDepartmentSerializer
 from .permissions import IsAdminUserAndSameCompany
 
 class AddUserToDepartmentView(APIView):
-    permission_classes =[IsAdminUserAndSameCompany]
-    
+    permission_classes = [IsAdminUserAndSameCompany]
+
     def post(self, request, *args, **kwargs):
         request_user = self.request.user
         admin = AdminUser.objects.get(admin=request_user)
-        if request_user.role == "Admin" and admin.is_active==True:
-            serializer = AddUserToDepartmentSerializer(data=request.data)
-            if serializer.is_valid():
-                department = serializer.validated_data['department_id']
-                user = serializer.validated_data['user_id']
-                department.users.add(user)
-                department.save()
-                return Response({"detail": "User added to department successfully."}, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({"Account Restricted": "Your account is Restricted. You cannot perform this task"}, status=status.HTTP_401_UNAUTHORIZED)
+        if request_user.role == "Admin" and admin.is_active:
+            user_id = request.data.get('user_id')
+            department_ids = request.data.get('department_ids')
+            team_member = CompaniesTeam.objects.get(id=user_id)
+            for department_id in department_ids:
+                department = Departments.objects.filter(id=department_id, is_active=True).first()
+                if department:
+                    department.users.add(team_member)
+                    department.save()
+                else:
+                    return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
+            # serializer = AddUserToDepartmentSerializer(data=request.data)
+            # if serializer.is_valid():
+            #     serializer.save()
+            #     return Response({"detail": "User added to departments successfully."}, status=status.HTTP_200_OK)
+            
+            return Response({"Success Message":"User entered in departments Successfully"}, status=status.HTTP_200_OK)
+        
+        return Response({"detail": "Your account is restricted. You cannot perform this task."}, status=status.HTTP_401_UNAUTHORIZED)
             
 from PyPDF2 import PdfReader
 from django.core.files.storage import default_storage

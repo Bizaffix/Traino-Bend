@@ -297,17 +297,34 @@ from teams.models import CompaniesTeam
 
 
 class AddUserToDepartmentSerializer(serializers.Serializer):
-    user_id = serializers.PrimaryKeyRelatedField(queryset=CompaniesTeam.objects.filter(is_active=True))
-    department_id = serializers.PrimaryKeyRelatedField(queryset=Departments.objects.filter(is_active=True))
-    
+    user_id = serializers.CharField()
+    department_ids = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=Departments.objects.filter(is_active=True))
+    )
+
     def validate(self, data):
-        user = data['user_id']
-        department = data['department_id']
-        if user in department.users.filter(is_active=True):
-            raise serializers.ValidationError("User is already in this department.")
+        user = CompaniesTeam.objects.filter(id=data['user_id'], is_active=True).first()
+        if not user:
+            raise serializers.ValidationError("User not found or inactive.")
+
+        department_ids = data['department_ids']
+        print(department_ids)
+        for dept_id in department_ids:
+            print(dept_id.id)
+            department = Departments.objects.filter(name=dept_id, is_active=True).first()
+            if not department:
+                raise serializers.ValidationError(f"Department with id {dept_id} not found.")
+            if user in department.users.filter(is_active=True):
+                raise serializers.ValidationError(f"User is already in the department with id {dept_id}.")
+        
+        data['user'] = user
+        data['departments'] = Departments.objects.filter(id__in=department_ids, is_active=True)
         return data
 
-    def update(self, instance, validated_data):
-        user = validated_data['user_id']
-        instance.users.add(user)
-        return instance
+    def create(self, validated_data):
+        user = validated_data['user']
+        departments = validated_data['departments']
+        for department in departments:
+            department.users.add(user)
+            department.save()
+        return user

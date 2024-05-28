@@ -139,19 +139,79 @@ Traino-ai.''',
     
 from teams.api.permissions import IsActiveAdminPermission
 
+# class CustomUserUpdateAPIView(UpdateAPIView):
+#     queryset = CustomUser.objects.all()
+#     serializer_class = CustomUserSerializer
+#     permission_classes = [IsAdminUserOrReadOnly, IsActiveAdminPermission]
+#     lookup_field = 'id'
+
+#     def put(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         if instance.added_by != request.user:
+#             return Response({"Account Access Errors": "You don't have permission to update this Account Holder's Details."},
+#                             status=status.HTTP_403_FORBIDDEN)
+
+#         return super().update(request, *args, **kwargs)
+
 class CustomUserUpdateAPIView(UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [IsAdminUserOrReadOnly, IsActiveAdminPermission]
+    permission_classes = [IsAdminUserOrReadOnly]
     lookup_field = 'id'
-
-    def put(self, request, *args, **kwargs):
+    
+    def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.added_by != request.user:
-            return Response({"Account Access Errors": "You don't have permission to update this Account Holder's Details."},
-                            status=status.HTTP_403_FORBIDDEN)
+        # if instance.added_by != request.user:
+        #     return Response({"Account Access Errors": "You don't have permission to update this Account Holder's Details."},
+        #                     status=status.HTTP_403_FORBIDDEN)
 
-        return super().update(request, *args, **kwargs)
+        if request.user.role == 'Super Admin' and instance.role != 'Admin':
+            return Response({"error": "Super Admin can only update Admins."}, status=status.HTTP_403_FORBIDDEN)
+        elif request.user.role == 'Admin' and instance.role != 'User':
+            return Response({"error": "Admin can only update Users."}, status=status.HTTP_403_FORBIDDEN)
+
+        if 'role' in request.data and request.data['role'] != instance.role:
+            return Response({"error": "Cannot change the role of the user."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'password' in request.data:
+            password = request.data.pop('password')
+            instance.set_password(password)
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        # Update additional fields based on role
+        if instance.role == 'Admin':
+            company_id = request.data.get('company')
+            if company_id:
+                admin_instance = AdminUser.objects.get(email=instance.email)
+                admin_instance.company_id = company_id
+                admin_instance.save()
+
+            # return Response({"update Successfully":"Admin Updated Successfully"}, status=status.HTTP_200_OK)
+            
+        elif instance.role == 'User':
+            company_id = request.data.get('company')
+            department_ids = request.data.get('department_ids', None)
+            if company_id:
+                member_instance = CompaniesTeam.objects.get(members__id=instance.id)
+                member_instance.company_id = company_id
+                member_instance.save()
+
+
+                for department in Departments.objects.filter(users=member_instance):
+                    department.users.remove(member_instance)
+                # member_instance.departments.clear()
+                if department_ids is not None:
+                    for department_id in department_ids:
+                        department = Departments.objects.filter(id=department_id, is_active=True).first()
+                        if department:
+                            department.users.add(member_instance)
+                        else:
+                            return Response({"error": f"Department with id {department_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class LoginAPIView(APIView):
     authentication_classes = []
