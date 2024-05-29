@@ -289,6 +289,11 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
             if admin.is_active==True:
                 instance.is_active = False
                 instance.save()
+                
+                department_documents = DepartmentsDocuments.objects.filter(department=instance)
+                for doc in department_documents:
+                    doc.is_active = False  # or doc.delete() to delete
+                    doc.save()
                 return Response({"Delete Status": "Successfully deleted the department." , "Department_id":instance.id},status=status.HTTP_202_ACCEPTED)
             return Response({"Account Error":"Account did not found"},status=status.HTTP_404_NOT_FOUND)
         return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
