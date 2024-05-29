@@ -570,27 +570,49 @@ class AddUserToDepartmentView(APIView):
 
     def post(self, request, *args, **kwargs):
         request_user = self.request.user
-        admin = AdminUser.objects.get(admin=request_user)
+        try:
+            admin = AdminUser.objects.get(admin=request_user)
+        except AdminUser.DoesNotExist:
+            return Response({"detail": "Admin user does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
         if request_user.role == "Admin" and admin.is_active:
-            user_id = request.data.get('user_id')
+            user_ids = request.data.get('user_ids')
             department_ids = request.data.get('department_ids')
-            team_member = CompaniesTeam.objects.get(id=user_id)
-            for department_id in department_ids:
-                department = Departments.objects.filter(id=department_id, is_active=True).first()
-                if department:
-                    department.users.add(team_member)
-                    department.save()
+
+            if not user_ids or not department_ids:
+                if not user_ids:
+                    return Response({"detail": "User IDs are required."}, status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
-            # serializer = AddUserToDepartmentSerializer(data=request.data)
-            # if serializer.is_valid():
-            #     serializer.save()
-            #     return Response({"detail": "User added to departments successfully."}, status=status.HTTP_200_OK)
-            
-            return Response({"Success Message":"User entered in departments Successfully"}, status=status.HTTP_200_OK)
-        
-        return Response({"detail": "Your account is restricted. You cannot perform this task."}, status=status.HTTP_401_UNAUTHORIZED)
-            
+                    return Response({"detail": "Department IDs are required."}, status=status.HTTP_400_BAD_REQUEST)
+            users_not_found = []
+            departments_not_found = []
+            successfully_added = []
+
+            for user_id in user_ids:
+                try:
+                    team_member = CompaniesTeam.objects.get(id=user_id , is_active=True)
+                except CompaniesTeam.DoesNotExist:
+                    users_not_found.append(user_id)
+                    continue
+
+                for department_id in department_ids:
+                    department = Departments.objects.filter(id=department_id, is_active=True).first()
+                    if department:
+                        department.users.add(team_member)
+                        department.save()
+                        successfully_added.append((user_id, department_id))
+                    else:
+                        departments_not_found.append(department_id)
+
+            response_data = {
+                "successfully_added": successfully_added,
+                "users_not_found": users_not_found,
+                "departments_not_found": departments_not_found,
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        return Response({"detail": "Your account is restricted. You cannot perform this task."}, status=status.HTTP_401_UNAUTHORIZED)            
 from PyPDF2 import PdfReader
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile

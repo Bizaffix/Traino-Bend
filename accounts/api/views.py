@@ -254,7 +254,7 @@ class LoginAPIView(APIView):
                             'created_at': serializer.data['created_at'],
                         }
                     else:
-                        return Response({"Not Found":"No Account Found against these credentials"})
+                        return Response({"Not Found":"No Account Found against these credentials"} , status=status.HTTP_404_NOT_FOUND)
                 elif serializer.data['role'] == 'User':
                     user_company = CompaniesTeam.objects.get(members=serializer.data['id'])
                     # print(user.company.id)
@@ -278,7 +278,7 @@ class LoginAPIView(APIView):
                             'created_at': serializer.data['created_at'],
                         }
                     else:
-                        return Response({"Not Found":"No Account Found Against These Credentials"})
+                        return Response({"Not Found":"No Account Found Against These Credentials"}, status=status.HTTP_404_NOT_FOUND)
                 else:
                     user_data = CustomUser.objects.get(email=email)
                     serializer = CustomUserDetailSerializer(user_data)
@@ -318,6 +318,11 @@ class UserDetailAPIView(APIView):
             if serializer.data['role'] == 'Admin':
                 admin = get_object_or_404(AdminUser, admin=user.id)
                 if admin.is_active:
+                    # refresh = RefreshToken.for_user(user)
+                    # token = {
+                    #         'refresh': str(refresh),
+                    #         'access': str(refresh.access_token),
+                    # }
                     serialized_user = {
                         'id': serializer.data['id'],
                         'first_name': serializer.data['first_name'],
@@ -335,6 +340,11 @@ class UserDetailAPIView(APIView):
             elif serializer.data['role'] == 'User':
                 user_company = get_object_or_404(CompaniesTeam, members=user.id)
                 if user_company.is_active:
+                    # refresh = RefreshToken.for_user(user)
+                    # token = {
+                    #         'refresh': str(refresh),
+                    #         'access': str(refresh.access_token),
+                    # }
                     serialized_user = {
                         'id': serializer.data['id'],
                         'first_name': serializer.data['first_name'],
@@ -350,6 +360,11 @@ class UserDetailAPIView(APIView):
                 else:
                     return Response({"Not Found": "No account found against these credentials"}, status=status.HTTP_404_NOT_FOUND)
             else:
+                # refresh = RefreshToken.for_user(user)
+                # token = {
+                #             'refresh': str(refresh),
+                #             'access': str(refresh.access_token),
+                # }
                 serialized_user = {
                     'id': serializer.data['id'],
                     'first_name': serializer.data['first_name'],
