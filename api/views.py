@@ -623,7 +623,292 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from departments.models import DepartmentsDocuments
 from django.shortcuts import get_object_or_404
+from .utils import generate_summary_from_gpt , generate_keypoints_from_gpt
+import logging
+from .serializers import CreateSummarySerializer , CreateKeypointsSerializer
+import chardet
+import pdfplumber
 
+logger = logging.getLogger(__name__)
+class CreateSummaryApiView(APIView):
+    serializer_class = CreateSummarySerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    queryset = DepartmentsDocuments.objects.filter(is_active=True)
+
+    def get(self, request):
+        document_id = request.query_params.get('document_id')
+        if not document_id:
+            return Response({"error": "document_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+        except DepartmentsDocuments.DoesNotExist:
+            return Response({"error": "No Document Found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        user = request.user
+        
+        if user.role == "Super Admin":
+            pass
+        elif user.role == "Admin":
+            admin = AdminUser.objects.get(admin=user, is_active=True)
+            if str(admin.company.id) != str(document.department.company.id):
+                return Response({"Access Denied":"You are not allowed to view the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+        elif user.role == "User":
+            member = CompaniesTeam.objects.filter(members=user, is_active=True).first()
+            user_departments = Departments.objects.filter(users=member, is_active=True)
+            if not user_departments.exists():
+                return Response({"No Association": "You are no longer associated with this department"}, status=status.HTTP_403_FORBIDDEN)
+
+            if not user_departments.filter(id=document.department.id).exists():
+                return Response({"Access Denied": "You are not allowed to view the summary of this department"}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            summary = DocumentSummary.objects.filter(document=document).first()
+            if not summary:
+                return Response({"Not Found":"No Summary Found against this document."}, status = status.HTTP_404_NOT_FOUND)
+            return Response({"id": summary.id, "summary": summary.summary}, status=status.HTTP_200_OK)
+        except DocumentSummary.DoesNotExist:
+            return Response({"error": "No summary found for this document"}, status=status.HTTP_404_NOT_FOUND)
+    
+    def post(self , request):
+        if request.user.role == "Admin":
+            document_id = request.data.get('document')
+            if not document_id:
+                return Response({"error":"document is required"}, status=status.HTTP_400_BAD_REQUEST)        
+            
+            user = request.user        
+                
+            try:
+                document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+            except DepartmentsDocuments.DoesNotExist:
+                return Response({"error":"No Document Found"}, status=status.HTTP_404_NOT_FOUND)
+
+            if user.role == "Admin":
+                admin = AdminUser.objects.get(admin=user, is_active=True)
+                if str(admin.company.id) != str(document.department.company.id):
+                    return Response({"Access Denied":"You are not allowed to create the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            if not document.file:
+                return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
+
+            content = self.read_file_content(document.file)
+            
+            if content is None:
+                return Response({"error": "Unable to decode file content"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            if not content.strip():
+                logger.error("Decoded content is empty")
+                return Response({"error": "Decoded content is empty"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            logger.info(f"Decoded content: {content[:100]}")  # Log the first 100 characters of the content
+
+            try:
+                summary = generate_summary_from_gpt(content)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            created_summary = DocumentSummary.objects.create(
+                summary=summary,
+                document = document,
+                added_by = self.request.user                
+            ) 
+            
+            return Response({"id":created_summary.id , "summary":f"{created_summary.summary}"}, status=status.HTTP_200_OK)
+        return Response({"Access Denied":"You Are not Allowed to create summary"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def read_file_content(self, file):
+        file_type = file.name.split('.')[-1].lower()
+        if file_type == 'pdf':
+            return self.read_pdf_content(file)
+        elif file_type == 'txt':
+            return self.read_text_file_content(file)
+        else:
+            logger.error("Unsupported file type.")
+            return None
+        
+    def read_pdf_content(self, file):
+        try:
+            pdf_content = []
+            with pdfplumber.open(file) as pdf:
+                for page in pdf.pages:
+                    text = page.extract_text()
+                    if text:
+                        pdf_content.append(text)
+            return "\n".join(pdf_content)
+        except Exception as e:
+            logger.error(f"Error reading PDF file: {e}")
+            return None
+
+    def read_text_file_content(self, file):
+        encodings = ['utf-8', 'latin-1']
+        content = None
+
+        for encoding in encodings:
+            try:
+                file.seek(0)  # Reset file pointer to the beginning
+                content = file.read().decode(encoding)
+                logger.info(f"Successfully decoded with encoding: {encoding}")
+                break
+            except UnicodeDecodeError:
+                logger.warning(f"Failed to decode with encoding: {encoding}")
+                continue  # Try next encoding if decoding fails
+
+        if content is None:
+            file.seek(0)
+            raw_data = file.read()
+            detected_encoding = chardet.detect(raw_data)['encoding']
+            try:
+                content = raw_data.decode(detected_encoding)
+                logger.info(f"Successfully decoded with detected encoding: {detected_encoding}")
+            except Exception as e:
+                logger.error(f"Failed to decode with detected encoding: {detected_encoding}, Error: {e}")
+
+        if content is None:
+            logger.error("Unable to decode file content with any encoding")
+        
+        return content
+
+class CreateKeypointsApiView(APIView):
+    serializer_class = CreateKeypointsSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    queryset = DepartmentsDocuments.objects.filter(is_active=True)
+
+    def get(self, request):
+        document_id = request.query_params.get('document_id')
+        if not document_id:
+            return Response({"error": "document_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+        except DepartmentsDocuments.DoesNotExist:
+            return Response({"error": "No Document Found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        user = request.user
+        
+        if user.role == "Super Admin":
+            pass
+        elif user.role == "Admin":
+            admin = AdminUser.objects.get(admin=user, is_active=True)
+            if str(admin.company.id) != str(document.department.company.id):
+                return Response({"Access Denied":"You are not allowed to view the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+        elif user.role == "User":
+            member = CompaniesTeam.objects.filter(members=user, is_active=True).first()
+            user_departments = Departments.objects.filter(users=member, is_active=True)
+            if not user_departments.exists():
+                return Response({"No Association": "You are no longer associated with this department"}, status=status.HTTP_403_FORBIDDEN)
+
+            if not user_departments.filter(id=document.department.id).exists():
+                return Response({"Access Denied": "You are not allowed to view the summary of this department"}, status=status.HTTP_403_FORBIDDEN)
+            
+        try:
+            keypoints = DocumentKeyPoints.objects.filter(document=document).first()
+            return Response({"id": keypoints.id, "keypoints": keypoints.keypoints}, status=status.HTTP_200_OK)
+        except DocumentSummary.DoesNotExist:
+            return Response({"error": "No keypoints found for this document"}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self , request):
+        if request.user.role == "Admin":
+            document_id = request.data.get('document')
+            if not document_id:
+                return Response({"error":"document is required"}, status=status.HTTP_400_BAD_REQUEST)        
+            
+            try:
+                document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+            except DepartmentsDocuments.DoesNotExist:
+                return Response({"error":"No Document Found"}, status=status.HTTP_404_NOT_FOUND)
+
+            user = request.user
+
+            if user.role == "Admin":
+                admin = AdminUser.objects.get(admin=user, is_active=True)
+                # print(str(admin.company.id))
+                # print(str(document.department.company.id))
+                # print(str(admin.company.id) != str(document.department.company.id))
+                if str(admin.company.id) != str(document.department.company.id):
+                    return Response({"Access Denied":"You are not allowed to create the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+            if not document.file:
+                return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
+
+            content = self.read_file_content(document.file)
+            
+            if content is None:
+                return Response({"error": "Unable to decode file content"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            if not content.strip():
+                logger.error("Decoded content is empty")
+                return Response({"error": "Decoded content is empty"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            logger.info(f"Decoded content: {content[:100]}")  # Log the first 100 characters of the content
+
+            try:
+                keypoints = generate_keypoints_from_gpt(content)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            created_keypoint = DocumentKeyPoints.objects.create(
+                keypoints=keypoints,
+                document = document,
+                added_by = self.request.user                
+            ) 
+            
+            return Response({"id":created_keypoint.id , "keypoints":f"{created_keypoint.keypoints}"}, status=status.HTTP_200_OK)
+        return Response({"Access Denied":"You Are not Allowed to create keypoints"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def read_file_content(self, file):
+        file_type = file.name.split('.')[-1].lower()
+        if file_type == 'pdf':
+            return self.read_pdf_content(file)
+        elif file_type == 'txt':
+            return self.read_text_file_content(file)
+        else:
+            logger.error("Unsupported file type.")
+            return None
+        
+    def read_pdf_content(self, file):
+        try:
+            pdf_content = []
+            with pdfplumber.open(file) as pdf:
+                for page in pdf.pages:
+                    text = page.extract_text()
+                    if text:
+                        pdf_content.append(text)
+            return "\n".join(pdf_content)
+        except Exception as e:
+            logger.error(f"Error reading PDF file: {e}")
+            return None
+
+    def read_text_file_content(self, file):
+        encodings = ['utf-8', 'latin-1']
+        content = None
+
+        for encoding in encodings:
+            try:
+                file.seek(0)  # Reset file pointer to the beginning
+                content = file.read().decode(encoding)
+                logger.info(f"Successfully decoded with encoding: {encoding}")
+                break
+            except UnicodeDecodeError:
+                logger.warning(f"Failed to decode with encoding: {encoding}")
+                continue  # Try next encoding if decoding fails
+
+        if content is None:
+            file.seek(0)
+            raw_data = file.read()
+            detected_encoding = chardet.detect(raw_data)['encoding']
+            try:
+                content = raw_data.decode(detected_encoding)
+                logger.info(f"Successfully decoded with detected encoding: {detected_encoding}")
+            except Exception as e:
+                logger.error(f"Failed to decode with detected encoding: {detected_encoding}, Error: {e}")
+
+        if content is None:
+            logger.error("Unable to decode file content with any encoding")
+        
+        return content
+    
 class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
     queryset = DocumentSummary.objects.all()
     serializer_class = DocumentSummarySerializer
@@ -767,125 +1052,125 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
 from PyPDF2 import PdfFileReader
 import os
 from .serializers import DocumentKeyPointsSerializer
-class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
-    queryset = DocumentKeyPoints.objects.filter(is_active=True)
-    serializer_class = DocumentKeyPointsSerializer
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUserOrReadOnly]
-    search_fields = ['id', 'content', 'prompt_text', 'name', 'company__name', 'document__name']
-    ordering_fields = ['name', 'id', 'company', 'document', 'created_at', 'updated_at']
-    ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']
+# class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
+#     queryset = DocumentKeyPoints.objects.filter(is_active=True)
+#     serializer_class = DocumentKeyPointsSerializer
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAdminUserOrReadOnly]
+#     search_fields = ['id', 'content', 'prompt_text', 'name', 'company__name', 'document__name']
+#     ordering_fields = ['name', 'id', 'company', 'document', 'created_at', 'updated_at']
+#     ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']
 
-    def get_queryset(self):
-        user = self.request.user
-        if user.role == "Super Admin":
-            return DocumentKeyPoints.objects.filter(is_active=True)
-        elif user.role == "Admin":
-            try:
-                admin = AdminUser.objects.get(admin=user, is_active=True)
-                company = admin.company_id
-                return DocumentKeyPoints.objects.filter(company=company)
-            except AdminUser.DoesNotExist:
-                raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
-        elif user.role == "User":
-            try:
-                user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
-                if user_teams.exists():
-                    company_ids = user_teams.values_list('company_id', flat=True)
-                    return DocumentKeyPoints.objects.filter(company__in=company_ids)
-                else:
-                    raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
-            except CompaniesTeam.DoesNotExist:
-                raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
-        else:
-            raise serializers.ValidationError({"Access Denied": "You are not authorized for this request"})
+#     def get_queryset(self):
+#         user = self.request.user
+#         if user.role == "Super Admin":
+#             return DocumentKeyPoints.objects.filter(is_active=True)
+#         elif user.role == "Admin":
+#             try:
+#                 admin = AdminUser.objects.get(admin=user, is_active=True)
+#                 company = admin.company_id
+#                 return DocumentKeyPoints.objects.filter(company=company)
+#             except AdminUser.DoesNotExist:
+#                 raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
+#         elif user.role == "User":
+#             try:
+#                 user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+#                 if user_teams.exists():
+#                     company_ids = user_teams.values_list('company_id', flat=True)
+#                     return DocumentKeyPoints.objects.filter(company__in=company_ids)
+#                 else:
+#                     raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
+#             except CompaniesTeam.DoesNotExist:
+#                 raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
+#         else:
+#             raise serializers.ValidationError({"Access Denied": "You are not authorized for this request"})
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        if user.role == "Admin":
-            try:
-                admin_user = AdminUser.objects.get(admin=user, is_active=True)
-                company = admin_user.company_id
-                requested_company_id = serializer.validated_data.get('company')
-                if requested_company_id.id != company:
-                    raise serializers.ValidationError("You can only create key points for your own company.")
+#     def perform_create(self, serializer):
+#         user = self.request.user
+#         if user.role == "Admin":
+#             try:
+#                 admin_user = AdminUser.objects.get(admin=user, is_active=True)
+#                 company = admin_user.company_id
+#                 requested_company_id = serializer.validated_data.get('company')
+#                 if requested_company_id.id != company:
+#                     raise serializers.ValidationError("You can only create key points for your own company.")
                 
-                # Extract text from uploaded file
-                document_content = self.extract_text_from_file(serializer.validated_data.get('document'))
+#                 # Extract text from uploaded file
+#                 document_content = self.extract_text_from_file(serializer.validated_data.get('document'))
                 
-                # Use OpenAI to create key points
-                key_points = self.generate_key_points(document_content)
-                serializer.save(added_by=user, content=key_points)
+#                 # Use OpenAI to create key points
+#                 key_points = self.generate_key_points(document_content)
+#                 serializer.save(added_by=user, content=key_points)
                 
-            except AdminUser.DoesNotExist:
-                raise serializers.ValidationError("Admin user not found.")
-        else:
-            raise serializers.ValidationError("Only Admins can create document key points.")
+#             except AdminUser.DoesNotExist:
+#                 raise serializers.ValidationError("Admin user not found.")
+#         else:
+#             raise serializers.ValidationError("Only Admins can create document key points.")
     
-    def perform_update(self, serializer):
-        user = self.request.user
-        instance = self.get_object()
-        if user.role == "Admin" and instance.added_by == user:
-            document_content = serializer.validated_data.get('content', instance.content)
-            key_points = self.generate_key_points(document_content)
-            serializer.save(content=key_points)
-            return serializer.data
-        else:
-            raise serializers.ValidationError("You do not have permission to update these key points.")
+#     def perform_update(self, serializer):
+#         user = self.request.user
+#         instance = self.get_object()
+#         if user.role == "Admin" and instance.added_by == user:
+#             document_content = serializer.validated_data.get('content', instance.content)
+#             key_points = self.generate_key_points(document_content)
+#             serializer.save(content=key_points)
+#             return serializer.data
+#         else:
+#             raise serializers.ValidationError("You do not have permission to update these key points.")
 
-    def perform_destroy(self, instance):
-        user = self.request.user
-        if user.role == "Admin" and instance.added_by == user:
-            obj_id = instance.id
-            instance.delete()
-            return Response({"Response": "Successfully Deleted the KeyPoints.", "id": obj_id})
-        else:
-            raise serializers.ValidationError("You do not have permission to delete these key points.")
+#     def perform_destroy(self, instance):
+#         user = self.request.user
+#         if user.role == "Admin" and instance.added_by == user:
+#             obj_id = instance.id
+#             instance.delete()
+#             return Response({"Response": "Successfully Deleted the KeyPoints.", "id": obj_id})
+#         else:
+#             raise serializers.ValidationError("You do not have permission to delete these key points.")
     
-    def extract_text_from_file(self, file):
-        """
-        Extract text from the uploaded file (PDF or text file).
-        """
-        if file.name.endswith('.pdf'):
-            return self.extract_text_from_pdf(file)
-        elif file.name.endswith('.txt'):
-            return self.extract_text_from_text(file)
-        else:
-            raise serializers.ValidationError("Unsupported file format. Only PDF and text files are supported.")
+#     def extract_text_from_file(self, file):
+#         """
+#         Extract text from the uploaded file (PDF or text file).
+#         """
+#         if file.name.endswith('.pdf'):
+#             return self.extract_text_from_pdf(file)
+#         elif file.name.endswith('.txt'):
+#             return self.extract_text_from_text(file)
+#         else:
+#             raise serializers.ValidationError("Unsupported file format. Only PDF and text files are supported.")
 
-    def extract_text_from_pdf(self, file):
-        """
-        Extract text from a PDF file.
-        """
-        try:
-            with open(file.temporary_file_path(), 'rb') as f:
-                pdf_reader = PdfFileReader(f)
-                text = ''
-                for page_num in range(pdf_reader.numPages):
-                    text += pdf_reader.getPage(page_num).extractText()
-                return text
-        except Exception as e:
-            raise serializers.ValidationError("Failed to extract text from PDF file.")
+#     def extract_text_from_pdf(self, file):
+#         """
+#         Extract text from a PDF file.
+#         """
+#         try:
+#             with open(file.temporary_file_path(), 'rb') as f:
+#                 pdf_reader = PdfFileReader(f)
+#                 text = ''
+#                 for page_num in range(pdf_reader.numPages):
+#                     text += pdf_reader.getPage(page_num).extractText()
+#                 return text
+#         except Exception as e:
+#             raise serializers.ValidationError("Failed to extract text from PDF file.")
 
-    def extract_text_from_text(self, file):
-        """
-        Extract text from a text file.
-        """
-        try:
-            with open(file.temporary_file_path(), 'r') as f:
-                return f.read()
-        except Exception as e:
-            raise serializers.ValidationError("Failed to read text from the text file.")
+#     def extract_text_from_text(self, file):
+#         """
+#         Extract text from a text file.
+#         """
+#         try:
+#             with open(file.temporary_file_path(), 'r') as f:
+#                 return f.read()
+#         except Exception as e:
+#             raise serializers.ValidationError("Failed to read text from the text file.")
 
-    def generate_key_points(self, content):
-        openai.api_key = openai_api_key
-        response = openai.Completion.create(
-            engine="gpt-3.5-turbo",
-            prompt=f"Extract key points from the following document:\n\n{content}",
-            max_tokens=150
-        )
-        key_points = response.choices[0].text.strip()
-        return key_points
+#     def generate_key_points(self, content):
+#         openai.api_key = openai_api_key
+#         response = openai.Completion.create(
+#             engine="gpt-3.5-turbo",
+#             prompt=f"Extract key points from the following document:\n\n{content}",
+#             max_tokens=150
+#         )
+#         key_points = response.choices[0].text.strip()
+#         return key_points
 # class DocumentKeypointsModelViewSet(viewsets.ModelViewSet):
 #     queryset = DocumentKeyPoints.objects.all()
 #     serializer_class = DocumentKeypointsSerializer

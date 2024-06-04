@@ -189,11 +189,11 @@ openai_api_key = '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'
 class DocumentSummarySerializer(serializers.ModelSerializer):
     added_by = UserCreateSerializer(many=False, read_only=True)
     document = serializers.UUIDField(write_only=True)
-    file = serializers.FileField(write_only=True)
+    # file = serializers.FileField(write_only=True)
     # created_at = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = DocumentSummary
-        fields = ['id', 'content', 'company', 'prompt_text', 'document', 'updated_at', 'added_by', 'file']
+        fields = ['id', 'document', 'updated_at', 'added_by']
 
     def validate_prompt_text(self, value):
         request = self.context.get('request')
@@ -328,3 +328,16 @@ class AddUserToDepartmentSerializer(serializers.Serializer):
             department.users.add(user)
             department.save()
         return user
+    
+    
+class CreateSummarySerializer(serializers.Serializer):
+    class Meta:
+        model = DepartmentsDocuments
+        fields = ['document']
+        
+        
+class CreateKeypointsSerializer(serializers.Serializer):
+    class Meta:
+        # model = 
+        fields = ['document']
+        

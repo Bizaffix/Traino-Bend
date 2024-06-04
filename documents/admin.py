@@ -197,9 +197,6 @@ class CustomDocumentAdmin(ModelAdmin):
         if dkp is None:
             dkp = DocumentKeyPoints(content='', prompt_text='concise outline in numeric order list', company_id = int(obj.company_id), document_id= str(obj.id), added_by_id= str(cur_user_id))
             dkp.save()
-
-            
-
     # def has_delete_permission(self, request, obj=None):
     #     return False
 
@@ -210,79 +207,79 @@ class CustomDocumentAdmin(ModelAdmin):
 
     #     return super().changeform_view(request, object_id, form_url, extra_context=extra_context)
 
-class DocumentSummaryAdmin(ModelAdmin):
+# class DocumentSummaryAdmin(ModelAdmin):
 
-    model = DocumentSummary
-    list_display = ('document', 'prompt_text')
-    list_filter = ('document',)
-    search_fields = ('prompt_text','content')
-    readonly_fields = ('id',)
+#     model = DocumentSummary
+#     list_display = ('id' , 'document', 'summary')
+#     list_filter = ('document',)
+#     search_fields = ('document','summary')
+#     readonly_fields = ('id',)
 
     
-    fieldsets = (
-        (None, {'fields': ('content', 'prompt_text')}),
-    )
+#     fieldsets = (
+#         (None, {'fields': ('document', 'summary')}),
+#     )
 
-    def get_list_display(self, request):
-        if request.user.role == 'Admin':
-            self.list_display = ('document', )
-        else:
-            self.list_display = ('document', 'prompt_text')
-        return super().get_list_display(request)
+#     def get_list_display(self, request):
+#         if request.user.role == 'Admin':
+#             self.list_display = ('document', )
+#         else:
+#             self.list_display = ('id', 'document', 'summary')
+#         return super().get_list_display(request)
 
-    def get_fieldsets(self, request, obj=None):
-        if request.user.role == 'Admin':
-            self.fieldsets = (
-                (None, {'fields': ('content',)}),
-            )
-        else:
-            self.fieldsets = (
-                (None, {'fields': ('content', 'prompt_text')}),
-            )
-        return super().get_fieldsets(request, obj)
+#     def get_fieldsets(self, request, obj=None):
+#         if request.user.role == 'Admin':
+#             self.fieldsets = (
+#                 (None, {'fields': ('summary',)}),
+#             )
+#         else:
+#             self.fieldsets = (
+#                 (None, {'fields': ('document', 'summary')}),
+#             )
+#         return super().get_fieldsets(request, obj)
 
-    def render_change_form(self, request, context, *args, **kwargs):
-        """We need to update the context to show the button."""
+#     def render_change_form(self, request, context, *args, **kwargs):
+#         """We need to update the context to show the button."""
         
-        if request.user.role == 'Admin':
-            context.update({'show_generate_button': False})  
-        else:
-            context.update({'show_generate_button': True})  
+#         if request.user.role == 'Admin':
+#             context.update({'show_generate_button': False})  
+#         else:
+#             context.update({'show_generate_button': True})  
 
-        return super().render_change_form(request, context, *args, **kwargs)
+#         return super().render_change_form(request, context, *args, **kwargs)
 
 
-    def has_delete_permission(self, request, obj=None):
-        return False
-    def has_add_permission(self, request, obj=None):
-        return False
+#     def has_delete_permission(self, request, obj=None):
+#         return False
+#     def has_add_permission(self, request, obj=None):
+#         return False
 
 class DocumentKeyPointsAdmin(ModelAdmin):
 
     model = DocumentKeyPoints
-    list_display = ('document', 'prompt_text')
-    list_filter = ('document',)
-    search_fields = ('prompt_text','content')
+    list_display = ('id','keypoints','document')
+    list_filter = ('id','keypoints','document')
+    search_fields = ('id','keypoints','document')
     
     fieldsets = (
-        (None, {'fields': ('content', 'prompt_text')}),
+        (None, {'fields': ('keypoints','document')}),
     )
 
     def get_list_display(self, request):
         if request.user.role == 'Admin':
-            self.list_display = ('document', )
+            self.list_display = ('id','keypoints','document')
         else:
-            self.list_display = ('document', 'prompt_text')
+            self.list_display = ('id','keypoints','document')
         return super().get_list_display(request)
 
     def get_fieldsets(self, request, obj=None):
         if request.user.role == 'Admin':
             self.fieldsets = (
-                (None, {'fields': ('content',)}),
+                (None, {'fields': ('keypoints',)}),
             )
         else:
             self.fieldsets = (
-                (None, {'fields': ('content', 'prompt_text')}),
+                (None, {'fields': ('id','keypoints','document')}),
             )
         return super().get_fieldsets(request, obj)
 
@@ -481,8 +478,8 @@ class DocumentQuizAdmin(ModelAdmin):
     
 
 admin.site.register(UserDocuments, CustomDocumentAdmin)
-admin.site.register(DocumentSummary, DocumentSummaryAdmin)
-admin.site.register(DocumentKeyPoints, DocumentKeyPointsAdmin)
+admin.site.register(DocumentSummary)
+admin.site.register(DocumentKeyPoints)#, DocumentKeyPointsAdmin
 admin.site.register(DocumentQuiz, DocumentQuizAdmin)
 
 

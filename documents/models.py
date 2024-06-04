@@ -37,20 +37,20 @@ class DocumentTeam(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assignee_user', default=0)
     is_assigned = models.BooleanField(default=False)
     notify_frequency =models.CharField(max_length = 2, default = '0')
+
 from company.models import company
 from departments.models import DepartmentsDocuments
+
 class DocumentSummary(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True , unique=True)
-    content = models.TextField(blank=True, null=True)
-    prompt_text = models.CharField(max_length = 255, blank=True, null=True)
-    company = models.ForeignKey(company, on_delete=models.CASCADE, related_name='summary_company')
+    summary = models.TextField(blank=True, null=True)
     document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE, related_name='summary_document')
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="summary_added_by")
     # is_active= models.BooleanField(default=True)
 
-    REQUIRED_FIELDS = ['prompt_text', 'document']
+    REQUIRED_FIELDS = ['summary', 'document']
 
     def __str__(self):
         if self.document.name is not None:
@@ -62,18 +62,17 @@ class DocumentSummary(models.Model):
     
 class DocumentKeyPoints(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
-    content = models.TextField(blank=True, null=True)
-    prompt_text = models.CharField(max_length = 255, blank=True, null=True)
-    company = models.ForeignKey(company, on_delete=models.CASCADE, related_name='keypoint_company')
+    keypoints = models.TextField(blank=True, null=True)
     document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="keypoint_added_by")
-    is_active = models.BooleanField(default=True)
+    # is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.document.name
-    
+        if self.document.name is not None:
+            return self.document.name
+        return "Failed To load Name"
     class Meta:
         verbose_name = ("Keypoints")
         verbose_name_plural = ("Keypoints")

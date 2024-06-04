@@ -58,9 +58,9 @@ class CompanyListApiView(ListAPIView):
     authentication_classes = [JWTAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
     permission_classes =[IsAdminUserOrReadOnly]
-    search_fields = ['name', 'company_id', 'logo', 'phone', 'country', 'address', 'city', 'fax', 'state_or_province', 'zip_code', 'website_url']
-    ordering_fields = ['name', 'company_id', 'logo', 'phone', 'country', 'address', 'city', 'fax', 'state_or_province', 'zip_code', 'website_url']
-    ordering = ['name', 'company_id', 'logo', 'phone', 'country', 'address', 'city', 'fax', 'state_or_province', 'zip_code', 'website_url']  # Default ordering (A-Z by company_name)
+    search_fields = ['id','name', 'company_id', 'logo', 'phone', 'country', 'address', 'city', 'fax', 'state_or_province', 'zip_code', 'website_url']
+    ordering_fields = ['id','name', 'company_id', 'logo', 'phone', 'country', 'address', 'city', 'fax', 'state_or_province', 'zip_code', 'website_url']
+    ordering = ['id','name', 'company_id', 'logo', 'phone', 'country', 'address', 'city', 'fax', 'state_or_province', 'zip_code', 'website_url']  # Default ordering (A-Z by company_name)
     
     def get_queryset(self):
         queryset = company.objects.filter(is_active=True)
