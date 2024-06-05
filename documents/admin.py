@@ -480,7 +480,8 @@ class DocumentQuizAdmin(ModelAdmin):
 admin.site.register(UserDocuments, CustomDocumentAdmin)
 admin.site.register(DocumentSummary)
 admin.site.register(DocumentKeyPoints)#, DocumentKeyPointsAdmin
-admin.site.register(DocumentQuiz, DocumentQuizAdmin)
+admin.site.register(DocumentQuiz)
+admin.site.register(QuizQuestions)
 
 
 # Register your models here.

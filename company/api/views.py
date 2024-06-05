@@ -115,9 +115,9 @@ class AdminListApiView(ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminListOrReadOnly]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['admin__first_name','admin__last_name', 'admin__email' , 'admin__role', 'admin__created_at', 'admin__updated_at', 'company__name']
-    ordering_fields = ['admin__first_name','admin__last_name', 'admin__email' , 'admin__role', 'admin__created_at', 'admin__updated_at', 'company__name']
-    ordering = ['admin__first_name','admin__last_name', 'admin__email' , 'admin__role', 'admin__created_at', 'admin__updated_at', 'company__name']  # Default ordering (A-Z by company_name)
+    search_fields = ['id','admin__first_name','admin__last_name', 'admin__email' , 'admin__role', 'admin__created_at', 'admin__updated_at', 'company__name']
+    ordering_fields = ['id','admin__first_name','admin__last_name', 'admin__email' , 'admin__role', 'admin__created_at', 'admin__updated_at', 'company__name']
+    ordering = ['id','admin__first_name','admin__last_name', 'admin__email' , 'admin__role', 'admin__created_at', 'admin__updated_at', 'company__name']  # Default ordering (A-Z by company_name)
     queryset = AdminUser.objects.filter(is_active=True)
 
     def get_queryset(self):

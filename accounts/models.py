@@ -98,6 +98,7 @@ class MyAdminSite(AdminSite):
             "Companys":9,
             "Company Team Members":10,
             "Company Users":11,
+            "Questions":12,
         }
 
         app_dict = self._build_app_dict(request, app_label)

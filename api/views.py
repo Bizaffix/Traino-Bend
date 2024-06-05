@@ -121,7 +121,7 @@ def generateDocumentSummary(request):
             if error.code == 'insufficient_quota':
                 raise serializers.ValidationError("You exceeded your current quota, please check your plan and billing details.")
             else:
-                print(error)
+                # print(error)
                 raise serializers.ValidationError("Your document content is too large, Please try with some other document.")
             
     else:
@@ -138,7 +138,7 @@ def generateDocumentKeypoints(keypoint_id, document_id, prompt_text):
             #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
             llm = ChatOpenAI(model_name='gpt-3.5-turbo')
             #print("test: 2")
-            print(document.file.path)
+            # print(document.file.path)
             text = readPDFFile(document.file.path)
             #print("test: 3")
 
@@ -619,15 +619,11 @@ class AddUserToDepartmentView(APIView):
 
         return Response({"detail": "Your account is restricted. You cannot perform this task."}, status=status.HTTP_401_UNAUTHORIZED)            
 from PyPDF2 import PdfReader
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 from departments.models import DepartmentsDocuments
 from django.shortcuts import get_object_or_404
-from .utils import generate_summary_from_gpt , generate_keypoints_from_gpt
+from .utils import *
 import logging
-from .serializers import CreateSummarySerializer , CreateKeypointsSerializer
-import chardet
-import pdfplumber
+from .serializers import *
 
 logger = logging.getLogger(__name__)
 class CreateSummaryApiView(APIView):
@@ -691,7 +687,7 @@ class CreateSummaryApiView(APIView):
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
 
-            content = self.read_file_content(document.file)
+            content = read_file_content(document.file)
             
             if content is None:
                 return Response({"error": "Unable to decode file content"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -715,58 +711,6 @@ class CreateSummaryApiView(APIView):
             
             return Response({"id":created_summary.id , "summary":f"{created_summary.summary}"}, status=status.HTTP_200_OK)
         return Response({"Access Denied":"You Are not Allowed to create summary"}, status=status.HTTP_401_UNAUTHORIZED)
-
-    def read_file_content(self, file):
-        file_type = file.name.split('.')[-1].lower()
-        if file_type == 'pdf':
-            return self.read_pdf_content(file)
-        elif file_type == 'txt':
-            return self.read_text_file_content(file)
-        else:
-            logger.error("Unsupported file type.")
-            return None
-        
-    def read_pdf_content(self, file):
-        try:
-            pdf_content = []
-            with pdfplumber.open(file) as pdf:
-                for page in pdf.pages:
-                    text = page.extract_text()
-                    if text:
-                        pdf_content.append(text)
-            return "\n".join(pdf_content)
-        except Exception as e:
-            logger.error(f"Error reading PDF file: {e}")
-            return None
-
-    def read_text_file_content(self, file):
-        encodings = ['utf-8', 'latin-1']
-        content = None
-
-        for encoding in encodings:
-            try:
-                file.seek(0)  # Reset file pointer to the beginning
-                content = file.read().decode(encoding)
-                logger.info(f"Successfully decoded with encoding: {encoding}")
-                break
-            except UnicodeDecodeError:
-                logger.warning(f"Failed to decode with encoding: {encoding}")
-                continue  # Try next encoding if decoding fails
-
-        if content is None:
-            file.seek(0)
-            raw_data = file.read()
-            detected_encoding = chardet.detect(raw_data)['encoding']
-            try:
-                content = raw_data.decode(detected_encoding)
-                logger.info(f"Successfully decoded with detected encoding: {detected_encoding}")
-            except Exception as e:
-                logger.error(f"Failed to decode with detected encoding: {detected_encoding}, Error: {e}")
-
-        if content is None:
-            logger.error("Unable to decode file content with any encoding")
-        
-        return content
 
 class CreateKeypointsApiView(APIView):
     serializer_class = CreateKeypointsSerializer
@@ -822,9 +766,6 @@ class CreateKeypointsApiView(APIView):
 
             if user.role == "Admin":
                 admin = AdminUser.objects.get(admin=user, is_active=True)
-                # print(str(admin.company.id))
-                # print(str(document.department.company.id))
-                # print(str(admin.company.id) != str(document.department.company.id))
                 if str(admin.company.id) != str(document.department.company.id):
                     return Response({"Access Denied":"You are not allowed to create the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -832,7 +773,7 @@ class CreateKeypointsApiView(APIView):
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
 
-            content = self.read_file_content(document.file)
+            content = read_file_content(document.file)
             
             if content is None:
                 return Response({"error": "Unable to decode file content"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -857,58 +798,167 @@ class CreateKeypointsApiView(APIView):
             return Response({"id":created_keypoint.id , "keypoints":f"{created_keypoint.keypoints}"}, status=status.HTTP_200_OK)
         return Response({"Access Denied":"You Are not Allowed to create keypoints"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    def read_file_content(self, file):
-        file_type = file.name.split('.')[-1].lower()
-        if file_type == 'pdf':
-            return self.read_pdf_content(file)
-        elif file_type == 'txt':
-            return self.read_text_file_content(file)
-        else:
-            logger.error("Unsupported file type.")
-            return None
-        
-    def read_pdf_content(self, file):
-        try:
-            pdf_content = []
-            with pdfplumber.open(file) as pdf:
-                for page in pdf.pages:
-                    text = page.extract_text()
-                    if text:
-                        pdf_content.append(text)
-            return "\n".join(pdf_content)
-        except Exception as e:
-            logger.error(f"Error reading PDF file: {e}")
-            return None
+from documents.models import QuizQuestions
 
-    def read_text_file_content(self, file):
-        encodings = ['utf-8', 'latin-1']
-        content = None
+import json
 
-        for encoding in encodings:
+class CreateQuizessApiView(APIView):
+    serializer_class = CreateQuizesSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    queryset = DepartmentsDocuments.objects.filter(is_active=True)
+
+    def post(self , request):
+        if request.user.role == "Admin":
+            document_id = request.data.get('document')
+            if not document_id:
+                return Response({"error":"document is required"}, status=status.HTTP_400_BAD_REQUEST)        
+            
             try:
-                file.seek(0)  # Reset file pointer to the beginning
-                content = file.read().decode(encoding)
-                logger.info(f"Successfully decoded with encoding: {encoding}")
-                break
-            except UnicodeDecodeError:
-                logger.warning(f"Failed to decode with encoding: {encoding}")
-                continue  # Try next encoding if decoding fails
+                document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+            except DepartmentsDocuments.DoesNotExist:
+                return Response({"error":"No Document Found"}, status=status.HTTP_404_NOT_FOUND)
 
-        if content is None:
-            file.seek(0)
-            raw_data = file.read()
-            detected_encoding = chardet.detect(raw_data)['encoding']
+            user = request.user
+
+            if user.role == "Admin":
+                admin = AdminUser.objects.get(admin=user, is_active=True)
+                if str(admin.company.id) != str(document.department.company.id):
+                    return Response({"Access Denied":"You are not allowed to create the Quiz of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+            if not document.file:
+                return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
+
+            content = read_file_content(document.file)
+            
+            if content is None:
+                return Response({"error": "Unable to decode file content"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            if not content.strip():
+                logger.error("Decoded content is empty")
+                return Response({"error": "Decoded content is empty"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            logger.info(f"Decoded content: {content[:100]}")  # Log the first 100 characters of the content
+
             try:
-                content = raw_data.decode(detected_encoding)
-                logger.info(f"Successfully decoded with detected encoding: {detected_encoding}")
+                quiz = generate_quizes_from_gpt(content)
+                if quiz is None:
+                    return Response({"error": "Failed to generate quiz"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             except Exception as e:
-                logger.error(f"Failed to decode with detected encoding: {detected_encoding}, Error: {e}")
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            created_quiz = DocumentQuiz.objects.create(
+                name= document.name,
+                quiz=quiz,
+                document = document,
+                added_by = self.request.user                
+            ) 
+            
+            # response_data = json.loads(quiz)
+            
+            questions_data = quiz.split("Question:")
 
-        if content is None:
-            logger.error("Unable to decode file content with any encoding")
-        
-        return content
-    
+            # Iterate through the questions and create QuizQuestions objects
+            for question_data in questions_data[1:]:
+                lines = question_data.strip().split("\n")
+
+                # Extract question text
+                question_text = lines[0].strip()
+
+                # Extract options and correct answer
+                options = {}
+                correct_answer = None
+                for line in lines[1:]:
+                    parts = line.split(": ")
+                    if len(parts) >= 2:  # Check if there are at least two elements
+                        option = parts[0].strip()
+                        text = parts[1].strip()
+                        if parts[0].strip() == "Correct Answer":
+                            correct_answer = parts[1].strip()
+                            # print(correct_answer)
+                        options[option] = text
+                # Create QuizQuestions object
+                quiz_question = QuizQuestions.objects.create(
+                    question=question_text,
+                    option_1=options.get("A"),
+                    option_2=options.get("B"),
+                    option_3=options.get("C"),
+                    option_4=options.get("D"),
+                    answer=correct_answer,
+                    quiz=created_quiz,  # Assuming 'created_quiz' is the instance of DocumentQuiz created earlier
+                    added_by=request.user  # Assuming 'request' is available in this context
+                )
+            return Response({"id":created_quiz.id , "quiz":f"{created_quiz.quiz}"}, status=status.HTTP_200_OK)
+        return Response({"Access Denied":"You Are not Allowed to create quiz"}, status=status.HTTP_401_UNAUTHORIZED)
+
+from .permissions import IsAssociatedWithDepartment
+
+class SubmitQuizView(APIView):
+    # permission_classes = [IsAssociatedWithDepartment]
+    def post(self, request):
+        if request.user.role == "Admin" or request.user.role == "Super Admin":
+            return Response({"Access Denied":"You are not authorized for this request"} , status = status.HTTP_401_UNAUTHORIZED)
+        elif request.user.role == "User":
+            member = CompaniesTeam.objects.filter(members=request.user, is_active=True).first()
+            user_departments = Departments.objects.filter(users=member, is_active=True)
+            if not user_departments.exists():
+                return Response({"Not Found":"Department Not Found"}, status=status.HTTP_401_UNAUTHORIZED)
+            quiz_id = request.data.get("quiz_id")
+            document = DocumentQuiz.objects.filter(id=quiz_id).first()
+            
+            if not document:
+                return Response({"Not Found": "Document Not Found"}, status=status.HTTP_404_NOT_FOUND)
+            
+            document_department = document.document.department
+
+            if not user_departments.filter(id=document_department.id).exists():
+                return Response({"Access Denied": "You are not allowed to submit quiz for this document"}, status=status.HTTP_403_FORBIDDEN)
+
+            answers = request.data.get("answers", [])
+
+            # Fetch the quiz questions for the provided quiz_id
+            quiz_questions = QuizQuestions.objects.filter(quiz_id=quiz_id)
+
+            if not quiz_questions.exists():
+                return Response({"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            # Validate the answers
+            total_questions = len(quiz_questions)
+            correct_answers = 0
+            for answer_data in answers:
+                question_id = answer_data.get("question_id")
+                selected_option = answer_data.get("option")
+
+                # Fetch the question from the database
+                try:
+                    question = quiz_questions.get(id=question_id)
+                except QuizQuestions.DoesNotExist:
+                    return Response({"error": f"Question with id {question_id} not found in the quiz"}, status=status.HTTP_404_NOT_FOUND)
+
+                # Check if the selected option is correct
+                if question.answer == selected_option:
+                    correct_answers += 1
+
+            # Calculate the score
+            score = (correct_answers / total_questions) * 100
+
+            if score > 33:
+                status_test = "Pass"
+            else:
+                status_test = "Fail"
+
+            # # Create a quiz submission record
+            # submission = QuizSubmission.objects.create(
+            #     user=request.user,
+            #     quiz_id=quiz_id,
+            #     score=score
+            # )
+
+            return Response({"Score": score , "Status":status_test}, status=status.HTTP_200_OK)
+        else:
+            return Response({"Access Denied":"Unauthorized Access Requested"}, status=status.HTTP_401_UNAUTHORIZED)
+
 class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
     queryset = DocumentSummary.objects.all()
     serializer_class = DocumentSummarySerializer

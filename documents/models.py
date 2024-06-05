@@ -80,14 +80,11 @@ class DocumentKeyPoints(models.Model):
 class DocumentQuiz(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
     name = models.CharField(max_length = 255)
-    content = models.TextField(blank=True, null=True)
-    prompt_text = models.CharField(max_length = 255, blank=True, null=True)
-    company = models.ForeignKey(company, on_delete=models.CASCADE, related_name='quiz_company')
+    quiz = models.TextField(blank=True, null=True)
     document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="quiz_added_by")
-    is_active = models.BooleanField(default=True)
     
     def __str__(self):
         return self.name
@@ -104,16 +101,13 @@ class QuizQuestions(models.Model):
     option_3 = models.CharField(max_length = 255, blank=True, null=True)
     option_4 = models.CharField(max_length = 255, blank=True, null=True)    
     answer = models.CharField(max_length = 2, blank=True, null=True)
-    company = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='quiz_question_company')
     quiz = models.ForeignKey(DocumentQuiz, on_delete=models.CASCADE)
-    document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="quiz_question_added_by")
-    is_active = models.BooleanField(default=True)
     
     def __str__(self):
-        return self.question or ''
+        return self.question
     
     class Meta:
         verbose_name = ("Question")

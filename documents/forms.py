@@ -27,7 +27,7 @@ def validate_answer(value):
 class QuizQuestionsForm(forms.ModelForm):
     class Meta:
         model = QuizQuestions
-        fields = ('id','question','option_1', 'option_2', 'option_3', 'option_4','answer', 'document',)
+        fields = ('id','question','option_1', 'option_2', 'option_3', 'option_4','answer')
         # exclude = ('document', )
     
     def __init__(self, *args, **kwargs):

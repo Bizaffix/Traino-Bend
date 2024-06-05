@@ -2,7 +2,7 @@ from djoser.serializers import UserCreateSerializer
 from accounts.models import CustomUser, CompanyTeam
 from departments.models import Departments , DepartmentsDocuments
 from documents.serializers import DepartmentsDocumentsSerializer
-from documents.models import UserDocuments, DocumentKeyPoints, DocumentQuiz, DocumentSummary
+from documents.models import UserDocuments, DocumentKeyPoints, DocumentQuiz, DocumentSummary, QuizQuestions
 from rest_framework import  serializers
 from django.db.models import Q
 
@@ -308,9 +308,9 @@ class AddUserToDepartmentSerializer(serializers.Serializer):
             raise serializers.ValidationError("User not found or inactive.")
 
         department_ids = data['department_ids']
-        print(department_ids)
+        # print(department_ids)
         for dept_id in department_ids:
-            print(dept_id.id)
+            # print(dept_id.id)
             department = Departments.objects.filter(name=dept_id, is_active=True).first()
             if not department:
                 raise serializers.ValidationError(f"Department with id {dept_id} not found.")
@@ -338,6 +338,20 @@ class CreateSummarySerializer(serializers.Serializer):
         
 class CreateKeypointsSerializer(serializers.Serializer):
     class Meta:
-        # model = 
+        model = DepartmentsDocuments
         fields = ['document']
         
+class CreateQuizesSerializer(serializers.Serializer):
+    class Meta:
+        model = DepartmentsDocuments
+        fields = ['document']
+
+
+class QuizQuestionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizQuestions
+        fields = '__all__'
+
+class SubmittedAnswerSerializer(serializers.Serializer):
+    question_id = serializers.UUIDField()
+    selected_option = serializers.CharField(max_length=2)
