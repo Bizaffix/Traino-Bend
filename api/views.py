@@ -365,7 +365,7 @@ class DepartmentListApiView(ListAPIView):
             queryset = Departments.objects.filter(is_active=True)
             company_id = self.request.query_params.get('company_id', None)
             if company_id is not None:
-                queryset = queryset.filter(company__id=company_id)
+                queryset = queryset.filter(company__id=company_id).distinct()
             return queryset
             
 from .serializers import CompanyDepartmentsSerializers
