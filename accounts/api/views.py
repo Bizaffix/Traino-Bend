@@ -164,9 +164,9 @@ class CustomUserUpdateAPIView(UpdateAPIView):
         #     return Response({"Account Access Errors": "You don't have permission to update this Account Holder's Details."},
         #                     status=status.HTTP_403_FORBIDDEN)
 
-        if request.user.role == 'Super Admin' and instance.role != 'Admin':
-            return Response({"error": "Super Admin can only update Admins."}, status=status.HTTP_403_FORBIDDEN)
-        elif request.user.role == 'Admin' and instance.role != 'User':
+        # if request.user.role == 'Super Admin':
+        #     return Response({"error": "Super Admin can only update Admins."}, status=status.HTTP_403_FORBIDDEN)
+        if request.user.role == 'Admin' and instance.role != 'User':
             return Response({"error": "Admin can only update Users."}, status=status.HTTP_403_FORBIDDEN)
 
         if 'role' in request.data and request.data['role'] != instance.role:
