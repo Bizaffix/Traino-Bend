@@ -58,13 +58,15 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
     """
     def has_permission(self, request, view):
         # Allow GET, HEAD, or OPTIONS requests (read-only)
-        if (request.user and request.user.is_authenticated and request.user.role == 'Super Admin')or (request.user and request.user.is_authenticated and request.user.role == 'User'):#
+        if (request.user and request.user.is_authenticated and request.user.role == 'User'):#
             if request.method in permissions.SAFE_METHODS:
                 return True
-        return request.user and request.user.is_authenticated and request.user.role == 'Admin' 
+        return request.user and request.user.is_authenticated and request.user.role == 'Admin' or request.user and request.user.is_authenticated and request.user.role == 'Super Admin' 
 
     def has_object_permission(self, request, view, obj):
         # Check if the requesting user is associated with the same company as the admin
+        if request.user.role == 'Super Admin':
+            return (request.user and request.user.is_authenticated and request.user.role == 'Super Admin')
         try:
             admin = AdminUser.objects.get(admin=request.user, is_active=True)
         except AdminUser.DoesNotExist:
@@ -74,4 +76,4 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         if isinstance(obj, CompaniesTeam):
             return obj.company == admin.company
 
-        return request.user and request.user.is_authenticated and request.user.role == 'Admin' and obj.company == admin.company
+        return (request.user and request.user.is_authenticated and request.user.role == 'Admin' and obj.company == admin.company)

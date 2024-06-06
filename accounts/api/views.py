@@ -29,9 +29,7 @@ class CustomUserCreateAPIView(CreateAPIView):
     permission_classes = [IsAdminUserOrReadOnly]  
     def create(self, request, *args, **kwargs):
         if request.user.role == 'Super Admin':
-            if request.data.get('role') != 'Admin':
-                return Response({"error": "Super Admin can only create Admins."},
-                                status=status.HTTP_403_FORBIDDEN)
+            pass
         elif request.user.role == 'Admin':
             if request.data.get('role') != 'User':
                 return Response({"error": "Admin can only create Users."},

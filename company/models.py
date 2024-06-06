@@ -10,7 +10,7 @@ import os
 class company(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
     name = models.CharField(max_length=50)
-    company_id = models.CharField(max_length=50)
+    company_id = models.CharField(max_length=50, null=True, blank=True)
     logo = models.ImageField(upload_to='media/company_logos', null=True, blank=True)
     country = CountryField()
     phone = PhoneNumberField()

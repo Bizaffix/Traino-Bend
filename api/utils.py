@@ -23,7 +23,7 @@ def generate_summary_from_gpt(content):
         max_tokens=2000  # Adjust the max tokens based on the required summary length
     )
     summary = response.choices[0].message['content'].strip()
-    return summary
+    return summary , prompt
 
 
 # Key-Points Generations from gpt
@@ -39,7 +39,7 @@ def generate_keypoints_from_gpt(content):
         max_tokens=2000  # Adjust the max tokens based on the required summary length
     )
     summary = response.choices[0].message['content'].strip()
-    return summary
+    return summary , prompt
 
 
 # Quizes Generations from gpt
@@ -56,7 +56,7 @@ def generate_quizes_from_gpt(content):
     )
     quiz = response.choices[0].message['content'].strip()
     # Extracting individual questions from the generated text
-    return quiz
+    return quiz , prompt
 
 
 def read_file_content(file):

@@ -44,6 +44,7 @@ from departments.models import DepartmentsDocuments
 class DocumentSummary(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True , unique=True)
     summary = models.TextField(blank=True, null=True)
+    prompt = models.TextField(blank=True, null=True)
     document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE, related_name='summary_document')
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
@@ -63,6 +64,7 @@ class DocumentSummary(models.Model):
 class DocumentKeyPoints(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
     keypoints = models.TextField(blank=True, null=True)
+    prompt = models.TextField(blank=True, null=True)
     document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
@@ -81,6 +83,7 @@ class DocumentQuiz(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
     name = models.CharField(max_length = 255)
     quiz = models.TextField(blank=True, null=True)
+    prompt = models.TextField(blank=True, null=True)
     document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
