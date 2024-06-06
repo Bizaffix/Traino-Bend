@@ -647,15 +647,20 @@ class CreateSummaryApiView(APIView):
         if user.role == "Super Admin":
             pass
         elif user.role == "Admin":
-            admin = AdminUser.objects.get(admin=user, is_active=True)
-            if str(admin.company.id) != str(document.department.company.id):
-                return Response({"Access Denied":"You are not allowed to view the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+            admin = AdminUser.objects.get(admin=user)
+            if admin.is_active == True:
+                if str(admin.company.id) != str(document.department.company.id):
+                    return Response({"Access Denied":"You are not allowed to view the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
         elif user.role == "User":
-            member = CompaniesTeam.objects.filter(members=user, is_active=True).first()
-            user_departments = Departments.objects.filter(users=member, is_active=True)
-            if not user_departments.exists():
-                return Response({"No Association": "You are no longer associated with this department"}, status=status.HTTP_403_FORBIDDEN)
-
+            member = CompaniesTeam.objects.filter(members=user).first()
+            if member.is_active == True:
+                user_departments = Departments.objects.filter(users=member, is_active=True)
+                if not user_departments.exists():
+                    return Response({"No Association": "You are no longer associated with this department"}, status=status.HTTP_403_FORBIDDEN)
+            else:
+                raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
             if not user_departments.filter(id=document.department.id).exists():
                 return Response({"Access Denied": "You are not allowed to view the summary of this department"}, status=status.HTTP_403_FORBIDDEN)
         try:
@@ -681,9 +686,11 @@ class CreateSummaryApiView(APIView):
 
             if user.role == "Admin":
                 admin = AdminUser.objects.get(admin=user, is_active=True)
-                if str(admin.company.id) != str(document.department.company.id):
-                    return Response({"Access Denied":"You are not allowed to create the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
-
+                if admin.is_active == True:
+                    if str(admin.company.id) != str(document.department.company.id):
+                        return Response({"Access Denied":"You are not allowed to create the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -733,15 +740,20 @@ class CreateKeypointsApiView(APIView):
         if user.role == "Super Admin":
             pass
         elif user.role == "Admin":
-            admin = AdminUser.objects.get(admin=user, is_active=True)
-            if str(admin.company.id) != str(document.department.company.id):
-                return Response({"Access Denied":"You are not allowed to view the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+            admin = AdminUser.objects.get(admin=user)
+            if admin.is_active == True:
+                if str(admin.company.id) != str(document.department.company.id):
+                    return Response({"Access Denied":"You are not allowed to view the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
         elif user.role == "User":
-            member = CompaniesTeam.objects.filter(members=user, is_active=True).first()
-            user_departments = Departments.objects.filter(users=member, is_active=True)
-            if not user_departments.exists():
-                return Response({"No Association": "You are no longer associated with this department"}, status=status.HTTP_403_FORBIDDEN)
-
+            member = CompaniesTeam.objects.filter(members=user).first()
+            if member.is_active == True:
+                user_departments = Departments.objects.filter(users=member, is_active=True)
+                if not user_departments.exists():
+                    return Response({"No Association": "You are no longer associated with this department"}, status=status.HTTP_403_FORBIDDEN)
+            else:
+                raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
             if not user_departments.filter(id=document.department.id).exists():
                 return Response({"Access Denied": "You are not allowed to view the summary of this department"}, status=status.HTTP_403_FORBIDDEN)
             
@@ -765,10 +777,12 @@ class CreateKeypointsApiView(APIView):
             user = request.user
 
             if user.role == "Admin":
-                admin = AdminUser.objects.get(admin=user, is_active=True)
-                if str(admin.company.id) != str(document.department.company.id):
-                    return Response({"Access Denied":"You are not allowed to create the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
-
+                admin = AdminUser.objects.get(admin=user)
+                if admin.is_active == True:
+                    if str(admin.company.id) != str(document.department.company.id):
+                        return Response({"Access Denied":"You are not allowed to create the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
 
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
@@ -822,10 +836,12 @@ class CreateQuizessApiView(APIView):
             user = request.user
 
             if user.role == "Admin":
-                admin = AdminUser.objects.get(admin=user, is_active=True)
-                if str(admin.company.id) != str(document.department.company.id):
-                    return Response({"Access Denied":"You are not allowed to create the Quiz of this document"}, status=status.HTTP_401_UNAUTHORIZED)
-
+                admin = AdminUser.objects.get(admin=user)
+                if admin.is_active == True:
+                    if str(admin.company.id) != str(document.department.company.id):
+                        return Response({"Access Denied":"You are not allowed to create the Quiz of this document"}, status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
 
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
@@ -900,10 +916,13 @@ class SubmitQuizView(APIView):
         if request.user.role == "Admin" or request.user.role == "Super Admin":
             return Response({"Access Denied":"You are not authorized for this request"} , status = status.HTTP_401_UNAUTHORIZED)
         elif request.user.role == "User":
-            member = CompaniesTeam.objects.filter(members=request.user, is_active=True).first()
-            user_departments = Departments.objects.filter(users=member, is_active=True)
-            if not user_departments.exists():
-                return Response({"Not Found":"Department Not Found"}, status=status.HTTP_401_UNAUTHORIZED)
+            member = CompaniesTeam.objects.filter(members=request.user).first()
+            if member.is_active==True:
+                user_departments = Departments.objects.filter(users=member, is_active=True)
+                if not user_departments.exists():
+                    return Response({"Not Found":"Department Not Found"}, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
             quiz_id = request.data.get("quiz_id")
             document = DocumentQuiz.objects.filter(id=quiz_id).first()
             

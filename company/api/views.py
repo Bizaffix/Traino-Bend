@@ -47,8 +47,34 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
+        
+        # Marked company as inactive
         instance.is_active = False
         instance.save()
+
+        # Marked all admin users as inactive
+        instance.company.all().update(is_active=False)
+
+        # Marked all departments and their related documents as inactive
+        departments = instance.department_company.all()
+        for department in departments:
+            department.is_active = False
+            department.save()
+
+            # Marked all department documents as inactive
+            documents = department.document_departments.all()
+            for document in documents:
+                document.is_active = False
+                document.save()
+
+                # Marked all summaries, keypoints, and quizzes related to the document as inactive
+                document.summary_document.all().delete()
+                document.documentkeypoints_set.all().delete()
+                document.documentquiz_set.all().delete()
+
+        # Marked all company teams as inactive
+        instance.company_teams.all().update(is_active=False)
+
         return Response({"Delete Status": "Successfully deleted the Company", "id": instance.id}, status=HTTP_202_ACCEPTED)
 
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -128,14 +154,17 @@ class AdminListApiView(ListAPIView):
         if self.request.user.role == 'Super Admin' or self.request.user.role == 'Admin': 
             company_id = self.request.query_params.get('company_id', None)
             if self.request.user.role == 'Admin':
-                admin = AdminUser.objects.get(admin=self.request.user, is_active=True)
-                if admin and str(company_id) == str(admin.company.id):
-                    queryset = AdminUser.objects.filter(is_active=True)
-                    if company_id:
-                        queryset = queryset.filter(company__id=company_id)
-                    return queryset
+                admin = AdminUser.objects.get(admin=self.request.user)
+                if admin.is_active == True:
+                    if str(company_id) == str(admin.company.id):
+                        queryset = AdminUser.objects.filter(is_active=True)
+                        if company_id:
+                            queryset = queryset.filter(company__id=company_id)
+                        return queryset
+                    else:
+                        return Response({"Unauthorized": "You are not allowed to see the admins of this company"}, status=status.HTTP_401_UNAUTHORIZED)
                 else:
-                    raise serializers.ValidationError({"Not Allowed":"You are not allowed"})
+                    raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
             else:
                 queryset = AdminUser.objects.filter(is_active=True)
                 company_id = self.request.query_params.get('company_id', None)

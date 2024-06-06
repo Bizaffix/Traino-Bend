@@ -486,48 +486,6 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
             "created_documents": created_documents
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
-
-    # def perform_create(self, serializer):
-    #     documents = serializer.save(added_by=self.request.user)
-    #     schedule_time = serializer.validated_data.get('schedule_time', timezone.now())
-
-    #     for document in documents:
-    #         document.scheduled_time = schedule_time
-    #         document.save()
-
-    #     return documents
-
-    # def create(self, request, *args, **kwargs):
-    #     # print(request.data)  # Debugging line to check input data
-    #     name = request.data.get('name')
-    #     document = DepartmentsDocuments.objects.filter(name=name, is_active=True)
-    #     if document:
-    #         raise serializers.ValidationError({"Document Exists":f"Document with name {name} already exists"})
-        
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     documents = self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)
-    #     response_data = {
-    #         "message": "Documents created successfully.",
-    #         "documents": [doc.id for doc in documents]
-    #     }
-    #     return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
-    
-    # def perform_create(self, serializer):
-    #     department_id = self.request.data.get('department')
-    #     name = self.request.data.get('name')
-    #     try:
-    #         company_name = DepartmentsDocuments.objects.get(name=name, is_active=True)
-    #         if company_name:
-    #             raise serializers.ValidationError(
-    #                 {"Document Exists": f"Document of this name {name} already exists"})
-    #     except DepartmentsDocuments.DoesNotExist:
-    #         # User does not exist, so continue with user creation
-    #         pass
-    #     department = Departments.objects.get(id=department_id)
-    #     serializer.save(added_by=self.request.user, department=department)
-
         
 from rest_framework import serializers
 from rest_framework.filters import SearchFilter, OrderingFilter 
@@ -565,13 +523,15 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                     queryset = queryset.filter(department__company=admin_company)
                     # return queryset
                 except AdminUser.DoesNotExist:
-                    raise serializers.ValidationError({"Account Error": "Your Account is Restricted. You cannot perform this request."})
+                    raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
 
             return queryset
 
         if user.role == "User":
             try:
-                user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+                user_teams = CompaniesTeam.objects.filter(members=user)
+                if user_teams.is_active != True:
+                    raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
                 user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
                 queryset = DepartmentsDocuments.objects.filter(department__in=user_departments, is_active=True)
                 if department_id:
@@ -581,18 +541,9 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                     raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."}, code="data_not_found")
                 return queryset
             except CompaniesTeam.DoesNotExist:
-                raise serializers.ValidationError({"Account Restriction": "You are not authorized to perform this task"}, code="account_restriction")
+                raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
 
-        raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized/")
-        # except Exception as e:
-        #     logger.error(f"Error occurred: {str(e)}")
-        #     raise
-            
-    # def handle_exception(self, exc):
-    #     if isinstance(exc, serializers.ValidationError):
-    #         return Response({"detail": exc.detail, "code": exc.get_codes()}, status=status.HTTP_400_BAD_REQUEST)
-    #     return super().handle_exception(exc)
-    
+        raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized/")    
 class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     serializer_class = DepartmentsDocumentsCreateSerializer

@@ -59,7 +59,7 @@ class MembersListApiView(ListAPIView):
                 admin_user = AdminUser.objects.get(admin=user, is_active=True)
                 company = admin_user.company
             except AdminUser.DoesNotExist:
-                raise serializers.ValidationError({"Admin Error":"Admin Account is Deleted By Super Admin. You can no longer request that"})
+                raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
 
             queryset = CompaniesTeam.objects.filter(company=company, is_active=True)
 

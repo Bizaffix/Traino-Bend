@@ -254,7 +254,7 @@ class LoginAPIView(APIView):
                             'created_at': serializer.data['created_at'],
                         }
                     else:
-                        return Response({"Not Found":"No Account Found against these credentials"} , status=status.HTTP_404_NOT_FOUND)
+                        return Response({"Unauthorized": "You are blocked or deleted"}, status=status.HTTP_401_UNAUTHORIZED)
                 elif serializer.data['role'] == 'User':
                     user_company = CompaniesTeam.objects.get(members=serializer.data['id'])
                     # print(user.company.id)
@@ -278,7 +278,7 @@ class LoginAPIView(APIView):
                             'created_at': serializer.data['created_at'],
                         }
                     else:
-                        return Response({"Not Found":"No Account Found Against These Credentials"}, status=status.HTTP_404_NOT_FOUND)
+                        return Response({"Unauthorized": "You are blocked or deleted"}, status=status.HTTP_401_UNAUTHORIZED)
                 else:
                     user_data = CustomUser.objects.get(email=email)
                     serializer = CustomUserDetailSerializer(user_data)
@@ -336,7 +336,7 @@ class UserDetailAPIView(APIView):
                         'created_at': serializer.data['created_at'],
                     }
                 else:
-                    return Response({"Not Found": "No account found against these credentials"}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({"Unauthorized": "You are blocked or deleted"}, status=status.HTTP_401_UNAUTHORIZED)
             elif serializer.data['role'] == 'User':
                 user_company = get_object_or_404(CompaniesTeam, members=user.id)
                 if user_company.is_active:
@@ -358,7 +358,7 @@ class UserDetailAPIView(APIView):
                         'created_at': serializer.data['created_at'],
                     }
                 else:
-                    return Response({"Not Found": "No account found against these credentials"}, status=status.HTTP_404_NOT_FOUND)
+                    return Response({"Unauthorized": "You are blocked or deleted"}, status=status.HTTP_401_UNAUTHORIZED)
             else:
                 # refresh = RefreshToken.for_user(user)
                 # token = {
