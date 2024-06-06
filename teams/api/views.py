@@ -108,7 +108,7 @@ class MembersListApiView(ListAPIView):
 from rest_framework.views import APIView
         
 class BulkUserDeleteAPIView(APIView):
-    permission_classes = [IsAdminUserOrReadOnly, IsActiveAdminUsersPermission]
+    permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
     def post(self, request, format=None):
         # Extract the list of user IDs from the request data
@@ -117,24 +117,36 @@ class BulkUserDeleteAPIView(APIView):
         # Validate that user IDs are provided
         if not user_ids:
             return Response({"message": "User IDs are required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            admin = AdminUser.objects.get(admin=request.user, is_active=True)
-        except AdminUser.DoesNotExist:
-            return False
-
-        # Check if the user to be deleted belongs to the same company as the admin
-        # Update the is_active field of each user
-        for user_id in user_ids:
+        
+        if request.user.role == 'Admin':        
             try:
-                user = CompaniesTeam.objects.get(id=user_id)
-                if isinstance(user, CompaniesTeam):
-                    if user.company == admin.company:
-                        user.is_active = False
-                        user.save()
-                    else:
-                        return Response({"Access Denied": "You are not authorized for this request"}, status=status.HTTP_403_FORBIDDEN)
-            except CompaniesTeam.DoesNotExist:
-                return Response({"message": f"User with ID {user_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+                admin = AdminUser.objects.get(admin=request.user, is_active=True)
+            except AdminUser.DoesNotExist:
+                return False
 
+            # Check if the user to be deleted belongs to the same company as the admin
+            # Update the is_active field of each user
+            for user_id in user_ids:
+                try:
+                    user = CompaniesTeam.objects.get(id=user_id)
+                    if isinstance(user, CompaniesTeam):
+                        if user.company == admin.company:
+                            user.is_active = False
+                            user.save()
+                        else:
+                            return Response({"Access Denied": "You are not authorized for this request"}, status=status.HTTP_403_FORBIDDEN)
+                except CompaniesTeam.DoesNotExist:
+                    return Response({"message": f"User with ID {user_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        elif request.user.role == 'Super Admin':
+            for user_id in user_ids:
+                try:
+                    user = CompaniesTeam.objects.get(id=user_id)
+                    if isinstance(user, CompaniesTeam):
+                        # if user.company == admin.company:
+                            user.is_active = False
+                            user.save()
+                        # else:
+                        #     return Response({"Access Denied": "You are not authorized for this request"}, status=status.HTTP_403_FORBIDDEN)
+                except CompaniesTeam.DoesNotExist:
+                    return Response({"message": f"User with ID {user_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
         return Response({"message": "Users Deleted successfully"}, status=status.HTTP_200_OK)
