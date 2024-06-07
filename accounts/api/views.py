@@ -209,7 +209,7 @@ class CustomUserUpdateAPIView(UpdateAPIView):
                             department.users.add(member_instance)
                             department.save()
                         else:
-                            return Response({"error": f"Department with id {department_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+                            return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
                 else:
                     raise serializers.ValidationError({"not found":"Departments Not Found"})
         return Response(serializer.data, status=status.HTTP_200_OK)
