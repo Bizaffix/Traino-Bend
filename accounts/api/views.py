@@ -192,7 +192,7 @@ class CustomUserUpdateAPIView(UpdateAPIView):
             
         elif instance.role == 'User':
             company_id = request.data.get('company')
-            department_ids = request.data.get('department_ids', None)
+            department_ids = request.data.get('department_ids', [])
             if company_id:
                 member_instance = CompaniesTeam.objects.get(members__id=instance.id)
                 member_instance.company_id = company_id

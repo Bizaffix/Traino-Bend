@@ -529,9 +529,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
 
         if user.role == "User":
             try:
-                user_teams = CompaniesTeam.objects.filter(members=user)
-                if user_teams.is_active != True:
-                    raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+                user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
                 user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
                 queryset = DepartmentsDocuments.objects.filter(department__in=user_departments, is_active=True)
                 if department_id:
