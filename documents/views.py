@@ -463,7 +463,11 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                     scheduled_time=scheduled_time,
                     published=validated_data.get('published', False)
                 )
-                document.assigned_users.set(user_ids)  # Assign teams to the document
+                valid_team_ids = []
+                for user_id in user_ids:
+                    if department.users.filter(id=user_id, is_active=True).exists():
+                        valid_team_ids.append(user_id)
+                document.assigned_users.set(valid_team_ids)  # Assign teams to the document
                 created_documents.append(document.id)
 
         if failure_departments:
