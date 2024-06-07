@@ -541,6 +541,7 @@ class CreateSummaryApiView(APIView):
     def post(self , request):
         if request.user.role == "Admin":
             document_id = request.data.get('document')
+            prompt = request.data.get('prompt')
             if not document_id:
                 return Response({"error":"document is required"}, status=status.HTTP_400_BAD_REQUEST)        
             
@@ -573,7 +574,7 @@ class CreateSummaryApiView(APIView):
             logger.info(f"Decoded content: {content[:100]}")  # Log the first 100 characters of the content
 
             try:
-                summary , _ = generate_summary_from_gpt(content)
+                summary , _ = generate_summary_from_gpt(content , prompt)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
@@ -636,6 +637,7 @@ class CreateKeypointsApiView(APIView):
     def post(self , request):
         if request.user.role == "Admin":
             document_id = request.data.get('document')
+            prompt = request.data.get('prompt')
             if not document_id:
                 return Response({"error":"document is required"}, status=status.HTTP_400_BAD_REQUEST)        
             
@@ -669,7 +671,7 @@ class CreateKeypointsApiView(APIView):
             logger.info(f"Decoded content: {content[:100]}")  # Log the first 100 characters of the content
 
             try:
-                keypoints , _ = generate_keypoints_from_gpt(content)
+                keypoints , _ = generate_keypoints_from_gpt(content, prompt)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
@@ -696,6 +698,7 @@ class CreateQuizessApiView(APIView):
     def post(self , request):
         if request.user.role == "Admin":
             document_id = request.data.get('document')
+            prompt = request.data.get('prompt')
             if not document_id:
                 return Response({"error":"document is required"}, status=status.HTTP_400_BAD_REQUEST)        
             
@@ -729,7 +732,7 @@ class CreateQuizessApiView(APIView):
             logger.info(f"Decoded content: {content[:100]}")  # Log the first 100 characters of the content
 
             try:
-                quiz , _ = generate_quizes_from_gpt(content)
+                quiz , _ = generate_quizes_from_gpt(content, prompt)
                 if quiz is None:
                     return Response({"error": "Failed to generate quiz"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             except Exception as e:
