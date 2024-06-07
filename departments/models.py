@@ -29,6 +29,7 @@ class DepartmentsDocuments(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     file = models.FileField(upload_to='media/documents/', null=True, blank=True)
     department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='document_departments', null=True, blank=True)
+    assigned_users = models.ManyToManyField(CompaniesTeam, related_name='assigned_documents', blank=True)
     scheduled_time  = models.DateTimeField(null=True, blank=True)
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)

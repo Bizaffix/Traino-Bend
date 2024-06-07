@@ -435,41 +435,35 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Retrieve validated data
         validated_data = serializer.validated_data
         department_ids = validated_data.pop('department_ids')
+        user_ids = validated_data.pop('user_ids')
         name = validated_data['name']
 
-        # List to hold department IDs where document already exists
         failure_departments = []
-
-        # List to hold created documents
         created_documents = []
         
         scheduled_time = validated_data.get('schedule_time')
 
-        # Iterate through each department ID
         for department_id in department_ids:
             try:
                 department = Departments.objects.get(id=department_id, is_active=True)
             except Departments.DoesNotExist:
                 continue  # Skip invalid departments
 
-
-            # Check if document with the same name already exists in the department
             existing_document = DepartmentsDocuments.objects.filter(name=name, department=department, is_active=True).exists()
             if existing_document:
                 failure_departments.append(department_id)
             else:
-                # Create the document and add it to the department
                 document = DepartmentsDocuments.objects.create(
                     name=name,
-                    added_by=request.user,  # Assuming user is authenticated
+                    added_by=request.user,
                     file=validated_data['file'],
                     department=department,
                     scheduled_time=scheduled_time,
                     published=validated_data.get('published', False)
                 )
+                document.assigned_users.set(user_ids)  # Assign teams to the document
                 created_documents.append(document.id)
 
         if failure_departments:
@@ -486,6 +480,62 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
             "created_documents": created_documents
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+
+    #     # Retrieve validated data
+    #     validated_data = serializer.validated_data
+    #     department_ids = validated_data.pop('department_ids')
+    #     name = validated_data['name']
+
+    #     # List to hold department IDs where document already exists
+    #     failure_departments = []
+
+    #     # List to hold created documents
+    #     created_documents = []
+        
+    #     scheduled_time = validated_data.get('schedule_time')
+
+    #     # Iterate through each department ID
+    #     for department_id in department_ids:
+    #         try:
+    #             department = Departments.objects.get(id=department_id, is_active=True)
+    #         except Departments.DoesNotExist:
+    #             continue  # Skip invalid departments
+
+
+    #         # Check if document with the same name already exists in the department
+    #         existing_document = DepartmentsDocuments.objects.filter(name=name, department=department, is_active=True).exists()
+    #         if existing_document:
+    #             failure_departments.append(department_id)
+    #         else:
+    #             # Create the document and add it to the department
+    #             document = DepartmentsDocuments.objects.create(
+    #                 name=name,
+    #                 added_by=request.user,  # Assuming user is authenticated
+    #                 file=validated_data['file'],
+    #                 department=department,
+    #                 scheduled_time=scheduled_time,
+    #                 published=validated_data.get('published', False)
+    #             )
+    #             created_documents.append(document.id)
+
+    #     if failure_departments:
+    #         failure_message = f"Document with name '{name}' already exists in departments: {failure_departments}."
+    #         response_data = {
+    #             "message": failure_message,
+    #             "created_documents": created_documents
+    #         }
+    #         return Response(response_data, status=status.HTTP_409_CONFLICT)
+
+    #     success_message = f"Document '{name}' added to departments successfully."
+    #     response_data = {
+    #         "message": success_message,
+    #         "created_documents": created_documents
+    #     }
+    #     return Response(response_data, status=status.HTTP_201_CREATED)
         
 from rest_framework import serializers
 from rest_framework.filters import SearchFilter, OrderingFilter 
@@ -528,20 +578,23 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
             return queryset
 
         if user.role == "User":
+            user_id = self.request.query_params.get('user_id', '')
             try:
-                user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
-                user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
-                queryset = DepartmentsDocuments.objects.filter(department__in=user_departments, is_active=True)
-                if department_id:
-                    queryset = queryset.filter(department__id=department_id)
-                    return queryset
-                if not queryset.exists():
-                    raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."}, code="data_not_found")
+                if user_id:
+                    user_teams = CompaniesTeam.objects.filter(id=user_id, is_active=True)
+                else:
+                    user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+
+                queryset = DepartmentsDocuments.objects.filter(assigned_users__in=user_teams, is_active=True).distinct()
+                # if department_id:
+                #     queryset = queryset.filter(department__id=department_id)
+                # if not queryset.exists():
+                #     raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."}, code="data_not_found")
                 return queryset
             except CompaniesTeam.DoesNotExist:
-                raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+                raise serializers.ValidationError({"Unauthorized": "The specified team does not exist or you are blocked"})
 
-        raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized/")    
+        raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized")
 class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     serializer_class = DepartmentsDocumentsCreateSerializer

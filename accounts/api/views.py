@@ -31,8 +31,8 @@ class CustomUserCreateAPIView(CreateAPIView):
         if request.user.role == 'Super Admin':
             pass
         elif request.user.role == 'Admin':
-            if request.data.get('role') != 'User':
-                return Response({"error": "Admin can only create Users."},
+            if request.data.get('role') == 'Super Admin':
+                return Response({"error": "Admin cannot create Super Admins."},
                                 status=status.HTTP_403_FORBIDDEN)
         else:
             return Response({"error": "You don't have permission to create users."},
@@ -137,21 +137,6 @@ Traino-ai.''',
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
 from teams.api.permissions import IsActiveAdminPermission
-
-# class CustomUserUpdateAPIView(UpdateAPIView):
-#     queryset = CustomUser.objects.all()
-#     serializer_class = CustomUserSerializer
-#     permission_classes = [IsAdminUserOrReadOnly, IsActiveAdminPermission]
-#     lookup_field = 'id'
-
-#     def put(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         if instance.added_by != request.user:
-#             return Response({"Account Access Errors": "You don't have permission to update this Account Holder's Details."},
-#                             status=status.HTTP_403_FORBIDDEN)
-
-#         return super().update(request, *args, **kwargs)
-
 class CustomUserUpdateAPIView(UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -160,14 +145,8 @@ class CustomUserUpdateAPIView(UpdateAPIView):
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        # if instance.added_by != request.user:
-        #     return Response({"Account Access Errors": "You don't have permission to update this Account Holder's Details."},
-        #                     status=status.HTTP_403_FORBIDDEN)
-
-        # if request.user.role == 'Super Admin':
-        #     return Response({"error": "Super Admin can only update Admins."}, status=status.HTTP_403_FORBIDDEN)
-        if request.user.role == 'Admin' and instance.role != 'User':
-            return Response({"error": "Admin can only update Users."}, status=status.HTTP_403_FORBIDDEN)
+        if request.user.role == 'Admin' and instance.role == 'Super Admin':
+            return Response({"error": "Admin cannot update Super Admins."}, status=status.HTTP_403_FORBIDDEN)
 
         if 'role' in request.data and request.data['role'] != instance.role:
             return Response({"error": "Cannot change the role of the user."}, status=status.HTTP_400_BAD_REQUEST)
@@ -181,12 +160,35 @@ class CustomUserUpdateAPIView(UpdateAPIView):
         self.perform_update(serializer)
 
         # Update additional fields based on role
-        if instance.role == 'Admin':
+        if request.user.role == "Super Admin":
+            if instance.role == 'Admin':
+                company_id = request.data.get('company')
+                if company_id:
+                    admin_instance = AdminUser.objects.get(admin=instance)
+                    admin_instance.company_id = company_id
+                    admin_instance.save()
+        elif request.user.role == "Admin":
             company_id = request.data.get('company')
+            department_ids = request.data.get('department_ids', [])
             if company_id:
-                admin_instance = AdminUser.objects.get(email=instance.email)
-                admin_instance.company_id = company_id
-                admin_instance.save()
+                member_instance = CompaniesTeam.objects.get(members__id=instance.id)
+                member_instance.company_id = company_id
+                member_instance.save()
+
+                for department in Departments.objects.filter(users=member_instance):
+                    department.users.remove(member_instance)
+                # member_instance.departments.clear()
+                    if department_ids is not None:
+                        for department_id in department_ids:
+                            department = Departments.objects.filter(id=department_id, is_active=True).first()
+                            if department:
+                                department.users.add(member_instance)
+                                department.save()
+                            else:
+                                return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
+                    else:
+                        raise serializers.ValidationError({"not found":"Departments Not Found"})
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
             # return Response({"update Successfully":"Admin Updated Successfully"}, status=status.HTTP_200_OK)
             
