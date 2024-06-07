@@ -176,7 +176,7 @@ REST_FRAMEWORK = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_METHODS = [
     'GET',
@@ -195,21 +195,20 @@ CORS_ALLOW_HEADERS = [
 
 
 CORS_ALLOWED_ORIGINS = [
+    "https://dashboard.traino.ai",
+    "https://app.traino.ai",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://app.traino.ai",
     "https://traino-ai-api.vercel.app",
-    "https://dashboard.traino.ai",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "https://app.traino.ai",
     "https://traino-ai-api.vercel.app",
     "https://dashboard.traino.ai",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
-
 
 # Email Configurations
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
