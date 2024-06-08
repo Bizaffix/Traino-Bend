@@ -31,8 +31,8 @@ SECRET_KEY = 'django-insecure-l9e&n!faln0p-p1es_bs3aqi$7kguo79_yaag5x5tke$9#c!78
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
+    '127.0.0.1:3000',
+    'localhost:3000',
     'app.traino.ai',
     'traino-ai-api.vercel.app',
     'dashboard.traino.ai',
@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
-    # 'django_apscheduler',
+    # 'post_office',
     'documents',
     'dal',
     'dal_select2',
@@ -174,23 +174,23 @@ REST_FRAMEWORK = {
 }
 
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 # CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE',
-    'OPTIONS'
-]
+# CORS_ALLOW_METHODS = [
+#     'GET',
+#     'POST',
+#     'PUT',
+#     'PATCH',
+#     'DELETE',
+#     'OPTIONS'
+# ]
 
-CORS_ALLOW_HEADERS = [
-    'Content-Type',
-    'Authorization',
-]
+# CORS_ALLOW_HEADERS = [
+#     'Content-Type',
+#     'Authorization',
+# ]
 
 
 

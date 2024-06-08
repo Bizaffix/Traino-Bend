@@ -92,6 +92,7 @@ class AdminSerializer(serializers.ModelSerializer):
 class AdminUpdateDeleteSerializer(serializers.ModelSerializer):
     email = serializers.SerializerMethodField(read_only=True)
     first_name = serializers.SerializerMethodField(read_only=True)
+    role = serializers.SerializerMethodField(read_only=True)
     last_name = serializers.SerializerMethodField(read_only=True)
     company = serializers.SerializerMethodField(read_only=True)
     phone = serializers.SerializerMethodField(read_only=True)
@@ -99,10 +100,14 @@ class AdminUpdateDeleteSerializer(serializers.ModelSerializer):
     admin_update_key = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = AdminUser
-        fields = ['id' , 'first_name' , 'last_name', 'email' , 'phone' , 'password' , 'company' , 'admin_update_key']
+        fields = ['id' , 'first_name' , 'last_name', 'email' , 'role' , 'phone' , 'password' , 'company' , 'admin_update_key']
     
     def get_email(self , obj):
         return obj.admin.email
+
+
+    def get_role(self , obj):
+        return obj.admin.role
 
     def get_first_name(self, obj):
         return obj.admin.first_name
