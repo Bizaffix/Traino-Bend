@@ -160,24 +160,25 @@ class CustomUserUpdateAPIView(UpdateAPIView):
         self.perform_update(serializer)
 
         # Update additional fields based on role
-        if request.user.role == "Super Admin":
+        if (request.user.role == "Super Admin") or (request.user.role == "Admin"):
             if instance.role == 'Admin':
                 company_id = request.data.get('company')
                 if company_id:
                     admin_instance = AdminUser.objects.get(admin=instance)
                     admin_instance.company_id = company_id
                     admin_instance.save()
-        elif request.user.role == "Admin":
-            company_id = request.data.get('company')
-            department_ids = request.data.get('department_ids', [])
-            if company_id:
-                member_instance = CompaniesTeam.objects.get(members__id=instance.id)
-                member_instance.company_id = company_id
-                member_instance.save()
+            elif instance.role == 'User':
+                company_id = request.data.get('company')
+                department_ids = request.data.get('department_ids', [])
+                if company_id:
+                    member_instance = CompaniesTeam.objects.get(members__id=instance.id)
+                    member_instance.company_id = company_id
+                    member_instance.save()
 
-                for department in Departments.objects.filter(users=member_instance):
-                    department.users.remove(member_instance)
-                # member_instance.departments.clear()
+
+                    for department in Departments.objects.filter(users=member_instance):
+                        department.users.remove(member_instance)
+                    # member_instance.departments.clear()
                     if department_ids is not None:
                         for department_id in department_ids:
                             department = Departments.objects.filter(id=department_id, is_active=True).first()
@@ -190,31 +191,33 @@ class CustomUserUpdateAPIView(UpdateAPIView):
                         raise serializers.ValidationError({"not found":"Departments Not Found"})
             return Response(serializer.data, status=status.HTTP_200_OK)
 
+        return Response({"Access Denied":"You have access to this action"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # elif request.user.role == "Admin":
+        #     company_id = request.data.get('company')
+        #     department_ids = request.data.get('department_ids', [])
+        #     if company_id:
+        #         member_instance = CompaniesTeam.objects.get(members__id=instance.id)
+        #         member_instance.company_id = company_id
+        #         member_instance.save()
+
+        #         for department in Departments.objects.filter(users=member_instance):
+        #             department.users.remove(member_instance)
+        #         # member_instance.departments.clear()
+        #             if department_ids is not None:
+        #                 for department_id in department_ids:
+        #                     department = Departments.objects.filter(id=department_id, is_active=True).first()
+        #                     if department:
+        #                         department.users.add(member_instance)
+        #                         department.save()
+        #                     else:
+        #                         return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
+        #             else:
+        #                 raise serializers.ValidationError({"not found":"Departments Not Found"})
+        #     return Response(serializer.data, status=status.HTTP_200_OK)
+
             # return Response({"update Successfully":"Admin Updated Successfully"}, status=status.HTTP_200_OK)
             
-        elif instance.role == 'User':
-            company_id = request.data.get('company')
-            department_ids = request.data.get('department_ids', [])
-            if company_id:
-                member_instance = CompaniesTeam.objects.get(members__id=instance.id)
-                member_instance.company_id = company_id
-                member_instance.save()
-
-
-                for department in Departments.objects.filter(users=member_instance):
-                    department.users.remove(member_instance)
-                # member_instance.departments.clear()
-                if department_ids is not None:
-                    for department_id in department_ids:
-                        department = Departments.objects.filter(id=department_id, is_active=True).first()
-                        if department:
-                            department.users.add(member_instance)
-                            department.save()
-                        else:
-                            return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
-                else:
-                    raise serializers.ValidationError({"not found":"Departments Not Found"})
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class LoginAPIView(APIView):
     authentication_classes = []

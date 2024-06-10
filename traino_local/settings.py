@@ -31,8 +31,8 @@ SECRET_KEY = 'django-insecure-l9e&n!faln0p-p1es_bs3aqi$7kguo79_yaag5x5tke$9#c!78
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1:3000',
-    'localhost:3000',
+    '127.0.0.1',
+    'localhost',
     'app.traino.ai',
     'traino-ai-api.vercel.app',
     'dashboard.traino.ai',
@@ -154,6 +154,19 @@ MEDIA_ROOT = os.path.join(BASE_DIR, '')
 MEDIA_URL = '/'
 
 
+# AWS email configurations
+
+AWS_ACCESS_KEY_ID = 'AKIAVIMMZLH3BTHFTKMK'
+AWS_SECRET_ACCESS_KEY = 'BDsJw26hIA6Bm6QBX7xk+vQdAc1ZODMOYtpADd4HDUKv'
+
+
+EMAIL_BACKEND = 'django_ses.SESBackend'
+
+AWS_SES_REGION_NAME = 'us-east-1'
+AWS_SES_REGION_ENDPOINT = 'email-smtp.us-east-1.amazonaws.com'
+
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -174,31 +187,11 @@ REST_FRAMEWORK = {
 }
 
 
-# CORS_ALLOW_ALL_ORIGINS = True
-
-# CORS_ALLOW_CREDENTIALS = True
-
-# CORS_ALLOW_METHODS = [
-#     'GET',
-#     'POST',
-#     'PUT',
-#     'PATCH',
-#     'DELETE',
-#     'OPTIONS'
-# ]
-
-# CORS_ALLOW_HEADERS = [
-#     'Content-Type',
-#     'Authorization',
-# ]
-
-
-
 CORS_ALLOWED_ORIGINS = [
     "https://dashboard.traino.ai",
     "https://app.traino.ai",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
     "https://traino-ai-api.vercel.app",
 ]
 
@@ -206,20 +199,20 @@ CSRF_TRUSTED_ORIGINS = [
     "https://app.traino.ai",
     "https://traino-ai-api.vercel.app",
     "https://dashboard.traino.ai",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
 ]
 
 # Email Configurations
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "mail.privateemail.com"
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'no-reply@traino.ai' #os.environ.get('EMAIL_USER')
-EMAIL_HOST_PASSWORD = 'hello123!@' #os.environ.get('EMAIL_PASS')
-EMAIL_DEFAULT_FROM = 'no-reply@traino.ai' # os.environ.get('EMAIL_USER')  # your sender email addreass
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-DEFAULT_FROM_EMAIL = 'no-reply@traino.ai'
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "mail.privateemail.com"
+# EMAIL_PORT = 465
+# EMAIL_HOST_USER = 'no-reply@traino.ai' #os.environ.get('EMAIL_USER')
+# EMAIL_HOST_PASSWORD = 'hello123!@' #os.environ.get('EMAIL_PASS')
+# EMAIL_DEFAULT_FROM = 'no-reply@traino.ai' # os.environ.get('EMAIL_USER')  # your sender email addreass
+# EMAIL_USE_TLS = False
+# EMAIL_USE_SSL = True
+# DEFAULT_FROM_EMAIL = 'no-reply@traino.ai'
 
 # DJOSER Settings
 
