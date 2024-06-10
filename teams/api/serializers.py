@@ -54,6 +54,49 @@ class CompaniesTeamSerializer(serializers.ModelSerializer):
     
     def get_user_update_key(self , obj):
         return obj.members.id
+
+
+
+from departments.models import Departments
+
+class CompaniesTeamDetailFullSerializers(serializers.ModelSerializer):
+    email = serializers.SerializerMethodField()
+    company = serializers.SerializerMethodField()
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+    phone = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
+    user_update_key = serializers.SerializerMethodField()
+    departments_names = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CompaniesTeam
+        fields = "__all__"
+        
+    def get_email(self , obj):
+        return obj.members.email
+    
+    def get_company(self , obj):
+        return obj.company.name
+    
+    def get_last_name(self , obj):
+        return obj.members.last_name
+    
+    def get_first_name(self , obj):
+        return obj.members.first_name
+    
+    def get_phone(self , obj):
+        return str(obj.members.phone)
+    
+    def get_user_update_key(self , obj):
+        return obj.members.id
+    
+    def get_role(self ,obj):
+        return obj.members.role
+
+    def get_departments_names(self, obj):
+        departments = Departments.objects.filter(users=obj, is_active=True)
+        return [department.name for department in departments]
     
     
 class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
@@ -64,7 +107,8 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     phone = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
     user_update_key = serializers.SerializerMethodField()
-    department = serializers.SerializerMethodField()
+    department_name = serializers.CharField(source='members.department.name', read_only=True)
+
     class Meta:
         model = CompaniesTeam
         fields = "__all__"
@@ -90,10 +134,10 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     def get_role(self ,obj):
         return obj.members.role
     
-    def get_department(self, obj):
-        # Assuming a reverse relation from CompaniesTeam to Departments
-        department = obj.departments_set.first()  # Assuming each user belongs to only one department
-        if department:
-            return department.name
-        else:
-            return None
+    # def get_department_name(self, obj):
+    #     # Assuming a reverse relation from CompaniesTeam to Departments
+    #     department = obj.departments_set.first()  # Assuming each user belongs to only one department
+    #     if department:
+    #         return department.name
+    #     else:
+    #         return None

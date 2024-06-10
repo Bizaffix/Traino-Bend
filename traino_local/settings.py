@@ -216,6 +216,8 @@ EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = 'no-reply@traino.ai'
 
+
+
 # DJOSER Settings
 
 DJOSER = {

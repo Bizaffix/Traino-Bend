@@ -2,7 +2,7 @@ from teams.models import CompaniesTeam
 from rest_framework.generics import (
     CreateAPIView, UpdateAPIView , RetrieveAPIView , DestroyAPIView, ListAPIView
 )
-from .serializers import CompaniesTeamSerializer , CompaniesTeamDetailsSerializers
+from .serializers import CompaniesTeamSerializer , CompaniesTeamDetailsSerializers, CompaniesTeamDetailFullSerializers
 from .permissions import IsAdminUserOrReadOnly
 from rest_framework.response import Response
 from rest_framework import status
@@ -21,7 +21,7 @@ class AddMembersApiView(CreateAPIView):
         serializer.save(is_active=True)
 
 class MembersUpdateDestroyApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIView):
-    serializer_class = CompaniesTeamDetailsSerializers
+    serializer_class = CompaniesTeamDetailFullSerializers
     permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
     queryset = CompaniesTeam.objects.filter(is_active=True)
@@ -42,18 +42,17 @@ from rest_framework.filters import SearchFilter, OrderingFilter
     
 class MembersListApiView(ListAPIView):
     serializer_class = CompaniesTeamDetailsSerializers
-    permission_classes = [IsAdminUserOrReadOnly, IsActiveAdminPermission]#, IsActiveAdminUsersPermission
+    permission_classes = [IsAdminUserOrReadOnly, IsActiveAdminPermission]
     authentication_classes = [JWTAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['id','members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']
-    ordering_fields = ['id','members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']
-    ordering = ['id','members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']  # Default ordering (A-Z by company_name)
+    search_fields = ['id', 'members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']
+    ordering_fields = ['id', 'members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']
+    ordering = ['id', 'members__first_name', 'members__last_name', 'members__email', 'members__phone', 'members__role']
     queryset = CompaniesTeam.objects.filter(is_active=True)
 
     def get_queryset(self):
         user = self.request.user
 
-        # Check if the user is an admin
         if user.role == "Admin":
             try:
                 admin_user = AdminUser.objects.get(admin=user, is_active=True)
@@ -63,48 +62,43 @@ class MembersListApiView(ListAPIView):
 
             queryset = CompaniesTeam.objects.filter(company=company, is_active=True)
 
-            # Check if the request is filtered by company
             requested_company_id = self.request.query_params.get('company_id')
             if requested_company_id:
                 if str(requested_company_id) != str(company.id):
                     raise serializers.ValidationError({"Access Denied": "You are not allowed to view users of another company."})
                 else:
-                    queryset = queryset.filter(company=requested_company_id)
-            
-            # Check if the request is filtered by department
+                    queryset = queryset.filter(company_id=requested_company_id)
+
             requested_department_id = self.request.query_params.get('department_id')
             if requested_department_id:
                 queryset = queryset.filter(departments__id=requested_department_id)
-            
-            # Check if the request is filtered by document
+
             requested_document_id = self.request.query_params.get('document_id')
             if requested_document_id:
                 queryset = queryset.filter(departments__document_departments__id=requested_document_id)
-            
+
             return queryset
 
         elif user.role == "Super Admin":
             queryset = self.queryset
 
-            requested_company_id = self.request.query_params.get('company_id')
+            requested_company_id = self.request.query_params.get('company_id', None)
             if requested_company_id:
-                queryset = queryset.filter(company=requested_company_id)
+                queryset = queryset.filter(company_id=requested_company_id)
 
-            # Check if the request is filtered by department
-            requested_department_id = self.request.query_params.get('department_id')
+            requested_department_id = self.request.query_params.get('department_id' , None)
             if requested_department_id:
                 queryset = queryset.filter(departments__id=requested_department_id)
-            
-            # Check if the request is filtered by document
-            requested_document_id = self.request.query_params.get('document_id')
+
+            requested_document_id = self.request.query_params.get('document_id' ,None)
             if requested_document_id:
                 queryset = queryset.filter(departments__document_departments__id=requested_document_id)
 
             return queryset
 
         else:
-            raise serializers.ValidationError({"Access Denied": "You are not authorized to view company members."})        
-        
+            raise serializers.ValidationError({"Access Denied": "You are not authorized to view company members."})
+                
 from rest_framework.views import APIView
         
 class BulkUserDeleteAPIView(APIView):
