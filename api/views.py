@@ -314,7 +314,7 @@ class DepartmentListApiView(ListAPIView):
         Optionally restricts the returned departments to a given company,
         by filtering against a `company_id` query parameter in the URL.
         """
-        queryset = super().get_queryset()  # Get the base queryset
+        queryset = super().get_queryset().distinct()  # Get the base queryset
         user = self.request.user
 
         if user.role == "Admin":
@@ -356,7 +356,20 @@ class DepartmentListApiView(ListAPIView):
                 queryset = queryset.filter(company__id=company_id)
             return queryset.distinct()
 
-
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # class DepartmentListApiView(ListAPIView):
 #     serializer_class = DepartmentListSerializers

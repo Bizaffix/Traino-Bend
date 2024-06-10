@@ -31,8 +31,8 @@ SECRET_KEY = 'django-insecure-l9e&n!faln0p-p1es_bs3aqi$7kguo79_yaag5x5tke$9#c!78
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
+    '127.0.0.1:3000',
+    'localhost:3000',
     'app.traino.ai',
     'traino-ai-api.vercel.app',
     'dashboard.traino.ai',
