@@ -31,8 +31,8 @@ SECRET_KEY = 'django-insecure-l9e&n!faln0p-p1es_bs3aqi$7kguo79_yaag5x5tke$9#c!78
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1:3000',
-    'localhost:3000',
+    # '127.0.0.1:3000',
+    # 'localhost:3000',
     '127.0.0.1',
     'localhost',
     'app.traino.ai',
@@ -192,8 +192,8 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "https://dashboard.traino.ai",
     "https://app.traino.ai",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://traino-ai-api.vercel.app",
 ]
 
@@ -201,8 +201,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://app.traino.ai",
     "https://traino-ai-api.vercel.app",
     "https://dashboard.traino.ai",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 # Email Configurations
