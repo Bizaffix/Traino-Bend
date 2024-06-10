@@ -298,6 +298,7 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
             return Response({"Account Error":"Account did not found"},status=status.HTTP_404_NOT_FOUND)
         return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
 
+
 class DepartmentListApiView(ListAPIView):
     serializer_class = DepartmentListSerializers
     authentication_classes = [JWTAuthentication]
@@ -305,68 +306,115 @@ class DepartmentListApiView(ListAPIView):
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['name', 'id', 'company__name']
     ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
-    ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
-    queryset = Departments.objects.filter(is_active=True)
+    ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
+    queryset = Departments.objects.filter(is_active=True).distinct()
 
     def get_queryset(self):
         """
-        Optionally restricts the returned administrators to a given company,
+        Optionally restricts the returned departments to a given company,
         by filtering against a `company_id` query parameter in the URL.
         """
-        if (self.request.user.role == "Admin"):
+        queryset = super().get_queryset()  # Get the base queryset
+        user = self.request.user
+
+        if user.role == "Admin":
             company_id = self.request.query_params.get('company_id', None)
-            # print(company_id)
-            admin = AdminUser.objects.get(admin=self.request.user)
-            queryset = Departments.objects.filter(is_active=True)
-            # print(admin.is_active)
-            # print(str(company_id) == str(admin.company.id))
-            if str(company_id) == str(admin.company.id):
-                if admin.is_active==True:
-                    if queryset is not None and company_id is not None:
-                        queryset = queryset.filter(company__id=company_id)
-                    return queryset
-                else:
-                        raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"})
-            else:
-                raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"})
-        elif self.request.user.role == "User":
+            admin = AdminUser.objects.get(admin=user)
+            
+            if str(company_id) != str(admin.company.id):
+                raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments of this company"})
+            if not admin.is_active:
+                raise serializers.ValidationError({"Permission Denied": "Your account is restricted. You cannot perform this task"})
+            
+            if company_id:
+                queryset = queryset.filter(company__id=company_id)
+            return queryset.distinct()
+
+        elif user.role == "User":
             user_id = self.request.query_params.get('user_id', None)
             if not user_id:
                 raise serializers.ValidationError({"user_id": "This query parameter is required for users."})
-            
+
             try:
-                user_teams = CompaniesTeam.objects.filter(members=self.request.user, is_active=True)
+                user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
                 user_departments = Departments.objects.filter(users__in=user_teams, is_active=True).distinct()
-                queryset = user_departments
 
                 if user_id:
-                    user_teams_filtered = CompaniesTeam.objects.filter(id=user_id, members=self.request.user, is_active=True)
+                    user_teams_filtered = CompaniesTeam.objects.filter(id=user_id, members=user, is_active=True)
                     if user_teams_filtered.exists():
-                        queryset = queryset.filter(users__in=user_teams_filtered)
+                        user_departments = user_departments.filter(users__in=user_teams_filtered)
                     else:
                         raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments for this user_id."})
                 
-                return queryset
+                return user_departments.distinct()
             except CompaniesTeam.DoesNotExist:
                 raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
 
-            # user = self.request.user
-            # company_id = self.request.query_params.get('company_id', None)
-            # try:
-            #     user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
-            #     user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
-            #     queryset = user_departments.distinct()
-            #     if company_id:
-            #         queryset = queryset.filter(company__id=company_id)
-            #     return queryset
-            # except CompaniesTeam.DoesNotExist:
-            #     raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
-        else:
-            queryset = Departments.objects.filter(is_active=True)
+        else:  # Super Admin or other roles
             company_id = self.request.query_params.get('company_id', None)
-            if company_id is not None:
-                queryset = queryset.filter(company__id=company_id).distinct()
-            return queryset
+            if company_id:
+                queryset = queryset.filter(company__id=company_id)
+            return queryset.distinct()
+
+
+
+# class DepartmentListApiView(ListAPIView):
+#     serializer_class = DepartmentListSerializers
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAdminUserOrReadOnly]
+#     filter_backends = [SearchFilter, OrderingFilter]
+#     search_fields = ['name', 'id', 'company__name']
+#     ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
+#     ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
+#     queryset = Departments.objects.filter(is_active=True)
+
+#     def get_queryset(self):
+#         """
+#         Optionally restricts the returned administrators to a given company,
+#         by filtering against a `company_id` query parameter in the URL.
+#         """
+#         if (self.request.user.role == "Admin"):
+#             company_id = self.request.query_params.get('company_id', None)
+#             # print(company_id)
+#             admin = AdminUser.objects.get(admin=self.request.user)
+#             queryset = Departments.objects.filter(is_active=True)
+#             # print(admin.is_active)
+#             # print(str(company_id) == str(admin.company.id))
+#             if str(company_id) == str(admin.company.id):
+#                 if admin.is_active==True:
+#                     if queryset is not None and company_id is not None:
+#                         queryset = queryset.filter(company__id=company_id)
+#                     return queryset
+#                 else:
+#                         raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"})
+#             else:
+#                 raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"})
+#         elif self.request.user.role == "User":
+#             user_id = self.request.query_params.get('user_id', None)
+#             if not user_id:
+#                 raise serializers.ValidationError({"user_id": "This query parameter is required for users."})
+            
+#             try:
+#                 user_teams = CompaniesTeam.objects.filter(members=self.request.user, is_active=True)
+#                 user_departments = Departments.objects.filter(users__in=user_teams, is_active=True).distinct()
+#                 queryset = user_departments
+
+#                 if user_id:
+#                     user_teams_filtered = CompaniesTeam.objects.filter(id=user_id, members=self.request.user, is_active=True)
+#                     if user_teams_filtered.exists():
+#                         queryset = queryset.filter(users__in=user_teams_filtered)
+#                     else:
+#                         raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments for this user_id."})
+                
+#                 return queryset
+#             except CompaniesTeam.DoesNotExist:
+#                 raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
+#         else:
+#             queryset = Departments.objects.filter(is_active=True)
+#             company_id = self.request.query_params.get('company_id', None)
+#             if company_id is not None:
+#                 queryset = queryset.filter(company__id=company_id)
+#             return queryset.distinct()
             
 from .serializers import CompanyDepartmentsSerializers
 
