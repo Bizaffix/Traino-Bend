@@ -275,8 +275,8 @@ class CustomUserUpdateAPIView(UpdateAPIView):
                     member_instance.save()
 
 
-                    for department in Departments.objects.filter(users=member_instance):
-                        department.users.remove(member_instance)
+                    # for department in Departments.objects.filter(users=member_instance):
+                    #     department.users.remove(member_instance)
                     # member_instance.departments.clear()
                     if department_ids is not None:
                         for department_id in department_ids:

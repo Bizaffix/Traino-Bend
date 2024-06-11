@@ -590,10 +590,6 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                     user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
 
                 queryset = DepartmentsDocuments.objects.filter(assigned_users__in=user_teams, is_active=True).distinct()
-                # if department_id:
-                #     queryset = queryset.filter(department__id=department_id)
-                # if not queryset.exists():
-                #     raise serializers.ValidationError({"Data Not Found": "No documents found for your departments."}, code="data_not_found")
                 return queryset
             except CompaniesTeam.DoesNotExist:
                 raise serializers.ValidationError({"Unauthorized": "The specified team does not exist or you are blocked"})
