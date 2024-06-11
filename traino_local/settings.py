@@ -191,25 +191,48 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "https://dashboard.traino.ai",
-    "https://dashboard.traino.ai/media/documents/",
+    # "https://dashboard.traino.ai/media/documents/",
     "https://app.traino.ai",
-    "https://app.traino.ai/media/documents/",
+    # "https://app.traino.ai/media/documents/",
     "http://localhost:3000",
-    "https://localhost:3000/media/documents/",
+    # "https://localhost:3000/media/documents/",
     "http://127.0.0.1:3000",
     "https://traino-ai-api.vercel.app",
-    "https://traino-ai-api.vercel.app/media/documents/",
+    # "https://traino-ai-api.vercel.app/media/documents/",
+]
+
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://app.traino.ai",
-    "https://app.traino.ai/media/documents/",
+    # "https://app.traino.ai/media/documents/",
     "https://traino-ai-api.vercel.app",
-    "https://traino-ai-api.vercel.app/media/documents/",
+    # "https://traino-ai-api.vercel.app/media/documents/",
     "https://dashboard.traino.ai",
-    "https://dashboard.traino.ai/media/documents/",
+    # "https://dashboard.traino.ai/media/documents/",
     "http://localhost:3000",
-    "https://localhost:3000/media/documents/",
+    # "https://localhost:3000/media/documents/",
     "http://127.0.0.1:3000",
 ]
 
