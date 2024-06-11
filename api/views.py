@@ -299,26 +299,21 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
         return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
 
 
+
 class DepartmentListApiView(ListAPIView):
     serializer_class = DepartmentListSerializers
+    queryset = Departments.objects.filter(is_active=True).distinct()
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
-    filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['name', 'id', 'company__name']
-    ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
-    ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
-    queryset = Departments.objects.filter(is_active=True).distinct()
-
+    # filter_backends = [SearchFilter, OrderingFilter]
+    # search_fields = ['name', 'id', 'company__name']
+    # ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
+    # ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
+    
     def get_queryset(self):
-        """
-        Optionally restricts the returned departments to a given company,
-        by filtering against a `company_id` query parameter in the URL.
-        """
-        queryset = super().get_queryset().distinct()  # Get the base queryset
         user = self.request.user
-
-        if user.role == "Admin":
-            company_id = self.request.query_params.get('company_id', None)
+        company_id = self.request.query_params.get('company_id')
+        if (user.role == 'Admin') or (user.role == 'Super Admin'):
             admin = AdminUser.objects.get(admin=user)
             
             if str(company_id) != str(admin.company.id):
@@ -327,8 +322,8 @@ class DepartmentListApiView(ListAPIView):
                 raise serializers.ValidationError({"Permission Denied": "Your account is restricted. You cannot perform this task"})
             
             if company_id:
-                queryset = queryset.filter(company__id=company_id)
-            return queryset.distinct()
+                return Departments.objects.filter(company__id=company_id, is_active=True).distinct()
+            return None
 
         elif user.role == "User":
             user_id = self.request.query_params.get('user_id', None)
@@ -337,39 +332,93 @@ class DepartmentListApiView(ListAPIView):
 
             try:
                 user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
-                user_departments = Departments.objects.filter(users__in=user_teams, is_active=True).distinct()
+                user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
 
                 if user_id:
                     user_teams_filtered = CompaniesTeam.objects.filter(id=user_id, members=user, is_active=True)
                     if user_teams_filtered.exists():
-                        user_departments = user_departments.filter(users__in=user_teams_filtered)
+                        user_departments = user_departments.filter(users__in=user_teams_filtered).distinct()
                     else:
                         raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments for this user_id."})
                 
-                return user_departments.distinct()
+                return user_departments
             except CompaniesTeam.DoesNotExist:
                 raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
 
-        else:  # Super Admin or other roles
-            company_id = self.request.query_params.get('company_id', None)
-            if company_id:
-                queryset = queryset.filter(company__id=company_id)
-            return queryset.distinct()
+        else:
+            return Response({"Access Denied":"You are Unauthorized"} , status=status.HTTP_401_UNAUTHORIZED)
+        
+# class DepartmentListApiView(ListAPIView):
+#     serializer_class = DepartmentListSerializers
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [IsAdminUserOrReadOnly]
+#     filter_backends = [SearchFilter, OrderingFilter]
+#     search_fields = ['name', 'id', 'company__name']
+#     ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
+#     ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
+#     queryset = Departments.objects.filter(is_active=True)
 
-    def list(self, request, *args, **kwargs):
-        try:
-            queryset = self.filter_queryset(self.get_queryset())
-            page = self.paginate_queryset(queryset)
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                return self.get_paginated_response(serializer.data)
+#     def get_queryset(self):
+#         """
+#         Optionally restricts the returned departments to a given company,
+#         by filtering against a `company_id` query parameter in the URL.
+#         """
+#         queryset = super().get_queryset()  # Get the base queryset
+#         user = self.request.user
+
+#         if user.role == "Admin":
+#             company_id = self.request.query_params.get('company_id', None)
+#             admin = AdminUser.objects.get(admin=user)
             
-            serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)
-        except serializers.ValidationError as e:
-            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#             if str(company_id) != str(admin.company.id):
+#                 raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments of this company"})
+#             if not admin.is_active:
+#                 raise serializers.ValidationError({"Permission Denied": "Your account is restricted. You cannot perform this task"})
+            
+#             if company_id:
+#                 queryset = queryset.filter(company__id=company_id).distinct()
+#             return queryset
+
+#         elif user.role == "User":
+#             user_id = self.request.query_params.get('user_id', None)
+#             if not user_id:
+#                 raise serializers.ValidationError({"user_id": "This query parameter is required for users."})
+
+#             try:
+#                 user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+#                 user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
+
+#                 if user_id:
+#                     user_teams_filtered = CompaniesTeam.objects.filter(id=user_id, members=user, is_active=True)
+#                     if user_teams_filtered.exists():
+#                         user_departments = user_departments.filter(users__in=user_teams_filtered).distinct()
+#                     else:
+#                         raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments for this user_id."})
+                
+#                 return user_departments
+#             except CompaniesTeam.DoesNotExist:
+#                 raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
+
+#         else:  # Super Admin or other roles
+#             company_id = self.request.query_params.get('company_id', None)
+#             if company_id:
+#                 queryset = queryset.filter(company__id=company_id).distinct()
+#             return queryset
+
+    # def list(self, request, *args, **kwargs):
+    #     try:
+    #         queryset = self.filter_queryset(self.get_queryset())
+    #         page = self.paginate_queryset(queryset)
+    #         if page is not None:
+    #             serializer = self.get_serializer(page, many=True)
+    #             return self.get_paginated_response(serializer.data)
+            
+    #         serializer = self.get_serializer(queryset, many=True)
+    #         return Response(serializer.data)
+    #     except serializers.ValidationError as e:
+    #         return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+    #     except Exception as e:
+    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # class DepartmentListApiView(ListAPIView):
 #     serializer_class = DepartmentListSerializers
