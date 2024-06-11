@@ -314,17 +314,19 @@ class DepartmentListApiView(ListAPIView):
         user = self.request.user
         company_id = self.request.query_params.get('company_id')
         if (user.role == 'Admin') or (user.role == 'Super Admin'):
-            if user.role == 'Admin':
+            if user.role == "Admin":
                 admin = AdminUser.objects.get(admin=user)
-                
                 if str(company_id) != str(admin.company.id):
                     raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments of this company"})
                 if not admin.is_active:
                     raise serializers.ValidationError({"Permission Denied": "Your account is restricted. You cannot perform this task"})
-            
-            if company_id:
-                return Departments.objects.filter(company__id=company_id, is_active=True).distinct()
-            return None
+                if company_id:
+                    return Departments.objects.filter(company__id=company_id, is_active=True).distinct()
+                return None
+            else:
+                if company_id:
+                    return Departments.objects.filter(company__id=company_id, is_active=True).distinct()
+                return None
 
         elif user.role == "User":
             user_id = self.request.query_params.get('user_id', None)
