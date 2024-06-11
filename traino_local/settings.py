@@ -192,7 +192,7 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "https://dashboard.traino.ai",
     "https://app.traino.ai",
-    "https://app.traino.ai/media/documents",
+    "https://app.traino.ai/media/documents/",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://traino-ai-api.vercel.app",
@@ -200,7 +200,7 @@ CORS_ALLOWED_ORIGINS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://app.traino.ai",
-    "https://app.traino.ai/media/documents",
+    "https://app.traino.ai/media/documents/",
     "https://traino-ai-api.vercel.app",
     "https://dashboard.traino.ai",
     "http://localhost:3000",
