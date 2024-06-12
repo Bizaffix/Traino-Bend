@@ -37,7 +37,9 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
 
 
 class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
-    department_id = serializers.UUIDField(format='hex_verbose', required=True, write_only=True, error_messages={'required': 'This field is required.'})
+    department_ids = serializers.ListField(
+        child=serializers.UUIDField(format='hex_verbose'), required=True, write_only=True,
+    )
     user_ids = serializers.ListField(
         child=serializers.UUIDField(format='hex_verbose'),
         required=False,
@@ -75,28 +77,33 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         return [{"id": user.id, "name": user.members.first_name} for user in obj.assigned_users.all()]
 
     def update(self, instance, validated_data):
-        # Handle department assignment
-        if 'department_id' in validated_data:
-            department_id = validated_data.pop('department_id')
-            instance.department = Departments.objects.get(id=department_id)
+        department_ids = validated_data.pop('department_ids', [])
+        user_ids = validated_data.pop('user_ids', [])
+        all_flag = validated_data.pop('all', False)
 
-        # Handle user assignment
-        all_users = validated_data.pop('all', False)
-        if all_users:
-            assigned_users = CompaniesTeam.objects.filter(departments__id=department_id)
-            instance.assigned_users.set(assigned_users)
-        if 'user_ids' in validated_data:
-            user_ids = validated_data.pop('user_ids')
-            assigned_users = CompaniesTeam.objects.filter(id__in=user_ids)
-            instance.assigned_users.set(assigned_users)
-        
+        # Handle department assignment
+        for department_id in department_ids:
+            instance.department = Departments.objects.get(id=department_id)
+            instance.save()
+
+            # Handle user assignment
+            if all_flag:
+                assigned_users = CompaniesTeam.objects.filter(departments__id=department_id)
+                instance.assigned_users.add(*assigned_users)
+            else:
+                assigned_users = CompaniesTeam.objects.filter(id__in=user_ids, departments__id=department_id)
+                instance.assigned_users.add(*assigned_users)
+
         # Update other fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
         instance.save()
         return instance
-  
+    
+    
+    
+    
 class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
     department_ids = serializers.ListField(
         child=serializers.UUIDField(format='hex_verbose'), write_only=True
