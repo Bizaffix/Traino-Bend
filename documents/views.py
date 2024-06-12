@@ -437,9 +437,10 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
 
         validated_data = serializer.validated_data
         department_ids = validated_data.pop('department_ids')
-        user_ids = validated_data.pop('user_ids')
+        user_ids = validated_data.pop('user_ids', [])
+        all_users = validated_data.pop('all', False)
         name = validated_data['name']
-
+        print(all_users)
         failure_departments = []
         created_documents = []
         
@@ -464,10 +465,21 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                     published=validated_data.get('published', False)
                 )
                 valid_team_ids = []
-                for user_id in user_ids:
-                    if department.users.filter(id=user_id, is_active=True).exists():
-                        valid_team_ids.append(user_id)
-                document.assigned_users.set(valid_team_ids)  # Assign teams to the document
+                
+                if all_users:
+                    assigned_users = CompaniesTeam.objects.filter(departments__id=department_id)
+                    # print(assigned_users)
+                    # document.assigned_users.set(assigned_users)
+                else:
+                    valid_team_ids = []
+                    for user_id in user_ids:
+                        if department.users.filter(id=user_id, is_active=True).exists():
+                            valid_team_ids.append(user_id)
+                    assigned_users = CompaniesTeam.objects.filter(id__in=valid_team_ids)
+                    # print(assigned_users)
+                    # document.assigned_users.set(assigned_users)
+                
+                document.assigned_users.set(assigned_users)
                 created_documents.append(document.id)
 
         if failure_departments:
@@ -544,40 +556,45 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
 from rest_framework import serializers
 from rest_framework.filters import SearchFilter, OrderingFilter 
 import logging
+from documents.models import DocumentKeyPoints , DocumentSummary
+
 
 logger = logging.getLogger(__name__)
+
+
+from django.db.models import Exists, OuterRef
 
 class DepartmentsDocumentsListAPIView(generics.ListAPIView):
     serializer_class = DepartmentsDocumentsSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']
-    ordering_fields = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']
-    ordering = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']  # Default ordering (A-Z by company_name)
+    search_fields = ['id', 'name', 'file', 'department__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
+    ordering_fields = ['id', 'name', 'file', 'department__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
+    ordering = ['id', 'name', 'file', 'department__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
 
     def get_queryset(self):
         user = self.request.user
-        # logger.debug(f"User: {user}, Role: {user.role}")
-        # print(f"User: {user}, Role: {user.role}")
         department_id = self.request.query_params.get('department_id', None)
-        # try:
-        # Query based on the user role
+
         if user.role in ["Super Admin", "Admin"]:
-                # Super Admin and Admin can view documents based on the department_id query parameter
             queryset = DepartmentsDocuments.objects.filter(is_active=True)
             if department_id:
                 queryset = queryset.filter(department__id=department_id)
+
             if user.role == "Admin":
                 try:
-                        # Get the company associated with the admin
                     admin_company = AdminUser.objects.get(admin=user, is_active=True).company
-                        # Filter documents by departments that are in the admin's company
                     queryset = queryset.filter(department__company=admin_company)
-                    # return queryset
                 except AdminUser.DoesNotExist:
                     raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+
+            # Annotate the queryset with is_summary and is_keypoints
+            queryset = queryset.annotate(
+                is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
+                is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id')))
+            )
 
             return queryset
 
@@ -589,15 +606,75 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                 else:
                     user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
 
-                queryset = DepartmentsDocuments.objects.filter(assigned_users__in=user_teams, is_active=True).distinct()
+                queryset = DepartmentsDocuments.objects.filter(
+                    assigned_users__in=user_teams, is_active=True
+                ).distinct().annotate(
+                    is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
+                    is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id')))
+                )
                 return queryset
             except CompaniesTeam.DoesNotExist:
                 raise serializers.ValidationError({"Unauthorized": "The specified team does not exist or you are blocked"})
 
         raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized")
+
+
+# class DepartmentsDocumentsListAPIView(generics.ListAPIView):
+#     serializer_class = DepartmentsDocumentsSerializer
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = [JWTAuthentication]
+#     filter_backends = [SearchFilter, OrderingFilter]
+#     search_fields = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']
+#     ordering_fields = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']
+#     ordering = ['id','name', 'file', 'department__name','published', 'created_at', 'updated_at', 'added_by__first_name']  # Default ordering (A-Z by company_name)
+#     queryset = DepartmentsDocuments.objects.filter(is_active=True)
+
+#     def get_queryset(self):
+#         user = self.request.user
+#         # logger.debug(f"User: {user}, Role: {user.role}")
+#         # print(f"User: {user}, Role: {user.role}")
+#         department_id = self.request.query_params.get('department_id', None)
+#         # try:
+#         # Query based on the user role
+#         if user.role in ["Super Admin", "Admin"]:
+#                 # Super Admin and Admin can view documents based on the department_id query parameter
+#             queryset = DepartmentsDocuments.objects.filter(is_active=True)
+#             if department_id:
+#                 queryset = queryset.filter(department__id=department_id)
+#             if user.role == "Admin":
+#                 try:
+#                         # Get the company associated with the admin
+#                     admin_company = AdminUser.objects.get(admin=user, is_active=True).company
+#                         # Filter documents by departments that are in the admin's company
+#                     queryset = queryset.filter(department__company=admin_company)
+#                     # return queryset
+#                     is_summary = DocumentSummary.objects.filter(document__id=queryset.id).first()
+#                     is_keypoints = DocumentKeyPoints.objects.filter(document__id=queryset.id).first()
+#                 except AdminUser.DoesNotExist:
+#                     raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+
+                
+#             return queryset
+
+#         if user.role == "User":
+#             user_id = self.request.query_params.get('user_id', '')
+#             try:
+#                 if user_id:
+#                     user_teams = CompaniesTeam.objects.filter(id=user_id, is_active=True)
+#                 else:
+#                     user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+
+#                 queryset = DepartmentsDocuments.objects.filter(assigned_users__in=user_teams, is_active=True).distinct()
+#                 return queryset
+#             except CompaniesTeam.DoesNotExist:
+#                 raise serializers.ValidationError({"Unauthorized": "The specified team does not exist or you are blocked"})
+
+#         raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized")
+
+from .serializers import DepartmentsDocumentsUpdateSerializer
 class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
-    serializer_class = DepartmentsDocumentsCreateSerializer
+    serializer_class = DepartmentsDocumentsUpdateSerializer
     permission_classes = [IsAdminUserOrReadOnly]
     authentication_classes = [JWTAuthentication]
     lookup_field = 'id'
@@ -605,6 +682,10 @@ class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDe
     def put(self, request, *args, **kwargs):
         if request.user.role == "User":
             raise serializers.ValidationError({"Access Denied": "You do not have permission to update documents."})
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Process the update
         return self.update(request, *args, **kwargs)
     
     def delete(self, request, *args, **kwargs):
