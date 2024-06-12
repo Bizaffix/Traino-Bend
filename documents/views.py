@@ -440,7 +440,7 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
         user_ids = validated_data.pop('user_ids', [])
         all_users = validated_data.pop('all', False)
         name = validated_data['name']
-        print(all_users)
+        # print(all_users)
         failure_departments = []
         created_documents = []
         
