@@ -542,7 +542,6 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                 is_quiz=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))
             )
             is_quiz=Exists(DocumentQuiz.objects.filter(document=OuterRef('id')))
-            print(is_quiz)
             return queryset
 
         if user.role == "User":
@@ -565,58 +564,13 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                     is_quiz=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))
                 )    
                 is_quiz=Exists(DocumentQuiz.objects.filter(document=OuterRef('id')))
-                print(is_quiz)
                 return queryset
             except CompaniesTeam.DoesNotExist:
                 raise serializers.ValidationError({"Unauthorized": "The specified team does not exist or you are blocked"})
 
         raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized")
 
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     department_id = self.request.query_params.get('department_id', None)
-
-    #     if user.role in ["Super Admin", "Admin"]:
-    #         queryset = DepartmentsDocuments.objects.filter(is_active=True)
-    #         if department_id:
-    #             queryset = queryset.filter(department__id=department_id)
-
-    #         if user.role == "Admin":
-    #             try:
-    #                 admin_company = AdminUser.objects.get(admin=user, is_active=True).company
-    #                 queryset = queryset.filter(department__company=admin_company)
-    #             except AdminUser.DoesNotExist:
-    #                 raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
-
-    #         # Annotate the queryset with is_summary and is_keypoints
-    #         queryset = queryset.annotate(
-    #             is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
-    #             is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id')))
-    #         )
-
-    #         return queryset
-
-    #     if user.role == "User":
-    #         user_id = self.request.query_params.get('user_id', '')
-    #         try:
-    #             if user_id:
-    #                 user_teams = CompaniesTeam.objects.filter(id=user_id, is_active=True)
-    #             else:
-    #                 user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
-
-    #             queryset = DepartmentsDocuments.objects.filter(
-    #                 assigned_users__in=user_teams, is_active=True
-    #             ).distinct().annotate(
-    #                 is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
-    #                 is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id')))
-    #             )
-    #             return queryset
-    #         except CompaniesTeam.DoesNotExist:
-    #             raise serializers.ValidationError({"Unauthorized": "The specified team does not exist or you are blocked"})
-
-    #     raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized")
-
-
+    
 from .serializers import DepartmentsDocumentsUpdateSerializer
 class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
