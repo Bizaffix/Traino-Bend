@@ -27,7 +27,7 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         # # This is custom permission on role bases
-        return request.user and request.user.is_authenticated and request.user.role == 'Admin' 
+        return (request.user and request.user.is_authenticated and request.user.role == 'Admin') or (request.user and request.user.is_authenticated and request.user.role == 'Super Admin') 
 
     def has_object_permission(self, request, view, obj):
         """

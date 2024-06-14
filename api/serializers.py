@@ -125,6 +125,17 @@ class CompanyTeamSerializer(serializers.ModelSerializer):
         instance = CompanyTeam.objects.create_user(**validated_data)
         return instance
         
+
+class QuizQuestionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizQuestions
+        fields = '__all__'
+        
+class QuizQuestionsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuizQuestions
+        fields = ['quiz' , 'id', 'question' , 'option_1' , 'option_2' , 'option_3' , 'option_4']
+
 class DocumentSerializer(serializers.ModelSerializer):
     company = UserCreateSerializer(many=False, read_only=True)
     added_by = UserCreateSerializer(many=False, read_only=True)

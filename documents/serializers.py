@@ -74,25 +74,47 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         return obj.created_at
 
     def get_assigned_users_details(self, obj):
-        return [{"id": user.id, "name": user.members.first_name} for user in obj.assigned_users.all()]
+        return [{"id": user.id, "first_name": user.members.first_name, "last_name":user.members.last_name} for user in obj.assigned_users.all()]
 
     def update(self, instance, validated_data):
-        department_ids = validated_data.pop('department_ids', [])
-        user_ids = validated_data.pop('user_ids', [])
+        new_department_ids = validated_data.pop('department_ids', [])
+        new_user_ids = validated_data.pop('user_ids', [])
         all_flag = validated_data.pop('all', False)
 
+        # Get current department and user associations
+        current_department_id = instance.department.id if instance.department else None
+        current_user_ids = list(instance.assigned_users.values_list('id', flat=True))
+
+        # Determine departments to add, keep, and remove
+        departments_to_add = set(new_department_ids) - ({current_department_id} if current_department_id else set())
+        departments_to_keep = {current_department_id} & set(new_department_ids) if current_department_id else set()
+        departments_to_remove = {current_department_id} - set(new_department_ids) if current_department_id else set()
+
+        # Determine users to add, keep, and remove
+        users_to_add = set(new_user_ids) - set(current_user_ids)
+        users_to_keep = set(new_user_ids) & set(current_user_ids)
+        users_to_remove = set(current_user_ids) - set(new_user_ids)
+
         # Handle department assignment
-        for department_id in department_ids:
+        for department_id in departments_to_remove:
+            instance.department = None
+            instance.save()
+
+        for department_id in departments_to_add:
             instance.department = Departments.objects.get(id=department_id)
             instance.save()
 
-            # Handle user assignment
-            if all_flag:
-                assigned_users = CompaniesTeam.objects.filter(departments__id=department_id)
-                instance.assigned_users.add(*assigned_users)
-            else:
-                assigned_users = CompaniesTeam.objects.filter(id__in=user_ids, departments__id=department_id)
-                instance.assigned_users.add(*assigned_users)
+        # Handle user assignment
+        if all_flag:
+            assigned_users = CompaniesTeam.objects.filter(departments__id__in=new_department_ids)
+            instance.assigned_users.set(assigned_users)
+        else:
+            for user_id in users_to_remove:
+                instance.assigned_users.remove(CompaniesTeam.objects.get(id=user_id))
+
+            for user_id in users_to_add:
+                if CompaniesTeam.objects.filter(id=user_id, departments__id__in=new_department_ids).exists():
+                    instance.assigned_users.add(CompaniesTeam.objects.get(id=user_id))
 
         # Update other fields
         for attr, value in validated_data.items():
@@ -100,10 +122,32 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
-    
-    
-    
-    
+
+    # def update(self, instance, validated_data):
+    #     department_ids = validated_data.pop('department_ids', [])
+    #     user_ids = validated_data.pop('user_ids', [])
+    #     all_flag = validated_data.pop('all', False)
+
+    #     # Handle department assignment
+    #     for department_id in department_ids:
+    #         instance.department = Departments.objects.get(id=department_id)
+    #         instance.save()
+
+    #         # Handle user assignment
+    #         if all_flag:
+    #             assigned_users = CompaniesTeam.objects.filter(departments__id=department_id)
+    #             instance.assigned_users.add(*assigned_users)
+    #         else:
+    #             assigned_users = CompaniesTeam.objects.filter(id__in=user_ids, departments__id=department_id)
+    #             instance.assigned_users.add(*assigned_users)
+
+    #     # Update other fields
+    #     for attr, value in validated_data.items():
+    #         setattr(instance, attr, value)
+
+    #     instance.save()
+    #     return instance
+        
 class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
     department_ids = serializers.ListField(
         child=serializers.UUIDField(format='hex_verbose'), write_only=True
@@ -164,42 +208,3 @@ class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
             documents.append(document)
 
         return documents
-
-    
-# class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
-#     department_ids = serializers.ListField(
-#         child=serializers.UUIDField(format='hex_verbose'), write_only=True
-#     )
-#     schedule_time = serializers.DateTimeField(required=False, allow_null=True)
-
-#     class Meta:
-#         model = DepartmentsDocuments
-#         fields = ['id', 'name', 'file', 'department_ids', 'schedule_time','published' ,'added_by' , 'created_at'] #'first_name' ,'last_name' , 'email' , 'phone' ,
-        
-#     def validate_department_ids(self, value):
-#         # Check if all departments are active
-#         for department_id in value:
-#             if not Departments.objects.filter(id=department_id, is_active=True).exists():
-#                 raise serializers.ValidationError({"department not found":f"Department with ID {department_id} is not active or does not exist."})
-#         return value
-    
-#     def create(self, validated_data):
-#         department_ids = validated_data.pop('department_ids')
-#         schedule_time = validated_data.pop('schedule_time', timezone.now())
-#         added_by = validated_data.pop('added_by')
-#         file = validated_data.pop('file')
-#         name = validated_data.pop('name')
-
-#         documents = []
-#         for department_id in department_ids:
-#             department = Departments.objects.get(id=department_id, is_active=True)
-#             document = DepartmentsDocuments.objects.create(
-#                 name=name,
-#                 added_by=added_by,
-#                 file=file,
-#                 department=department,
-#                 created_at=schedule_time if schedule_time > timezone.now() else timezone.now()
-#             )
-#             documents.append(document)
-        
-#         return documents

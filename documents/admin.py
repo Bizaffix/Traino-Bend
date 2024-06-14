@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from .models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, QuizQuestions, DocumentTeam
+from .models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, QuizQuestions, DocumentTeam, QuizResult
 from accounts.models import CompanyTeam, Departments
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
@@ -482,6 +482,6 @@ admin.site.register(DocumentSummary)
 admin.site.register(DocumentKeyPoints)#, DocumentKeyPointsAdmin
 admin.site.register(DocumentQuiz)
 admin.site.register(QuizQuestions)
-
+admin.site.register(QuizResult)
 
 # Register your models here.

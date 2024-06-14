@@ -11,6 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .permissions import IsAdminUserOrReadOnly, IsActiveAdminPermission , IsActiveAdminUsersPermission
 from rest_framework import serializers
 from company.models import AdminUser
+from accounts.models import CustomUser
 
 class AddMembersApiView(CreateAPIView):
     serializer_class = CompaniesTeamSerializer
@@ -35,8 +36,9 @@ class MembersUpdateDestroyApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIVie
         instance = self.get_object()
         instance.is_active=False
         instance.save()
+        user = CustomUser.objects.get(email=instance.members.email)
+        user.delete()
         return Response({"Delete Status": "Successfully Removed the User" , "id":instance.id}, status=status.HTTP_202_ACCEPTED)
-
 
 from rest_framework.filters import SearchFilter, OrderingFilter
     

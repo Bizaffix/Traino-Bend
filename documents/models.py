@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import CustomUser, Departments
+from company.models import AdminUser
 import uuid
 
 
@@ -87,6 +88,7 @@ class DocumentQuiz(models.Model):
     document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+    upload = models.BooleanField(default=False)
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="quiz_added_by")
     
     def __str__(self):
@@ -115,3 +117,35 @@ class QuizQuestions(models.Model):
     class Meta:
         verbose_name = ("Question")
         verbose_name_plural = ("Questions")
+
+
+from teams.models import CompaniesTeam
+
+class QuizResult(models.Model):
+    user = models.ForeignKey(CompaniesTeam , on_delete=models.CASCADE)
+    quiz = models.ForeignKey(DocumentQuiz, on_delete=models.CASCADE)
+    score = models.DecimalField(max_digits=5, decimal_places=2)
+    status = models.CharField(max_length=10)
+
+    class Meta:
+        unique_together = ('user', 'quiz')
+
+    def __str__(self):
+        return f"{self.user.members.first_name} - {self.quiz.name} - {self.status}"
+        
+class SummaryCount(models.Model):
+    admin = models.ForeignKey(AdminUser , null=True , blank=True , on_delete=models.CASCADE)
+    document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
+    request_count = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.admin.first_name} has summary count {self.request_count} for {self.document}"
+    
+class KeypointsCount(models.Model):
+    admin = models.ForeignKey(AdminUser , null=True , blank=True, on_delete=models.CASCADE)
+    document = models.ForeignKey(DepartmentsDocuments, on_delete=models.CASCADE)
+    request_count = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.admin.first_name} has summary count {self.request_count} for {self.document}"
+    

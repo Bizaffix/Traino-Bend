@@ -257,16 +257,6 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
     queryset = Departments.objects.filter(is_active=True)
     lookup_field = 'id'
 
-    # def get(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     print(self.request.user.role)
-    #     admin = AdminUser.objects.get(admin=self.request.user)
-    #     if str(instance.company.id) == str(admin.company.id):
-    #         if admin.is_active==True:
-    #             return super().retrieve(request, *args, **kwargs)
-    #         return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"}, status=status.HTTP_403_FORBIDDEN)
-    #     return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
-
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
@@ -298,17 +288,11 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
             return Response({"Account Error":"Account did not found"},status=status.HTTP_404_NOT_FOUND)
         return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
 
-
-
 class DepartmentListApiView(ListAPIView):
     serializer_class = DepartmentListSerializers
     queryset = Departments.objects.filter(is_active=True).distinct()
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
-    # filter_backends = [SearchFilter, OrderingFilter]
-    # search_fields = ['name', 'id', 'company__name']
-    # ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
-    # ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
     
     def get_queryset(self):
         user = self.request.user
@@ -350,137 +334,7 @@ class DepartmentListApiView(ListAPIView):
 
         else:
             return Response({"Access Denied":"You are Unauthorized"} , status=status.HTTP_401_UNAUTHORIZED)
-        
-# class DepartmentListApiView(ListAPIView):
-#     serializer_class = DepartmentListSerializers
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAdminUserOrReadOnly]
-#     filter_backends = [SearchFilter, OrderingFilter]
-#     search_fields = ['name', 'id', 'company__name']
-#     ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
-#     ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
-#     queryset = Departments.objects.filter(is_active=True)
-
-#     def get_queryset(self):
-#         """
-#         Optionally restricts the returned departments to a given company,
-#         by filtering against a `company_id` query parameter in the URL.
-#         """
-#         queryset = super().get_queryset()  # Get the base queryset
-#         user = self.request.user
-
-#         if user.role == "Admin":
-#             company_id = self.request.query_params.get('company_id', None)
-#             admin = AdminUser.objects.get(admin=user)
-            
-#             if str(company_id) != str(admin.company.id):
-#                 raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments of this company"})
-#             if not admin.is_active:
-#                 raise serializers.ValidationError({"Permission Denied": "Your account is restricted. You cannot perform this task"})
-            
-#             if company_id:
-#                 queryset = queryset.filter(company__id=company_id).distinct()
-#             return queryset
-
-#         elif user.role == "User":
-#             user_id = self.request.query_params.get('user_id', None)
-#             if not user_id:
-#                 raise serializers.ValidationError({"user_id": "This query parameter is required for users."})
-
-#             try:
-#                 user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
-#                 user_departments = Departments.objects.filter(users__in=user_teams, is_active=True)
-
-#                 if user_id:
-#                     user_teams_filtered = CompaniesTeam.objects.filter(id=user_id, members=user, is_active=True)
-#                     if user_teams_filtered.exists():
-#                         user_departments = user_departments.filter(users__in=user_teams_filtered).distinct()
-#                     else:
-#                         raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments for this user_id."})
-                
-#                 return user_departments
-#             except CompaniesTeam.DoesNotExist:
-#                 raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
-
-#         else:  # Super Admin or other roles
-#             company_id = self.request.query_params.get('company_id', None)
-#             if company_id:
-#                 queryset = queryset.filter(company__id=company_id).distinct()
-#             return queryset
-
-    # def list(self, request, *args, **kwargs):
-    #     try:
-    #         queryset = self.filter_queryset(self.get_queryset())
-    #         page = self.paginate_queryset(queryset)
-    #         if page is not None:
-    #             serializer = self.get_serializer(page, many=True)
-    #             return self.get_paginated_response(serializer.data)
-            
-    #         serializer = self.get_serializer(queryset, many=True)
-    #         return Response(serializer.data)
-    #     except serializers.ValidationError as e:
-    #         return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-    #     except Exception as e:
-    #         return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# class DepartmentListApiView(ListAPIView):
-#     serializer_class = DepartmentListSerializers
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAdminUserOrReadOnly]
-#     filter_backends = [SearchFilter, OrderingFilter]
-#     search_fields = ['name', 'id', 'company__name']
-#     ordering_fields = ['name' , 'id', 'company' , 'users' , 'created_at', 'updated_at']
-#     ordering = ['name','id', 'company' , 'users' , 'created_at', 'updated_at']  # Default ordering (A-Z by company_name)
-#     queryset = Departments.objects.filter(is_active=True)
-
-#     def get_queryset(self):
-#         """
-#         Optionally restricts the returned administrators to a given company,
-#         by filtering against a `company_id` query parameter in the URL.
-#         """
-#         if (self.request.user.role == "Admin"):
-#             company_id = self.request.query_params.get('company_id', None)
-#             # print(company_id)
-#             admin = AdminUser.objects.get(admin=self.request.user)
-#             queryset = Departments.objects.filter(is_active=True)
-#             # print(admin.is_active)
-#             # print(str(company_id) == str(admin.company.id))
-#             if str(company_id) == str(admin.company.id):
-#                 if admin.is_active==True:
-#                     if queryset is not None and company_id is not None:
-#                         queryset = queryset.filter(company__id=company_id)
-#                     return queryset
-#                 else:
-#                         raise serializers.ValidationError({"Permission Denied":"Your Account is Restricted. You cannot Perform this task"})
-#             else:
-#                 raise serializers.ValidationError({"Permission Denied":"You are not allowed to view departments of this company"})
-#         elif self.request.user.role == "User":
-#             user_id = self.request.query_params.get('user_id', None)
-#             if not user_id:
-#                 raise serializers.ValidationError({"user_id": "This query parameter is required for users."})
-            
-#             try:
-#                 user_teams = CompaniesTeam.objects.filter(members=self.request.user, is_active=True)
-#                 user_departments = Departments.objects.filter(users__in=user_teams, is_active=True).distinct()
-#                 queryset = user_departments
-
-#                 if user_id:
-#                     user_teams_filtered = CompaniesTeam.objects.filter(id=user_id, members=self.request.user, is_active=True)
-#                     if user_teams_filtered.exists():
-#                         queryset = queryset.filter(users__in=user_teams_filtered)
-#                     else:
-#                         raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments for this user_id."})
-                
-#                 return queryset
-#             except CompaniesTeam.DoesNotExist:
-#                 raise serializers.ValidationError({"Permission Denied": "You are not allowed to view departments."}, code="permission_denied")
-#         else:
-#             queryset = Departments.objects.filter(is_active=True)
-#             company_id = self.request.query_params.get('company_id', None)
-#             if company_id is not None:
-#                 queryset = queryset.filter(company__id=company_id)
-#             return queryset.distinct()
-            
+                    
 from .serializers import CompanyDepartmentsSerializers
 
 class CompanyDepartmentsListAPIView(ListAPIView):
@@ -598,11 +452,13 @@ class AddUserToDepartmentView(APIView):
 from PyPDF2 import PdfReader
 from departments.models import DepartmentsDocuments
 from django.shortcuts import get_object_or_404
+from documents.models import SummaryCount , KeypointsCount
 from .utils import *
 import logging
 from .serializers import *
 
 logger = logging.getLogger(__name__)
+
 class CreateSummaryApiView(APIView):
     serializer_class = CreateSummarySerializer
     authentication_classes = [JWTAuthentication]
@@ -675,6 +531,10 @@ class CreateSummaryApiView(APIView):
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
 
+            summary_request, created = SummaryCount.objects.get_or_create(admin=admin, document=document)
+            if summary_request.request_count >= 5:
+                return Response({"error": "Summary creation limit reached. No more than 5 requests allowed for this document."}, status=status.HTTP_403_FORBIDDEN)
+
             content = read_file_content(document.file)
             
             if content is None:
@@ -697,6 +557,9 @@ class CreateSummaryApiView(APIView):
                 prompt = _ ,
                 added_by = self.request.user                
             ) 
+            
+            summary_request.request_count += 1
+            summary_request.save()
             
             return Response({"id":created_summary.id , "summary":f"{created_summary.summary}", "prompt":f"{created_summary.prompt}"}, status=status.HTTP_200_OK)
         return Response({"Access Denied":"You Are not Allowed to create summary"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -772,6 +635,10 @@ class CreateKeypointsApiView(APIView):
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
 
+            keypoints_request, created = KeypointsCount.objects.get_or_create(admin=admin, document=document)
+            if keypoints_request.request_count >= 5:
+                return Response({"error": "Keypoints creation limit reached. No more than 5 requests allowed for this document."}, status=status.HTTP_403_FORBIDDEN)
+
             content = read_file_content(document.file)
             
             if content is None:
@@ -795,23 +662,118 @@ class CreateKeypointsApiView(APIView):
                 added_by = self.request.user                
             ) 
             
+            keypoints_request.request_count += 1
+            keypoints_request.save()
+            
             return Response({"id":created_keypoint.id , "keypoints":f"{created_keypoint.keypoints}", "prompt":f"{created_keypoint.prompt}"}, status=status.HTTP_200_OK)
         return Response({"Access Denied":"You Are not Allowed to create keypoints"}, status=status.HTTP_401_UNAUTHORIZED)
 
-from documents.models import QuizQuestions
+from documents.models import QuizQuestions , QuizResult
 
 import json
 
+
+class QuestionsofQuiz(ListAPIView):
+    serializer_class = QuizQuestionsListSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    def get_queryset(self):
+        quiz_id = self.request.query_params.get('quiz_id')
+        if not quiz_id:
+            return QuizQuestions.objects.none()
+        
+        quiz = get_object_or_404(DocumentQuiz, id=quiz_id)
+        questions = QuizQuestions.objects.filter(quiz=quiz)
+        return questions
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)    
+    
 class CreateQuizessApiView(APIView):
     serializer_class = CreateQuizesSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUserOrReadOnly]
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
 
+    def get(self, request):
+        document_id = request.query_params.get('document_id')
+        if not document_id:
+            return Response({"error": "document_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+        except DepartmentsDocuments.DoesNotExist:
+            return Response({"error": "No Document Found"}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+
+        if user.role == "Super Admin":
+            quizzes = DocumentQuiz.objects.filter(document=document)
+        elif user.role == "Admin":
+            admin = AdminUser.objects.get(admin=user)
+            if admin.is_active:
+                if str(admin.company.id) == str(document.department.company.id):
+                    quizzes = DocumentQuiz.objects.filter(document=document)
+                else:
+                    return Response({"Access Denied": "You are not allowed to view quizzes for this document"}, status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+        else:  # Regular User
+            member = CompaniesTeam.objects.filter(members=user).first()
+            if member and member.is_active:
+                assigned_documents = DepartmentsDocuments.objects.filter(department__users=member, is_active=True)
+                if document in assigned_documents:
+                    quizzes = DocumentQuiz.objects.filter(document=document, upload=True)
+                else:
+                    return Response({"Access Denied": "You are not allowed to view quizzes for this document"}, status=status.HTTP_403_FORBIDDEN)
+            else:
+                return Response({"No Association": "You are no longer associated with this department"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Prepare the response data
+        if request.user.role == 'User':
+            response_data = []
+            for quiz in quizzes:
+                # Check if the user has already attempted the quiz
+                try:
+                    quiz_result = QuizResult.objects.get(user=member, quiz=quiz)
+                    quiz_data = {
+                        "id": quiz.id,
+                        "name": quiz.name,
+                        "upload_status": quiz.upload,
+                        "attempt_status": "Attempted",
+                        "score": quiz_result.score,
+                        "result_status": quiz_result.status
+                    }
+                except QuizResult.DoesNotExist:
+                    quiz_data = {
+                        "id": quiz.id,
+                        "name": quiz.name,
+                        "upload_status": quiz.upload,
+                        "attempt_status": "Yet to attempt",
+                        "score": None,
+                        "result_status": None
+                    }
+                response_data.append(quiz_data)
+
+            return Response(response_data, status=status.HTTP_200_OK)    
+        else:
+            response_data = []
+            for quiz in quizzes:
+                # Check if the user has already attempted the quiz
+                quiz_data = {
+                        "id": quiz.id,
+                        "name": quiz.name,
+                        "upload_status": quiz.upload,
+                }
+                response_data.append(quiz_data)
+            return Response(response_data, status=status.HTTP_200_OK)
+
+
     def post(self , request):
         if request.user.role == "Admin":
             document_id = request.data.get('document')
-            prompt = request.data.get('prompt')
             if not document_id:
                 return Response({"error":"document is required"}, status=status.HTTP_400_BAD_REQUEST)        
             
@@ -833,6 +795,10 @@ class CreateQuizessApiView(APIView):
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
 
+            quiz_count = DocumentQuiz.objects.filter(document=document, added_by=user).count()
+            if quiz_count >= 10:
+                return Response({"error": "Quiz creation limit reached. No more than 10 quizzes allowed for this document."}, status=status.HTTP_403_FORBIDDEN)
+
             content = read_file_content(document.file)
             
             if content is None:
@@ -845,14 +811,14 @@ class CreateQuizessApiView(APIView):
             logger.info(f"Decoded content: {content[:100]}")  # Log the first 100 characters of the content
 
             try:
-                quiz , _ = generate_quizes_from_gpt(content, prompt)
+                quiz , _ = generate_quizes_from_gpt(content)
                 if quiz is None:
                     return Response({"error": "Failed to generate quiz"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
             created_quiz = DocumentQuiz.objects.create(
-                name= document.name,
+                name= f"Quiz # {quiz_count} of {document.name}",
                 quiz=quiz,
                 prompt = _ ,
                 document = document,
@@ -862,6 +828,9 @@ class CreateQuizessApiView(APIView):
             # response_data = json.loads(quiz)
             
             questions_data = quiz.split("Question:")
+
+            if len(questions_data) - 1 > 10:
+                return Response({"error": "Each quiz can have a maximum of 10 questions."}, status=status.HTTP_400_BAD_REQUEST)
 
             # Iterate through the questions and create QuizQuestions objects
             for question_data in questions_data[1:]:
@@ -891,10 +860,66 @@ class CreateQuizessApiView(APIView):
                     option_4=options.get("D"),
                     answer=correct_answer,
                     quiz=created_quiz,  # Assuming 'created_quiz' is the instance of DocumentQuiz created earlier
-                    added_by=request.user  # Assuming 'request' is available in this context
+                    added_by=request.user  # Assuming 'request' is available in this context "prompt":f"{created_quiz.prompt}"
                 )
-            return Response({"id":created_quiz.id , "quiz":f"{created_quiz.quiz}", "prompt":f"{created_quiz.prompt}"}, status=status.HTTP_200_OK)
+            return Response({"id":created_quiz.id , "quiz":f"{created_quiz.quiz}"}, status=status.HTTP_200_OK)
         return Response({"Access Denied":"You Are not Allowed to create quiz"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class UploadQuiz(APIView):
+    serializer_class = CreateQuizesSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    queryset = DocumentQuiz.objects.all()
+    
+    def post(self , request):
+        quiz_id = request.data.get('quiz_id')
+        quiz = DocumentQuiz.objects.get(id=quiz_id)
+        if quiz:
+            quiz.upload = True
+            quiz.save()
+            return Response({"message":"Quiz is Successfully uploaded or updated", "id":quiz.id}, status=status.HTTP_202_ACCEPTED)
+        return Response({"Not Found":"No quiz found"}, status=status.HTTP_404_NOT_FOUND)
+
+class EditQuizes(APIView):
+    serializer_class = QuizQuestionsSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+
+    def put(self, request, question_id):
+        question = get_object_or_404(QuizQuestions, id=question_id)
+        user = request.user
+
+        if user.role != "Admin":
+            return Response({"error": "Access Denied"}, status=status.HTTP_403_FORBIDDEN)
+
+        admin = AdminUser.objects.get(admin=user)
+        if not admin.is_active:
+            raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+        if str(admin.company.id) != str(question.quiz.document.department.company.id):
+            return Response({"Access Denied": "You are not allowed to edit this question"}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.serializer_class(question, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, question_id):
+        question = get_object_or_404(QuizQuestions, id=question_id)
+        user = request.user
+
+        if user.role != "Admin":
+            return Response({"error": "Access Denied"}, status=status.HTTP_403_FORBIDDEN)
+
+        admin = AdminUser.objects.get(admin=user)
+        if not admin.is_active:
+            raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+        if str(admin.company.id) != str(question.quiz.document.department.company.id):
+            return Response({"Access Denied": "You are not allowed to delete this question"}, status=status.HTTP_403_FORBIDDEN)
+        q_id = question.id
+        question.delete()
+        return Response({"message": "Question deleted successfully", "id":q_id}, status=status.HTTP_200_OK)
 
 from .permissions import IsAssociatedWithDepartment
 
@@ -954,14 +979,13 @@ class SubmitQuizView(APIView):
                 status_test = "Pass"
             else:
                 status_test = "Fail"
-
-            # # Create a quiz submission record
-            # submission = QuizSubmission.objects.create(
-            #     user=request.user,
-            #     quiz_id=quiz_id,
-            #     score=score
-            # )
-
+            member = CompaniesTeam.objects.filter(members=request.user).first()
+            quiz_result, created = QuizResult.objects.update_or_create(
+                user=member,
+                quiz=document,
+                defaults={'score': score, 'status': status_test}
+            )
+            
             return Response({"Score": score , "Status":status_test}, status=status.HTTP_200_OK)
         else:
             return Response({"Access Denied":"Unauthorized Access Requested"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -1105,180 +1129,3 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
             return Response({"Response":"Successfully Deleted the Summary.","id": obj_id})
         else:
             raise serializers.ValidationError("You do not have permission to delete this summary.")
-    
-from PyPDF2 import PdfFileReader
-import os
-from .serializers import DocumentKeyPointsSerializer
-# class DocumentKeyPointsModelViewSet(viewsets.ModelViewSet):
-#     queryset = DocumentKeyPoints.objects.filter(is_active=True)
-#     serializer_class = DocumentKeyPointsSerializer
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAdminUserOrReadOnly]
-#     search_fields = ['id', 'content', 'prompt_text', 'name', 'company__name', 'document__name']
-#     ordering_fields = ['name', 'id', 'company', 'document', 'created_at', 'updated_at']
-#     ordering = ['name', 'id', 'company', 'users', 'created_at', 'updated_at']
-
-#     def get_queryset(self):
-#         user = self.request.user
-#         if user.role == "Super Admin":
-#             return DocumentKeyPoints.objects.filter(is_active=True)
-#         elif user.role == "Admin":
-#             try:
-#                 admin = AdminUser.objects.get(admin=user, is_active=True)
-#                 company = admin.company_id
-#                 return DocumentKeyPoints.objects.filter(company=company)
-#             except AdminUser.DoesNotExist:
-#                 raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
-#         elif user.role == "User":
-#             try:
-#                 user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
-#                 if user_teams.exists():
-#                     company_ids = user_teams.values_list('company_id', flat=True)
-#                     return DocumentKeyPoints.objects.filter(company__in=company_ids)
-#                 else:
-#                     raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
-#             except CompaniesTeam.DoesNotExist:
-#                 raise serializers.ValidationError({"Access Denied": "Your Account is Restricted"})
-#         else:
-#             raise serializers.ValidationError({"Access Denied": "You are not authorized for this request"})
-
-#     def perform_create(self, serializer):
-#         user = self.request.user
-#         if user.role == "Admin":
-#             try:
-#                 admin_user = AdminUser.objects.get(admin=user, is_active=True)
-#                 company = admin_user.company_id
-#                 requested_company_id = serializer.validated_data.get('company')
-#                 if requested_company_id.id != company:
-#                     raise serializers.ValidationError("You can only create key points for your own company.")
-                
-#                 # Extract text from uploaded file
-#                 document_content = self.extract_text_from_file(serializer.validated_data.get('document'))
-                
-#                 # Use OpenAI to create key points
-#                 key_points = self.generate_key_points(document_content)
-#                 serializer.save(added_by=user, content=key_points)
-                
-#             except AdminUser.DoesNotExist:
-#                 raise serializers.ValidationError("Admin user not found.")
-#         else:
-#             raise serializers.ValidationError("Only Admins can create document key points.")
-    
-#     def perform_update(self, serializer):
-#         user = self.request.user
-#         instance = self.get_object()
-#         if user.role == "Admin" and instance.added_by == user:
-#             document_content = serializer.validated_data.get('content', instance.content)
-#             key_points = self.generate_key_points(document_content)
-#             serializer.save(content=key_points)
-#             return serializer.data
-#         else:
-#             raise serializers.ValidationError("You do not have permission to update these key points.")
-
-#     def perform_destroy(self, instance):
-#         user = self.request.user
-#         if user.role == "Admin" and instance.added_by == user:
-#             obj_id = instance.id
-#             instance.delete()
-#             return Response({"Response": "Successfully Deleted the KeyPoints.", "id": obj_id})
-#         else:
-#             raise serializers.ValidationError("You do not have permission to delete these key points.")
-    
-#     def extract_text_from_file(self, file):
-#         """
-#         Extract text from the uploaded file (PDF or text file).
-#         """
-#         if file.name.endswith('.pdf'):
-#             return self.extract_text_from_pdf(file)
-#         elif file.name.endswith('.txt'):
-#             return self.extract_text_from_text(file)
-#         else:
-#             raise serializers.ValidationError("Unsupported file format. Only PDF and text files are supported.")
-
-#     def extract_text_from_pdf(self, file):
-#         """
-#         Extract text from a PDF file.
-#         """
-#         try:
-#             with open(file.temporary_file_path(), 'rb') as f:
-#                 pdf_reader = PdfFileReader(f)
-#                 text = ''
-#                 for page_num in range(pdf_reader.numPages):
-#                     text += pdf_reader.getPage(page_num).extractText()
-#                 return text
-#         except Exception as e:
-#             raise serializers.ValidationError("Failed to extract text from PDF file.")
-
-#     def extract_text_from_text(self, file):
-#         """
-#         Extract text from a text file.
-#         """
-#         try:
-#             with open(file.temporary_file_path(), 'r') as f:
-#                 return f.read()
-#         except Exception as e:
-#             raise serializers.ValidationError("Failed to read text from the text file.")
-
-#     def generate_key_points(self, content):
-#         openai.api_key = openai_api_key
-#         response = openai.Completion.create(
-#             engine="gpt-3.5-turbo",
-#             prompt=f"Extract key points from the following document:\n\n{content}",
-#             max_tokens=150
-#         )
-#         key_points = response.choices[0].text.strip()
-#         return key_points
-# class DocumentKeypointsModelViewSet(viewsets.ModelViewSet):
-#     queryset = DocumentKeyPoints.objects.all()
-#     serializer_class = DocumentKeypointsSerializer
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes = [IsAuthenticated]
-#     filter_backends = [SearchFilter, OrderingFilter]
-#     search_fields = ['content', 'prompt_text']
-
-
-#     def get_queryset(self):
-#         return DocumentKeyPoints.objects.filter(company_id=self.request.user.id)
-
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-        
-#         document_id = int(request.data['document'])
-#         document_keypoint = DocumentKeyPoints.objects.get(document_id = document_id, company_id = self.request.user.id)
-#         generateDocumentKeypoints(document_keypoint.id, document_id, serializer.validated_data['prompt_text'])
-#         serializer = ReadOnlyDocumentKeypointsSerializer(document_keypoint)
-
-#         headers = self.get_success_headers(serializer.data)
-#         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-#     def update(self, request, *args, **kwargs):
-#         partial = kwargs.pop('partial', False)
-#         instance = self.get_object()
-#         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-#         serializer.is_valid(raise_exception=True)
-
-#         self.perform_update(serializer)
-        
-        
-#         serializer = ReadOnlyDocumentKeypointsSerializer(instance)
-
-#         return Response(serializer.data)
-    
-#     def list(self, request, *args, **kwargs):
-#         queryset = self.filter_queryset(self.get_queryset())
-
-#         page = self.paginate_queryset(queryset)
-#         if page is not None:
-#             serializer = ReadOnlyDocumentKeypointsSerializer(page, many=True)
-#             return self.get_paginated_response(serializer.data)
-
-#         serializer = ReadOnlyDocumentKeypointsSerializer(queryset, many=True)
-#         return Response(serializer.data) 
-
-#     def retrieve(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         serializer = ReadOnlyDocumentKeypointsSerializer(instance)
-#         return Response(serializer.data) 
-
-#     def destroy(self, request, *args, **kwargs):
-#         raise serializers.ValidationError("You are not allowed to perform that action.")

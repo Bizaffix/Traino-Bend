@@ -1,140 +1,24 @@
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveAPIView , CreateAPIView , UpdateAPIView, DestroyAPIView
+from rest_framework.generics import CreateAPIView , UpdateAPIView
 from .serializers import CustomUserDetailSerializer , CustomUserSerializer
 from rest_framework.permissions import IsAuthenticated
 from accounts.models import CustomUser
 from teams.models import CompaniesTeam
-from company.models import company , AdminUser
+from company.models import AdminUser
 from rest_framework import status
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
-from django.forms.models import model_to_dict
 from django.contrib.auth.hashers import make_password
 from .permissions import IsAdminUserOrReadOnly
 from rest_framework import serializers
 from company.api.serializers import AdminSerializer 
-from company.models import company
 from teams.api.serializers import CompaniesTeamSerializer
 from departments.models import Departments
-from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.conf import settings
-
-# class CustomUserCreateAPIView(CreateAPIView):
-#     queryset = CustomUser.objects.all()
-#     serializer_class = CustomUserSerializer
-#     permission_classes = [IsAdminUserOrReadOnly]  
-#     def create(self, request, *args, **kwargs):
-#         if request.user.role == 'Super Admin':
-#             pass
-#         elif request.user.role == 'Admin':
-#             if request.data.get('role') == 'Super Admin':
-#                 return Response({"error": "Admin cannot create Super Admins."},
-#                                 status=status.HTTP_403_FORBIDDEN)
-#         else:
-#             return Response({"error": "You don't have permission to create users."},
-#                             status=status.HTTP_403_FORBIDDEN)
-            
-#         request.data['added_by'] = request.user.id
-#         new_user_role = request.data.get('role')
-#         email = request.data.get('email')
-#         department_ids = request.data.get('department_ids', [])
-#         try:
-#             user_data = CustomUser.objects.get(email=email)
-#             if user_data:
-#                 raise serializers.ValidationError(
-#                     {"Account Exists": f"{new_user_role} with this email {email} already exists"})
-#         except CustomUser.DoesNotExist:
-#             # User does not exist, so continue with user creation
-#             pass
-#         password = request.data.pop('password', None) 
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.save(password=make_password(password))
-#         if new_user_role == 'Admin':
-#             company_id = request.data.get('company')
-#             if not company_id:
-#                 user.delete()
-#                 raise serializers.ValidationError({"Bad Request":"Company id is required"})
-#             admin_data = {'email': email, 'company': company_id}
-#             admin_create = AdminSerializer(data=admin_data)
-#             if admin_create.is_valid(raise_exception=True):
-#                 admin_create.save()
-#                 if settings.DEBUG:
-#                     login_url = 'https://dashboard.traino.ai/signin/'
-#                 else:
-#                     login_url = 'https://dashboard.traino.ai/signin/'
-#                 send_mail(
-#                 subject="Welcome to Traino-ai",
-#                 message=f'''Welcome to Traino-ai.
-
-# We're so excited to be working with you, and we want to be sure we start off on the right foot.
-# Your email and password to access the Traino-ai portal is shown below.Please click here to sign-in.
-
-# Username: {email}
-# Password: {password}
-# Role: {new_user_role}
-
-# Please {login_url} and complete your profile.
-
-# Regards
-# Traino-ai.''',
-#                 from_email="no-reply@traino.ai",
-#                 recipient_list=[email],
-#                 fail_silently=False,
-#                 )
-#             else:
-#                 user.delete()
-#                 return Response(admin_create.errors, status=status.HTTP_400_BAD_REQUEST)
-#         elif new_user_role == 'User':
-#             company_id = request.data.get('company')
-#             if not company_id:
-#                 user.delete()
-#                 raise serializers.ValidationError({"Bad Request":"Company id is required"})
-#             member_data = {'members': user.id, 'company': company_id}
-#             member = CompaniesTeamSerializer(data=member_data)
-#             if member.is_valid(raise_exception=True):
-#                 member.save()
-#             else:
-#                 user.delete()
-#                 return Response(admin_create.errors, status=status.HTTP_400_BAD_REQUEST)
-#             team_member = CompaniesTeam.objects.get(members__email=email)
-#             for department_id in department_ids:
-#                 department = Departments.objects.filter(id=department_id, is_active=True).first()
-#                 if department:
-#                     department.users.add(team_member)
-#                     department.save()
-#                 else:
-#                     return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
-#             if settings.DEBUG:
-#                 login_url = 'https://dashboard.traino.ai/signin/'
-#             else:
-#                 login_url = 'https://dashboard.traino.ai/signin/'
-#             send_mail(
-#                 subject="Welcome to Traino-ai",
-#                 message=f'''Welcome to Traino-ai.
-
-# We're so excited to be working with you, and we want to be sure we start off on the right foot.
-# Your email and password to access the Traino-ai portal is shown below.Please click here to sign-in.
-
-# Username: {email}
-# Password: {password}
-# Role: {new_user_role}
-
-# Please {login_url} and complete your profile.
-
-# Regards
-# Traino-ai.''',
-#             from_email="no-reply@traino.ai",
-#             recipient_list=[email],
-#             fail_silently=False,
-#             )
-#         self.perform_create(serializer)
-#         headers = self.get_success_headers(serializer.data)
-#         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class CustomUserCreateAPIView(CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -156,9 +40,9 @@ class CustomUserCreateAPIView(CreateAPIView):
         department_ids = request.data.get('department_ids', [])
         
         try:
-            user_data = CustomUser.objects.get(email=email)
+            user_data = CustomUser.active_users().filter(email=email).exists()
             if user_data:
-                raise serializers.ValidationError({"Account Exists": f"{new_user_role} with this email {email} already exists"})
+                return Response({"error": f"{new_user_role} with this email {email} already exists"}, status=status.HTTP_400_BAD_REQUEST)
         except CustomUser.DoesNotExist:
             pass  # User does not exist, proceed with creation
 
@@ -234,22 +118,25 @@ Traino-ai.''',
             recipient_list=[email],
             fail_silently=False,
         )
-
-from teams.api.permissions import IsActiveAdminPermission
+        
 class CustomUserUpdateAPIView(UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [IsAdminUserOrReadOnly]
     lookup_field = 'id'
-    
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
+        
+        # Check if Admin is trying to update a Super Admin
         if request.user.role == 'Admin' and instance.role == 'Super Admin':
             return Response({"error": "Admin cannot update Super Admins."}, status=status.HTTP_403_FORBIDDEN)
 
+        # Check if the role change is attempted
         if 'role' in request.data and request.data['role'] != instance.role:
             return Response({"error": "Cannot change the role of the user."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Handle password change
         if 'password' in request.data:
             password = request.data.pop('password')
             instance.set_password(password)
@@ -268,56 +155,92 @@ class CustomUserUpdateAPIView(UpdateAPIView):
                     admin_instance.save()
             elif instance.role == 'User':
                 company_id = request.data.get('company')
-                department_ids = request.data.get('department_ids', [])
+                new_department_ids = request.data.get('department_ids', [])
+                
                 if company_id:
                     member_instance = CompaniesTeam.objects.get(members__id=instance.id)
                     member_instance.company_id = company_id
                     member_instance.save()
 
+                    if new_department_ids is not None:
+                        current_department_ids = list(member_instance.departments_set.values_list('id', flat=True))
 
-                    # for department in Departments.objects.filter(users=member_instance):
-                    #     department.users.remove(member_instance)
-                    # member_instance.departments.clear()
-                    if department_ids is not None:
-                        for department_id in department_ids:
+                        # Determine departments to add, keep, and remove
+                        departments_to_add = set(new_department_ids) - set(current_department_ids)
+                        departments_to_keep = set(new_department_ids) & set(current_department_ids)
+                        departments_to_remove = set(current_department_ids) - set(new_department_ids)
+
+                        # Handle department assignment
+                        for department_id in departments_to_remove:
+                            department = Departments.objects.get(id=department_id)
+                            department.users.remove(member_instance)
+                            department.save()
+
+                        for department_id in departments_to_add:
                             department = Departments.objects.filter(id=department_id, is_active=True).first()
                             if department:
                                 department.users.add(member_instance)
                                 department.save()
                             else:
-                                return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
+                                return Response({"Not Found": f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
+
+                        for department_id in departments_to_keep:
+                            # No operation needed for kept departments
+                            pass
+
                     else:
-                        raise serializers.ValidationError({"not found":"Departments Not Found"})
+                        return Response({"not found": "Departments Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response({"Access Denied":"You have access to this action"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({"Access Denied": "You do not have access to this action"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    # def update(self, request, *args, **kwargs):
+    #     instance = self.get_object()
+    #     if request.user.role == 'Admin' and instance.role == 'Super Admin':
+    #         return Response({"error": "Admin cannot update Super Admins."}, status=status.HTTP_403_FORBIDDEN)
 
-        # elif request.user.role == "Admin":
-        #     company_id = request.data.get('company')
-        #     department_ids = request.data.get('department_ids', [])
-        #     if company_id:
-        #         member_instance = CompaniesTeam.objects.get(members__id=instance.id)
-        #         member_instance.company_id = company_id
-        #         member_instance.save()
+    #     if 'role' in request.data and request.data['role'] != instance.role:
+    #         return Response({"error": "Cannot change the role of the user."}, status=status.HTTP_400_BAD_REQUEST)
 
-        #         for department in Departments.objects.filter(users=member_instance):
-        #             department.users.remove(member_instance)
-        #         # member_instance.departments.clear()
-        #             if department_ids is not None:
-        #                 for department_id in department_ids:
-        #                     department = Departments.objects.filter(id=department_id, is_active=True).first()
-        #                     if department:
-        #                         department.users.add(member_instance)
-        #                         department.save()
-        #                     else:
-        #                         return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
-        #             else:
-        #                 raise serializers.ValidationError({"not found":"Departments Not Found"})
-        #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #     if 'password' in request.data:
+    #         password = request.data.pop('password')
+    #         instance.set_password(password)
+        
+    #     serializer = self.get_serializer(instance, data=request.data, partial=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_update(serializer)
 
-            # return Response({"update Successfully":"Admin Updated Successfully"}, status=status.HTTP_200_OK)
+    #     # Update additional fields based on role
+    #     if (request.user.role == "Super Admin") or (request.user.role == "Admin"):
+    #         if instance.role == 'Admin':
+    #             company_id = request.data.get('company')
+    #             if company_id:
+    #                 admin_instance = AdminUser.objects.get(admin=instance)
+    #                 admin_instance.company_id = company_id
+    #                 admin_instance.save()
+    #         elif instance.role == 'User':
+    #             company_id = request.data.get('company')
+    #             department_ids = request.data.get('department_ids', [])
+    #             if company_id:
+    #                 member_instance = CompaniesTeam.objects.get(members__id=instance.id)
+    #                 member_instance.company_id = company_id
+    #                 member_instance.save()
+
+    #                 if department_ids is not None:
+    #                     for department_id in department_ids:
+    #                         department = Departments.objects.filter(id=department_id, is_active=True).first()
+    #                         if department:
+    #                             department.users.add(member_instance)
+    #                             department.save()
+    #                         else:
+    #                             return Response({"Not Found":f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
+    #                 else:
+    #                     raise serializers.ValidationError({"not found":"Departments Not Found"})
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    #     return Response({"Access Denied":"You have access to this action"}, status=status.HTTP_401_UNAUTHORIZED)
             
-
 class LoginAPIView(APIView):
     authentication_classes = []
     permission_classes = []
@@ -336,9 +259,6 @@ class LoginAPIView(APIView):
                 serializer = CustomUserDetailSerializer(user_data)  # Use CustomUserDetailSerializer
                 if serializer.data['role'] == 'Admin':
                     admin = AdminUser.objects.get(admin=serializer.data['id'])
-                    # print(admin.company.id)
-                    # print(admin.company.name)
-                    # print(admin.is_active == True)
                     if admin.is_active==True:
                         refresh = RefreshToken.for_user(user)
                         token = {
@@ -361,8 +281,6 @@ class LoginAPIView(APIView):
                         return Response({"Unauthorized": "You are blocked or deleted"}, status=status.HTTP_401_UNAUTHORIZED)
                 elif serializer.data['role'] == 'User':
                     user_company = CompaniesTeam.objects.get(members=serializer.data['id'])
-                    # print(user.company.id)
-                    # print(user.company.name)
                     if user_company.is_active==True:
                         refresh = RefreshToken.for_user(user)
                         token = {
@@ -398,8 +316,6 @@ class LoginAPIView(APIView):
                         'phone': serializer.data['phone'],
                         'email': serializer.data['email'],
                         'role': serializer.data['role'],
-                        # 'company_id':admin.company.id,
-                        # 'company_name':admin.company.name,
                         'created_at': serializer.data['created_at'],
                     }
             except CustomUser.DoesNotExist:
@@ -422,11 +338,6 @@ class UserDetailAPIView(APIView):
             if serializer.data['role'] == 'Admin':
                 admin = get_object_or_404(AdminUser, admin=user.id)
                 if admin.is_active:
-                    # refresh = RefreshToken.for_user(user)
-                    # token = {
-                    #         'refresh': str(refresh),
-                    #         'access': str(refresh.access_token),
-                    # }
                     serialized_user = {
                         'id': serializer.data['id'],
                         'first_name': serializer.data['first_name'],
@@ -444,11 +355,6 @@ class UserDetailAPIView(APIView):
             elif serializer.data['role'] == 'User':
                 user_company = get_object_or_404(CompaniesTeam, members=user.id)
                 if user_company.is_active:
-                    # refresh = RefreshToken.for_user(user)
-                    # token = {
-                    #         'refresh': str(refresh),
-                    #         'access': str(refresh.access_token),
-                    # }
                     serialized_user = {
                         'id': serializer.data['id'],
                         'first_name': serializer.data['first_name'],
@@ -464,11 +370,6 @@ class UserDetailAPIView(APIView):
                 else:
                     return Response({"Unauthorized": "You are blocked or deleted"}, status=status.HTTP_401_UNAUTHORIZED)
             else:
-                # refresh = RefreshToken.for_user(user)
-                # token = {
-                #             'refresh': str(refresh),
-                #             'access': str(refresh.access_token),
-                # }
                 serialized_user = {
                     'id': serializer.data['id'],
                     'first_name': serializer.data['first_name'],

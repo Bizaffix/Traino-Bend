@@ -43,14 +43,14 @@ def generate_keypoints_from_gpt(content, prompt):
 
 
 # Quizes Generations from gpt
-def generate_quizes_from_gpt(content, prompt):
+def generate_quizes_from_gpt(content):
     openai.api_key = openai_api_key
-    # prompt = f"You are the teacher, Provide me the random number quizes with mcqs and each mcq contains the 4 options and also provide me the correct option as well by just labeling A , B ,C Or D for correct answer. Make sure everytime the quizes maybe changed and hard: \n\n{content[:7500]} \n. Please make sure in your response no extra and use less text exists in response neither in start nor in end and question must be as question , question: , options as A:, B:  "
+    prompt = f"You are the teacher, Provide me the random number of quizes having maximum limit of 10 questions with mcqs and each mcq contains the 4 options and also provide me the correct option as well by just labeling A , B ,C Or D for correct answer. Make sure everytime the quizes will be changed than previous and hard: \n\n{content[:7500]} \n. Please make sure in your response no extra and use less text exists in response neither in start nor in end and question must be as question , question: , options as A:, B:  "
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"{prompt}\n\n{content[:7500]}"}
+            {"role": "user", "content": prompt}
         ],
         max_tokens=2000  # Adjust the max tokens based on the required summary length
     )

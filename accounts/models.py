@@ -17,8 +17,13 @@ class CustomUser(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey("self", models.CASCADE, default=None, null=True)
-
+    is_available=models.BooleanField(default=True)
+    
     objects = CustomUserManager()
+
+    @classmethod
+    def active_users(cls):
+        return cls.objects.filter(is_available=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'role']
@@ -99,6 +104,7 @@ class MyAdminSite(AdminSite):
             "Company Team Members":10,
             "Company Users":11,
             "Questions":12,
+            "Quiz results":13,
         }
 
         app_dict = self._build_app_dict(request, app_label)

@@ -18,7 +18,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
     def get_password(self , obj):
         return obj.password
 
-
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value , is_available=True).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+    
 class AdminCreationSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
     class Meta:

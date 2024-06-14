@@ -130,12 +130,19 @@ class AdminUserUpdateAndDeleteApiView(RetrieveAPIView,UpdateAPIView, DestroyAPIV
         AdminUser.objects.get(id=self.kwargs['id'])
         return self.update(request, *args , **kwargs)
     
-    def delete(self , request , *args , **kwargs):
+    def delete(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.is_active=False
+        
+        # Check if the user is trying to delete their own account
+        if instance.admin == request.user:
+            return Response({"Alert": "You cannot delete their own account."}, status=status.HTTP_403_FORBIDDEN)
+        
+        instance.is_active = False
         instance.save()
-        return Response({"status": "Successfully Delete the Admin" , "id":instance.id}, status=HTTP_202_ACCEPTED)
-
+        user = CustomUser.objects.get(email=instance.admin.email)
+        user.delete()
+        return Response({"status": "Successfully deleted the admin", "id": instance.id}, status=status.HTTP_202_ACCEPTED)
+    
 class AdminListApiView(ListAPIView):
     serializer_class = AdminUpdateDeleteSerializer
     authentication_classes = [JWTAuthentication]
