@@ -31,7 +31,7 @@ class CustomUserAdmin(UserAdmin):
     form = CustomUserChangeForm
 
     model = CustomUser
-    list_display = ('id', 'email', 'first_name', 'last_name', 'is_active', 'role', 'created','updated','added_by', 'is_available')
+    list_display = ('id', 'email', 'first_name', 'last_name', 'is_active', 'role', 'created','updated','added_by')
     list_filter = ('is_active',)
     fieldsets = (
         (None, {'fields': ('email', 'password', ('first_name', 'last_name'))}),
@@ -115,7 +115,7 @@ class CustomCompanyAdmin(UserAdmin):
     form = CompanyUserChangeForm
 
     model = CustomCompanyUser
-    list_display = ('id','email', 'first_name', 'last_name', 'is_active', 'role', 'created','updated','added_by', 'is_available')
+    list_display = ('id','email', 'first_name', 'last_name', 'is_active', 'role', 'created','updated','added_by')
     list_filter = ('is_active',)
     fieldsets = (
         (None, {'fields': ('email', 'password', ('first_name', 'last_name'))}),
@@ -235,7 +235,7 @@ class CustomCompanyTeamMembers(UserAdmin):
     form = CompanyUserChangeForm
 
     model = CustomCompanyTeamUser
-    list_display = ('id','email', 'first_name', 'last_name', 'is_active', 'role', 'created','updated','added_by', 'is_available')
+    list_display = ('id','email', 'first_name', 'last_name', 'is_active', 'role', 'created','updated','added_by')
     list_filter = ('is_active',)
     fieldsets = (
         (None, {'fields': ('email', 'password', ('first_name', 'last_name'))}),
