@@ -40,7 +40,7 @@ class CustomUserCreateAPIView(CreateAPIView):
         department_ids = request.data.get('department_ids', [])
         
         try:
-            user_data = CustomUser.active_users().filter(email=email).exists()
+            user_data = CustomUser.objects.filter(email=email).exists()
             if user_data:
                 return Response({"error": f"{new_user_role} with this email {email} already exists"}, status=status.HTTP_400_BAD_REQUEST)
         except CustomUser.DoesNotExist:
