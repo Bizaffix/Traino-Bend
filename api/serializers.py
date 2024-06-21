@@ -132,10 +132,14 @@ class QuizQuestionsSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class QuizQuestionsListSerializer(serializers.ModelSerializer):
+    options = serializers.SerializerMethodField()
     class Meta:
         model = QuizQuestions
-        fields = ['quiz' , 'id', 'question' , 'option_1' , 'option_2' , 'option_3' , 'option_4']
-
+        fields = ['quiz' , 'id', 'question' , 'options']
+    
+    def get_options(self , obj):
+        return [obj.option_1 , obj.option_2 , obj.option_3 , obj.option_4]
+    
 class DocumentSerializer(serializers.ModelSerializer):
     company = UserCreateSerializer(many=False, read_only=True)
     added_by = UserCreateSerializer(many=False, read_only=True)

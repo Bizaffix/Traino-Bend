@@ -40,7 +40,15 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
      
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        data = request.data
+
+        # Check if the name is being updated
+        new_name = data.get('name')
+        if new_name and new_name != instance.name:
+            if company.objects.filter(name=new_name, is_active=True).exists():
+                raise serializers.ValidationError({"Error": "A company with this name already exists."})
+            
+        serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)

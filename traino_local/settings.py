@@ -236,6 +236,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://dashboard.traino.ai",
     # "https://dashboard.traino.ai/media/documents/",
     "http://localhost:3000",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:8000"
     # "https://localhost:3000/media/documents/",
     "http://127.0.0.1:3000",
 ]

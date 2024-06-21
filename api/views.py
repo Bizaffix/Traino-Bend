@@ -226,22 +226,23 @@ class DepartmentCreateApiview(CreateAPIView):
         company_id_from_request = self.request.data.get('company')
         name = self.request.data.get('name')
         try:
-            company_name = Departments.objects.get(name=name, is_active=True)
+            company_name = Departments.objects.get(name=name, company=company_id_from_request, is_active=True)
             if company_name:
                 raise serializers.ValidationError(
-                    {"Department Exists": f"Department with this name {name} already exists"})
+                    {"Department Exists": f"Department with this name {name} already exists in this company"})
         except Departments.DoesNotExist:
             # User does not exist, so continue with user creation
             pass
         # Get the admin user associated with the request user
-        try:
-            admin_user = AdminUser.objects.get(admin=self.request.user, is_active=True)
-        except AdminUser.DoesNotExist:
-            raise serializers.ValidationError({"Error": "Your account is deleted as Admin by Super Admin. You can no Longer access this feature"})
+        if self.request.user.role == 'Admin':
+            try:
+                admin_user = AdminUser.objects.get(admin=self.request.user, is_active=True)
+            except AdminUser.DoesNotExist:
+                raise serializers.ValidationError({"Error": "Your account is deleted as Admin by Super Admin. You can no Longer access this feature"})
 
         # Check if the company ID from the request matches the company associated with the admin user
-        if str(admin_user.company.id) != company_id_from_request:
-            raise serializers.ValidationError({"Access Denied": "You are not allowed to create departments in this company."})
+            if str(admin_user.company.id) != company_id_from_request:
+                raise serializers.ValidationError({"Access Denied": "You are not allowed to create departments in this company."})
 
         # Save the department with the associated admin user
         serializer.save(added_by=self.request.user)
@@ -266,8 +267,16 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
         admin = AdminUser.objects.get(admin=self.request.user)
         if str(instance.company.id) == str(admin.company.id):
             if admin.is_active==True:
-                Departments.objects.get(id=self.kwargs['id'])
-                return self.update(request, *args , **kwargs)
+                data = request.data
+                new_name = data.get('name')
+                if new_name and new_name != instance.name:
+                    if Departments.objects.filter(name=new_name, is_active=True).exists():
+                        raise serializers.ValidationError({"Error": "A department with this name already exists and is active."})
+
+                serializer = self.get_serializer(instance, data=data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                self.perform_update(serializer)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             return Response({"Account Error":"Your Profile is restricted . You are not allowed to perform this action"},status=status.HTTP_404_NOT_FOUND)
         return Response({"Account Error":"Your Profile is Not Authorized for this request as you are requesting data for unknown company department."},status=status.HTTP_401_UNAUTHORIZED)
     

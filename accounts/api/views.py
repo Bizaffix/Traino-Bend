@@ -241,9 +241,12 @@ class CustomUserUpdateAPIView(UpdateAPIView):
 
     #     return Response({"Access Denied":"You have access to this action"}, status=status.HTTP_401_UNAUTHORIZED)
             
+            
+            
 class LoginAPIView(APIView):
     authentication_classes = []
     permission_classes = []
+    
     def post(self, request):
         data = request.data
         email = data.get('email')
