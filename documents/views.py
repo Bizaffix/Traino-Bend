@@ -482,11 +482,10 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                 document.assigned_users.set(assigned_users)
                 created_documents.append(document.id)
 
-        if failure_departments:
+        if sorted(failure_departments) == sorted(department_ids):
             failure_message = f"Document with name '{name}' already exists in departments: {failure_departments}."
             response_data = {
                 "message": failure_message,
-                "created_documents": created_documents
             }
             return Response(response_data, status=status.HTTP_409_CONFLICT)
 
