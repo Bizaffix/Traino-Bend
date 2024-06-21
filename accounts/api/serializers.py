@@ -11,6 +11,7 @@ class CustomUserDetailSerializer(serializers.ModelSerializer):
 
 class CustomUserSerializer(serializers.ModelSerializer):
     password = serializers.SerializerMethodField(read_only=True)
+    id = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = CustomUser
         fields = ['id','first_name' , 'last_name', 'email', 'phone', 'role', 'password','added_by']
@@ -23,6 +24,64 @@ class CustomUserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("A user with this email already exists.")
         return value
     
+
+from teams.models import CompaniesTeam
+
+class CustomUserUpdateSerializer(serializers.ModelSerializer):
+    password = serializers.SerializerMethodField(read_only=True)
+    id = serializers.SerializerMethodField(read_only=True)
+    user_update_key = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = CustomUser
+        fields = ['id','first_name' , 'last_name', 'email', 'phone', 'role', 'password','added_by' , 'user_update_key']
+
+    def get_id(self , obj):
+        id = CompaniesTeam.objects.get(members=obj.id)
+        return id.id
+    
+    def get_user_update_key(self , obj):
+        return obj.id
+
+    def get_password(self , obj):
+        return obj.password
+
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+    
+
+
+from company.models import AdminUser
+
+class CustomAdminUpdateSerializer(serializers.ModelSerializer):
+    password = serializers.SerializerMethodField(read_only=True)
+    id = serializers.SerializerMethodField(read_only=True)
+    admin_update_key = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = CustomUser
+        fields = ['id','first_name' , 'last_name', 'email', 'phone', 'role', 'password','added_by' , 'admin_update_key']
+
+    def get_id(self , obj):
+        id = AdminUser.objects.get(admin=obj.id)
+        return id.id
+    
+    def get_admin_update_key(self , obj):
+        return obj.id
+
+    def get_password(self , obj):
+        return obj.password
+
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+    
+
+
+
+
+
     
 class AdminCreationSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()

@@ -119,6 +119,8 @@ Traino-ai.''',
             fail_silently=False,
         )
         
+        
+from .serializers import CustomAdminUpdateSerializer , CustomUserUpdateSerializer
 class CustomUserUpdateAPIView(UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -141,10 +143,17 @@ class CustomUserUpdateAPIView(UpdateAPIView):
             password = request.data.pop('password')
             instance.set_password(password)
         
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
+        
+        if instance.role == 'Admin':
+            serializer = CustomAdminUpdateSerializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+        
+        if instance.role == 'User':
+            serializer = CustomUserUpdateSerializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+        
         # Update additional fields based on role
         if (request.user.role == "Super Admin") or (request.user.role == "Admin"):
             if instance.role == 'Admin':
