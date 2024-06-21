@@ -63,21 +63,6 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
      
-    # def put(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     data = request.data
-
-    #     # Check if the name is being updated
-    #     new_name = data.get('name')
-    #     if new_name and new_name != instance.name:
-    #         if company.objects.filter(name=new_name, is_active=True).exists():
-    #             raise serializers.ValidationError({"Error": "A company with this name already exists."})
-            
-    #     serializer = self.get_serializer(instance, data=data, partial=True)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_update(serializer)
-    #     return Response(serializer.data)
-
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         
@@ -159,9 +144,32 @@ class AdminUserUpdateAndDeleteApiView(RetrieveAPIView,UpdateAPIView, DestroyAPIV
     queryset = AdminUser.objects.filter(is_active=True)
     lookup_field = 'id'
      
-    def put(self , request , *args, **kwargs):
-        AdminUser.objects.get(id=self.kwargs['id'])
-        return self.update(request, *args , **kwargs)
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Handle both full and partial updates
+        partial = kwargs.pop('partial', False)
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        kwargs['partial'] = False
+        return self.update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
+    # def put(self , request , *args, **kwargs):
+    #     instance = self.get_object()
+    #     data = request.data
+    #     serializer = self.get_serializer(instance, data=data, partial=partial)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_update(serializer)
+    #     return Response(serializer.data)
     
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()

@@ -45,7 +45,7 @@ def generate_keypoints_from_gpt(content, prompt):
 # Quizes Generations from gpt
 def generate_quizes_from_gpt(content):
     openai.api_key = openai_api_key
-    prompt = f"You are the teacher. Provide me a random number of quizzes with a maximum limit of 10 questions, each containing 4 options as MCQs. Indicate the correct option by labeling it A, B, C, or D. Ensure the quizzes are different each time and challenging:\n\n{content[:7500]}\nPlease ensure your response is concise with no extra text, and format questions as 'question:', and options as 'A:', 'B:', etc."
+    prompt = f"You are the teacher. Provide me a random number of quizzes with a maximum limit of 10 questions, each containing 4 options as MCQs. Indicate the correct option by labeling it A, B, C, or D. Ensure the quizzes are different each time and challenging:\n\n{content[:7500]}\nPlease ensure your response is concise with no extra text, and format questions as 'Question:', and options as 'A:', 'B:', etc."
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[

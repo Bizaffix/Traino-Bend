@@ -28,10 +28,25 @@ class MembersUpdateDestroyApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIVie
     queryset = CompaniesTeam.objects.filter(is_active=True)
     lookup_field = 'id'
     
-    def put(self , request , *args, **kwargs):
-        CompaniesTeam.objects.get(id=self.kwargs['id'])
-        return self.update(request, *args , **kwargs)
-    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Handle both full and partial updates
+        partial = kwargs.pop('partial', False)
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        kwargs['partial'] = False
+        return self.update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
     def delete(self , request , *args , **kwargs):
         instance = self.get_object()
         instance.is_active=False
