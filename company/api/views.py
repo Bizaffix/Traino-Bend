@@ -46,7 +46,7 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
         new_name = data.get('name')
         if new_name and new_name != instance.name:
             if company.objects.filter(name=new_name, is_active=True).exists():
-                raise ValidationError({"Error": "A company with this name already exists."})
+                raise serializers.ValidationError({"Error": "A company with this name already exists."})
 
         # Handle both full and partial updates
         partial = kwargs.pop('partial', False)
