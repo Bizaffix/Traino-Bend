@@ -836,17 +836,26 @@ class CreateQuizessApiView(APIView):
             
             # response_data = json.loads(quiz)
             
-            questions_data = quiz.split("Question:")
+            # questions_data = quiz.split("Question:")
+
+            possible_formats = ["Question:", "question:", "Question 1:", "q:"]
+            questions_data = []
+            temp_data = quiz
+            for fmt in possible_formats:
+                if fmt in temp_data:
+                    parts = temp_data.split(fmt)
+                    if len(parts) > 1:
+                        questions_data.extend(parts[1:])
+                        temp_data = parts[0]
 
             if len(questions_data) - 1 > 10:
                 return Response({"error": "Each quiz can have a maximum of 10 questions."}, status=status.HTTP_400_BAD_REQUEST)
 
-            import re
-            questions_data = re.split(r'\b(?:Question:|question:|Question \d+:|q:)\b', quiz)
+            
 
             # Iterate through the questions and create QuizQuestions objects
             for question_data in questions_data[1:]:
-                lines = question_data.strip()
+                lines = question_data.strip().split("\n")
 
                 # Extract question text
                 question_text = lines[0].strip()
