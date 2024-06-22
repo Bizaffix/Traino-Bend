@@ -844,10 +844,9 @@ class CreateQuizessApiView(APIView):
             import re
             questions_data = re.split(r'\b(?:Question:|question:|Question \d+:|q:)\b', quiz)
 
-
             # Iterate through the questions and create QuizQuestions objects
             for question_data in questions_data[1:]:
-                lines = question_data.strip().split("\n")
+                lines = question_data.strip()
 
                 # Extract question text
                 question_text = lines[0].strip()
