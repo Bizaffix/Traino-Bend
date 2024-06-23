@@ -163,14 +163,6 @@ class AdminUserUpdateAndDeleteApiView(RetrieveAPIView,UpdateAPIView, DestroyAPIV
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
 
-    # def put(self , request , *args, **kwargs):
-    #     instance = self.get_object()
-    #     data = request.data
-    #     serializer = self.get_serializer(instance, data=data, partial=partial)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_update(serializer)
-    #     return Response(serializer.data)
-    
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         
@@ -240,6 +232,8 @@ class BulkAdminDeleteAPIView(APIView):
                 admin = AdminUser.objects.get(id=admin_id)
                 admin.is_active = False
                 admin.save()
+                admin_user = CustomUser.objects.filter(email=admin.admin.email)
+                admin_user.delete()
             except AdminUser.DoesNotExist:
                 return Response({"message": f"Admin with ID {admin_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
 

@@ -144,6 +144,8 @@ class BulkUserDeleteAPIView(APIView):
                         if user.company == admin.company:
                             user.is_active = False
                             user.save()
+                            user_info = CustomUser.objects.filter(email=user.members.email)
+                            user_info.delete()
                         else:
                             return Response({"Access Denied": "You are not authorized for this request"}, status=status.HTTP_403_FORBIDDEN)
                 except CompaniesTeam.DoesNotExist:
