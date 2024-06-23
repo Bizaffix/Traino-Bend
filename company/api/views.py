@@ -71,8 +71,13 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
         instance.save()
 
         # Marked all admin users as inactive
-        instance.company.all().update(is_active=False)
-
+        admin_users = instance.company.all()
+        for admin_user in admin_users:
+            if admin_user.admin:
+                admin_user.admin.delete()
+            admin_user.is_active = False
+            admin_user.save()
+            
         # Marked all departments and their related documents as inactive
         departments = instance.department_company.all()
         for department in departments:
@@ -91,8 +96,13 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
                 document.documentquiz_set.all().delete()
 
         # Marked all company teams as inactive
-        instance.company_teams.all().update(is_active=False)
-
+        company_teams = instance.company_teams.all()
+        for team in company_teams:
+            if team.members:
+                team.members.delete()
+            team.is_active = False
+            team.save()
+            
         return Response({"Delete Status": "Successfully deleted the Company", "id": instance.id}, status=HTTP_202_ACCEPTED)
 
 from rest_framework.filters import SearchFilter, OrderingFilter
