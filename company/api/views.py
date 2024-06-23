@@ -66,7 +66,7 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         
-        print(instance.id)
+        # print(instance.id)
         # Marked all admin users as inactive
         admin_users = AdminUser.objects.filter(company=instance.id)
         for admin_user in admin_users:
