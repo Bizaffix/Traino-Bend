@@ -73,10 +73,10 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
         # Marked all admin users as inactive
         admin_users = instance.company.all()
         for admin_user in admin_users:
-            if admin_user.admin:
-                admin_user.admin.delete()
             admin_user.is_active = False
             admin_user.save()
+            if admin_user.admin:
+                admin_user.admin.delete()
             
         # Marked all departments and their related documents as inactive
         departments = instance.department_company.all()
