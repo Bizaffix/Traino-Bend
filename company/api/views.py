@@ -66,15 +66,18 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         
-
+        print(instance.id)
         # Marked all admin users as inactive
-        admin_users = instance.company.all()
+        admin_users = AdminUser.objects.filter(company=instance.id)
         for admin_user in admin_users:
             admin_user.is_active = False
             admin_user.save()
+        
+        # Delete all admin users' CustomUser info
+        for admin_user in admin_users:
             if admin_user.admin:
                 admin_user.admin.delete()
-            
+                    
         # Marked all departments and their related documents as inactive
         departments = instance.department_company.all()
         for department in departments:
@@ -93,13 +96,15 @@ class CompanyUpdateAndDeleteApiView(RetrieveAPIView , UpdateAPIView, DestroyAPIV
                 document.documentquiz_set.all().delete()
 
         # Marked all company teams as inactive
-        company_teams = instance.company_teams.all()
+        company_teams = CompaniesTeam.objects.filter(company=instance.id)
         for team in company_teams:
             team.is_active = False
             team.save()
+        
+        # Delete all team members' CustomUser info
+        for team in company_teams:
             if team.members:
-                team.members.delete()
-            
+                team.members.delete()    
         
         # Marked company as inactive
         instance.is_active = False
