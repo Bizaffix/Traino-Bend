@@ -243,16 +243,32 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Email Configurations
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "mail.privateemail.com"
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'no-reply@traino.ai' #os.environ.get('EMAIL_USER')
-EMAIL_HOST_PASSWORD = 'hello123!@' #os.environ.get('EMAIL_PASS')
-EMAIL_DEFAULT_FROM = 'no-reply@traino.ai' # os.environ.get('EMAIL_USER')  # your sender email addreass
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "mail.privateemail.com"
+# EMAIL_PORT = 465
+# EMAIL_HOST_USER = 'no-reply@traino.ai' #os.environ.get('EMAIL_USER')
+# EMAIL_HOST_PASSWORD = 'hello123!@' #os.environ.get('EMAIL_PASS')
+# EMAIL_DEFAULT_FROM = 'no-reply@traino.ai' # os.environ.get('EMAIL_USER')  # your sender email addreass
+# EMAIL_USE_TLS = False
+# EMAIL_USE_SSL = True
+# DEFAULT_FROM_EMAIL = 'no-reply@traino.ai'
+
+# SeS Emails Configurations
+# traino_local/settings.py
+
+EMAIL_BACKEND = 'django_ses.SESBackend'
+AWS_SES_REGION_NAME = 'us-east-1'
+AWS_SES_REGION_ENDPOINT = 'email-smtp.us-east-1.amazonaws.com'
+AWS_ACCESS_KEY_ID = 'AKIAVIMMZLH3BTHFTKMK'
+AWS_SECRET_ACCESS_KEY = 'BDsJw26hIA6Bm6QBX7xk+vQdAc1ZODMOYtpADd4HDUKv'
+
+EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
+EMAIL_PORT = 467
+EMAIL_HOST_USER = 'no-reply@traino.ai'
+EMAIL_HOST_PASSWORD = 'hello123!@'
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = 'no-reply@traino.ai'
-
 
 
 # DJOSER Settings

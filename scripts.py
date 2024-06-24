@@ -1,4 +1,5 @@
 import os
+from django.core.mail import send_mail
 import django
 from django.conf import settings
 
@@ -6,21 +7,13 @@ from django.conf import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'traino_local.settings')
 django.setup()
 
-from post_office import mail
-
+subject = 'hello'
 from_email = 'no-reply@traino.ai'
-to_email = 'mshariq28022000@gmail.com'
-subject = 'Test Email'
-body = 'This is a test email. From Muhammad Shariq Shafiq'
+to_email = ["mshariq28022000@hotmail.com"]
+message = "Test mail"
 
 try:
-    mail.send(
-        recipients=[to_email],  # List of email addresses also accepted
-        sender=from_email,
-        subject=subject,
-        message=body,
-        html_message='This is a <strong>test email</strong>. From Muhammad Shariq Shafiq',
-    )
-    print('Email sent successfully!')
+    send_mail(subject, message, from_email, to_email, fail_silently=False)
+    print("Successfully Sent")
 except Exception as e:
-    print(f'Failed to send email: {e}')
+    print(f'Something went wrong: {e}')
