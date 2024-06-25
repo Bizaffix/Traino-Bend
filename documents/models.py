@@ -139,7 +139,7 @@ class SummaryCount(models.Model):
     request_count = models.IntegerField(default=0)
     
     def __str__(self):
-        return f"{self.admin.first_name} has summary count {self.request_count} for {self.document}"
+        return f"{self.admin.admin.first_name} has summary count {self.request_count} for {self.document}"
     
 class KeypointsCount(models.Model):
     admin = models.ForeignKey(AdminUser , null=True , blank=True, on_delete=models.CASCADE)
@@ -147,5 +147,5 @@ class KeypointsCount(models.Model):
     request_count = models.IntegerField(default=0)
     
     def __str__(self):
-        return f"{self.admin.first_name} has summary count {self.request_count} for {self.document}"
+        return f"{self.admin.admin.first_name} has summary count {self.request_count} for {self.document}"
     

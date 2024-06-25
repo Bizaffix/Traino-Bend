@@ -1,0 +1,307 @@
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:14:24 PKT)" (scheduled at 2024-06-25 10:13:24.480326+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:14:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:15:24 PKT)" (scheduled at 2024-06-25 10:14:24.480326+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:15:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:16:24 PKT)" (scheduled at 2024-06-25 10:15:24.480326+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:16:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:17:24 PKT)" (scheduled at 2024-06-25 10:16:24.480326+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:17:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:18:24 PKT)" (scheduled at 2024-06-25 10:17:24.480326+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:18:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:19:24 PKT)" (scheduled at 2024-06-25 10:18:24.480326+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:19:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:20:24 PKT)" (scheduled at 2024-06-25 10:19:24.480326+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:20:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:21:24 PKT)" (scheduled at 2024-06-25 10:20:24.480326+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:21:24 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:22:40 PKT)" (scheduled at 2024-06-25 10:21:40.352737+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:22:40 PKT)" executed successfully
+INFO:api.views:Decoded content: Oracle® Database
+SQL Language Quick Reference
+19c
+E96311-16
+November 2023
+Oracle Database SQL Langua
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:23:40 PKT)" (scheduled at 2024-06-25 10:22:40.352737+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:23:40 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:24:40 PKT)" (scheduled at 2024-06-25 10:23:40.352737+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:24:40 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:25:40 PKT)" (scheduled at 2024-06-25 10:24:40.352737+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:25:40 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:26:40 PKT)" (scheduled at 2024-06-25 10:25:40.352737+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:26:40 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:27:40 PKT)" (scheduled at 2024-06-25 10:26:40.352737+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:27:40 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:28:40 PKT)" (scheduled at 2024-06-25 10:27:40.352737+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:28:40 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:30:39 PKT)" (scheduled at 2024-06-25 10:29:39.631218+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:30:39 PKT)" executed successfully
+WARNING:django.request:Forbidden: /api/summary/
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:31:39 PKT)" (scheduled at 2024-06-25 10:30:39.631218+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:31:39 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:32:39 PKT)" (scheduled at 2024-06-25 10:31:39.631218+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:32:39 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:33:39 PKT)" (scheduled at 2024-06-25 10:32:39.631218+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:33:39 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:34:39 PKT)" (scheduled at 2024-06-25 10:33:39.631218+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:34:39 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+WARNING:django.request:Forbidden: /api/summary/
+WARNING:django.request:Forbidden: /api/summary/
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:35:30 PKT)" (scheduled at 2024-06-25 10:35:30.132896+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:36:30 PKT)" executed successfully
+WARNING:django.request:Forbidden: /api/summary/
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:37:30 PKT)" (scheduled at 2024-06-25 10:36:30.132896+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:37:30 PKT)" executed successfully
+WARNING:django.request:Forbidden: /api/summary/
+ERROR:django.request:Internal Server Error: /admin/departments/departmentsdocuments/
+Traceback (most recent call last):
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\options.py", line 716, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\sites.py", line 240, in inner
+    return view(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\options.py", line 2018, in changelist_view
+    response = self.response_action(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\options.py", line 1650, in response_action
+    response = func(self, request, queryset)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\actions.py", line 39, in delete_selected
+    ) = modeladmin.get_deleted_objects(queryset, request)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\options.py", line 2160, in get_deleted_objects
+    return get_deleted_objects(objs, request, self.admin_site)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 171, in get_deleted_objects
+    to_delete = collector.nested(format_callback)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 238, in nested
+    roots.extend(self._nested(root, seen, format_callback))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 222, in _nested
+    children.extend(self._nested(child, seen, format_callback))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 224, in _nested
+    ret = [format_callback(obj)]
+           ^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 144, in format_callback
+    no_edit_link = "%s: %s" % (capfirst(opts.verbose_name), obj)
+                                                            ^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\documents\models.py", line 142, in __str__
+    return f"{self.admin.first_name} has summary count {self.request_count} for {self.document}"
+              ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AdminUser' object has no attribute 'first_name'
+ERROR:django.request:Internal Server Error: /admin/departments/departmentsdocuments/
+Traceback (most recent call last):
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\options.py", line 716, in wrapper
+    return self.admin_site.admin_view(view)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\decorators\cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\sites.py", line 240, in inner
+    return view(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 188, in _view_wrapper
+    result = _process_exception(request, e)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\utils\decorators.py", line 186, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\options.py", line 2018, in changelist_view
+    response = self.response_action(
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\options.py", line 1650, in response_action
+    response = func(self, request, queryset)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\actions.py", line 39, in delete_selected
+    ) = modeladmin.get_deleted_objects(queryset, request)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\options.py", line 2160, in get_deleted_objects
+    return get_deleted_objects(objs, request, self.admin_site)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 171, in get_deleted_objects
+    to_delete = collector.nested(format_callback)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 238, in nested
+    roots.extend(self._nested(root, seen, format_callback))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 222, in _nested
+    children.extend(self._nested(child, seen, format_callback))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 224, in _nested
+    ret = [format_callback(obj)]
+           ^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\contrib\admin\utils.py", line 144, in format_callback
+    no_edit_link = "%s: %s" % (capfirst(opts.verbose_name), obj)
+                                                            ^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\documents\models.py", line 142, in __str__
+    return f"{self.admin.first_name} has summary count {self.request_count} for {self.document}"
+              ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AdminUser' object has no attribute 'first_name'
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:38:30 PKT)" (scheduled at 2024-06-25 10:37:30.132896+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:38:30 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\documents\models.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:40:24 PKT)" (scheduled at 2024-06-25 10:39:24.346982+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:40:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:41:24 PKT)" (scheduled at 2024-06-25 10:40:24.346982+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:41:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:42:24 PKT)" (scheduled at 2024-06-25 10:41:24.346982+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:42:24 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:43:24 PKT)" (scheduled at 2024-06-25 10:42:24.346982+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:43:24 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\views.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:44:51 PKT)" (scheduled at 2024-06-25 10:43:51.235020+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:44:51 PKT)" executed successfully
+WARNING:django.request:Not Found: /api/summary/
+INFO:api.views:Decoded content: Oracle® Database
+SQL Language Quick Reference
+19c
+E96311-16
+November 2023
+Oracle Database SQL Langua
+ERROR:api.utils:Error occurred during API request: raise_for_status
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:45:51 PKT)" (scheduled at 2024-06-25 10:44:51.235020+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:45:51 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:46:51 PKT)" (scheduled at 2024-06-25 10:45:51.235020+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:46:51 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:47:51 PKT)" (scheduled at 2024-06-25 10:46:51.235020+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:47:51 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+ERROR:django.request:Internal Server Error: /api/summary/
+Traceback (most recent call last):
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\api\views.py", line 552, in post
+    if not content.strip():
+           ^^^^^^^^^^^^^
+AttributeError: 'tuple' object has no attribute 'strip'
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:50:03 PKT)" (scheduled at 2024-06-25 10:50:03.742265+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:51:03 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:52:03 PKT)" (scheduled at 2024-06-25 10:51:03.742265+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:52:03 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:53:03 PKT)" (scheduled at 2024-06-25 10:52:03.742265+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:53:03 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:54:03 PKT)" (scheduled at 2024-06-25 10:53:03.742265+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:54:03 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:55:03 PKT)" (scheduled at 2024-06-25 10:54:03.742265+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:55:03 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:56:03 PKT)" (scheduled at 2024-06-25 10:55:03.742265+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:56:03 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:57:03 PKT)" (scheduled at 2024-06-25 10:56:03.742265+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:57:03 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\documents\models.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:59:10 PKT)" (scheduled at 2024-06-25 10:58:10.362281+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 10:59:10 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:00:10 PKT)" (scheduled at 2024-06-25 10:59:10.362281+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:00:10 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:02:08 PKT)" (scheduled at 2024-06-25 11:01:08.405940+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:02:08 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:03:08 PKT)" (scheduled at 2024-06-25 11:02:08.405940+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:03:08 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+WARNING:django.request:Unauthorized: /api/summary/
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:03:39 PKT)" (scheduled at 2024-06-25 11:03:39.766297+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:04:39 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:05:39 PKT)" (scheduled at 2024-06-25 11:04:39.766297+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:05:39 PKT)" executed successfully
+ERROR:api.views:Decoded content is empty
+ERROR:django.request:Internal Server Error: /api/summary/
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:06:39 PKT)" (scheduled at 2024-06-25 11:05:39.766297+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:06:39 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:07:58 PKT)" (scheduled at 2024-06-25 11:06:58.497652+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:07:58 PKT)" executed successfully
+ERROR:api.utils:Error reading PDF file: object of type 'Page' has no len()
+ERROR:django.request:Internal Server Error: /api/summary/
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:08:58 PKT)" (scheduled at 2024-06-25 11:07:58.497652+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:08:58 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:09:58 PKT)" (scheduled at 2024-06-25 11:08:58.497652+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:09:58 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:11:54 PKT)" (scheduled at 2024-06-25 11:10:54.068660+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:11:54 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:12:54 PKT)" (scheduled at 2024-06-25 11:11:54.068660+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:12:54 PKT)" executed successfully
+INFO:api.views:Decoded content: Oracle® Database
+SQL Language Quick Reference
+19c
+E96311-16
+November 2023
+Oracle Database SQL Langua
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:14:49 PKT)" (scheduled at 2024-06-25 11:13:49.671465+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 11:14:49 PKT)" executed successfully
+INFO:api.views:Decoded content: Oracle® Database
+SQL Language Quick Reference
+19c
+E96311-16
+November 2023
+Oracle Database SQL Langua
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\utils.py changed, reloading.

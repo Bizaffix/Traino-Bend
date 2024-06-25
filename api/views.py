@@ -540,8 +540,8 @@ class CreateSummaryApiView(APIView):
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
 
-            summary_request, created = SummaryCount.objects.get_or_create(admin=admin, document=document)
-            if summary_request.request_count >= 5:
+            summary_request = DocumentSummary.objects.filter(document=document, added_by=user).count()
+            if summary_request == 5:
                 return Response({"error": "Summary creation limit reached. No more than 5 requests allowed for this document."}, status=status.HTTP_403_FORBIDDEN)
 
             content = read_file_content(document.file)
@@ -567,8 +567,8 @@ class CreateSummaryApiView(APIView):
                 added_by = self.request.user                
             ) 
             
-            summary_request.request_count += 1
-            summary_request.save()
+            # summary_request.request_count += 1
+            # summary_request.save()
             
             return Response({"id":created_summary.id , "summary":f"{created_summary.summary}", "prompt":f"{created_summary.prompt}"}, status=status.HTTP_200_OK)
         return Response({"Access Denied":"You Are not Allowed to create summary"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -644,8 +644,9 @@ class CreateKeypointsApiView(APIView):
             if not document.file:
                 return Response({"Not Found":"No File is associated"}, status=status.HTTP_400_BAD_REQUEST)
 
-            keypoints_request, created = KeypointsCount.objects.get_or_create(admin=admin, document=document)
-            if keypoints_request.request_count >= 5:
+            keypoint_count = DocumentKeyPoints.objects.filter(document=document , added_by=user).count()
+            # keypoints_request, created = KeypointsCount.objects.get_or_create(admin=admin, document=document)
+            if keypoint_count == 5:
                 return Response({"error": "Keypoints creation limit reached. No more than 5 requests allowed for this document."}, status=status.HTTP_403_FORBIDDEN)
 
             content = read_file_content(document.file)
@@ -671,8 +672,8 @@ class CreateKeypointsApiView(APIView):
                 added_by = self.request.user                
             ) 
             
-            keypoints_request.request_count += 1
-            keypoints_request.save()
+            # keypoints_request.request_count += 1
+            # keypoints_request.save()
             
             return Response({"id":created_keypoint.id , "keypoints":f"{created_keypoint.keypoints}", "prompt":f"{created_keypoint.prompt}"}, status=status.HTTP_200_OK)
         return Response({"Access Denied":"You Are not Allowed to create keypoints"}, status=status.HTTP_401_UNAUTHORIZED)
