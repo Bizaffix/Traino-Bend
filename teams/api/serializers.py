@@ -109,7 +109,7 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     phone = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
     user_update_key = serializers.SerializerMethodField()
-    department_name = serializers.SerializerMethodField()
+    departments = serializers.SerializerMethodField()
 
     class Meta:
         model = CompaniesTeam
@@ -136,8 +136,8 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     def get_role(self ,obj):
         return obj.members.role
     
-    def get_departments_names(self, obj):
+    def get_departments(self, obj):
         departments = Departments.objects.filter(users=obj, is_active=True)
-        return [department.name for department in departments]
+        return [{"id": department.id, "department_name": department.name} for department in departments]
     
     

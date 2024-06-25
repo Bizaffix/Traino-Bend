@@ -993,3 +993,38 @@ INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (tr
 INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:00:58 PKT)" executed successfully
 INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\teams\api\serializers.py changed, reloading.
 INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\teams\api\serializers.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:03:54 PKT)" (scheduled at 2024-06-25 19:02:54.853212+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:03:54 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:04:54 PKT)" (scheduled at 2024-06-25 19:03:54.853212+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:04:54 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:05:54 PKT)" (scheduled at 2024-06-25 19:04:54.853212+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:05:54 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:06:54 PKT)" (scheduled at 2024-06-25 19:05:54.853212+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:06:54 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:07:54 PKT)" (scheduled at 2024-06-25 19:06:54.853212+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:07:54 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:08:54 PKT)" (scheduled at 2024-06-25 19:07:54.853212+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:08:54 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:09:54 PKT)" (scheduled at 2024-06-25 19:08:54.853212+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:09:54 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:10:54 PKT)" (scheduled at 2024-06-25 19:09:54.853212+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:10:54 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\teams\api\serializers.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:12:43 PKT)" (scheduled at 2024-06-25 19:11:43.286112+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:12:43 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:13:43 PKT)" (scheduled at 2024-06-25 19:12:43.286112+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:13:43 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\teams\api\serializers.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:15:42 PKT)" (scheduled at 2024-06-25 19:14:42.149458+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:15:42 PKT)" executed successfully
+WARNING:django.security.csrf:Forbidden (CSRF cookie not set.): /login/
+WARNING:django.request:Unauthorized: /api/login/
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:16:42 PKT)" (scheduled at 2024-06-25 19:15:42.149458+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:16:42 PKT)" executed successfully
+WARNING:django.request:Unauthorized: /api/login/
+WARNING:django.request:Not Found: /favicon.ico
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:17:42 PKT)" (scheduled at 2024-06-25 19:16:42.149458+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:17:42 PKT)" executed successfully
+WARNING:django.request:Unauthorized: /api/login/
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:18:42 PKT)" (scheduled at 2024-06-25 19:17:42.149458+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-25 19:18:42 PKT)" executed successfully
