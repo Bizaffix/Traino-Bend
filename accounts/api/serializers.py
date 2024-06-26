@@ -12,9 +12,17 @@ class CustomUserDetailSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     password = serializers.SerializerMethodField(read_only=True)
     # id = serializers.SerializerMethodField(read_only=True)
+    # update_key = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = CustomUser
         fields = ['id','first_name' , 'last_name', 'email', 'phone', 'role', 'password','added_by']
+
+    # def get_id(self , obj):
+    #     if obj.role == 'Admin':
+    #         id = AdminUser.objects.get(admin=obj.id)
+    #     elif obj.role == 'User':
+    #         id = CompaniesTeam.objects.get(members=obj.id)
+    #     return id.id
 
     def get_password(self , obj):
         return obj.password
@@ -78,11 +86,6 @@ class CustomAdminUpdateSerializer(serializers.ModelSerializer):
         return value
     
 
-
-
-
-
-    
 class AdminCreationSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
     class Meta:
