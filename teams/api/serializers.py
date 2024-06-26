@@ -138,6 +138,6 @@ class CompaniesTeamDetailsSerializers(serializers.ModelSerializer):
     
     def get_departments_names(self, obj):
         departments = Departments.objects.filter(users=obj, is_active=True)
-        return [department.id for department in departments]
+        return [department.name for department in departments]
     
     
