@@ -330,3 +330,23 @@ INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: i
 INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:38:04 PKT)" (scheduled at 2024-06-26 09:37:04.722982+05:00)
 INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:38:04 PKT)" executed successfully
 INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\serializers.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:40:13 PKT)" (scheduled at 2024-06-26 09:39:13.425698+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:40:13 PKT)" executed successfully
+WARNING:django.request:Unauthorized: /api/login/
+WARNING:django.request:Not Found: /favicon.ico
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:41:13 PKT)" (scheduled at 2024-06-26 09:40:13.425698+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:41:13 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:42:13 PKT)" (scheduled at 2024-06-26 09:41:13.425698+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:42:13 PKT)" executed successfully
+INFO:api.views:Decoded content: Oracle® Database
+SQL Language Quick Reference
+19c
+E96311-16
+November 2023
+Oracle Database SQL Langua
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:43:13 PKT)" (scheduled at 2024-06-26 09:42:13.425698+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:43:13 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:44:13 PKT)" (scheduled at 2024-06-26 09:43:13.425698+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:44:13 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:45:13 PKT)" (scheduled at 2024-06-26 09:44:13.425698+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-26 09:45:13 PKT)" executed successfully
