@@ -138,7 +138,7 @@ class QuizQuestionsListSerializer(serializers.ModelSerializer):
         fields = ['quiz' , 'id', 'question' , 'options']
     
     def get_options(self , obj):
-        return [obj.option_1 , obj.option_2 , obj.option_3 , obj.option_4]
+        return [{"A":obj.option_1 , "B":obj.option_2 , "C":obj.option_3 , "D":obj.option_4}]
     
 class DocumentSerializer(serializers.ModelSerializer):
     company = UserCreateSerializer(many=False, read_only=True)
