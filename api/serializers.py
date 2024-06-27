@@ -126,10 +126,19 @@ class CompanyTeamSerializer(serializers.ModelSerializer):
         return instance
         
 
-class QuizQuestionsSerializer(serializers.ModelSerializer):
+class QuizQuestionsSerializer(serializers.ModelSerializer):    
+    options = serializers.SerializerMethodField()
+    quiz = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = QuizQuestions
-        fields = '__all__'
+        fields = ['quiz', 'id', 'question', 'options', 'answer', 'created_at', 'updated_at', 'added_by']
+    
+    def get_quiz(self , obj):
+        return obj.quiz.id
+    
+    def get_options(self , obj):
+        return [{"A":obj.option_1 , "B":obj.option_2 , "C":obj.option_3 , "D":obj.option_4}]
+    
         
 class QuizQuestionsListSerializer(serializers.ModelSerializer):
     options = serializers.SerializerMethodField()
@@ -362,10 +371,10 @@ class CreateQuizesSerializer(serializers.Serializer):
         fields = ['document']
 
 
-class QuizQuestionsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = QuizQuestions
-        fields = '__all__'
+# class QuizQuestionsSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = QuizQuestions
+#         fields = ['id' , 'question' , 'option_1' , 'option_2' , 'option_3' , 'option_4' , 'amswer']
 
 class SubmittedAnswerSerializer(serializers.Serializer):
     question_id = serializers.UUIDField()

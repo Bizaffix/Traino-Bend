@@ -909,6 +909,12 @@ class EditQuizes(APIView):
     permission_classes = [IsAdminUserOrReadOnly]
 
     def put(self, request, question_id):
+        return self.update_question(request, question_id, partial=False)
+
+    def patch(self, request, question_id):
+        return self.update_question(request, question_id, partial=True)
+
+    def update_question(self, request, question_id, partial):
         question = get_object_or_404(QuizQuestions, id=question_id)
         user = request.user
 
@@ -921,11 +927,42 @@ class EditQuizes(APIView):
         if str(admin.company.id) != str(question.quiz.document.department.company.id):
             return Response({"Access Denied": "You are not allowed to edit this question"}, status=status.HTTP_403_FORBIDDEN)
 
-        serializer = self.serializer_class(question, data=request.data, partial=True)
+        # Ensure that options is a list of dictionaries
+        options = request.data.get('options')
+        if options and isinstance(options, list) and len(options) == 1 and isinstance(options[0], dict):
+            options_dict = options[0]
+            question.option_1 = options_dict.get('A')
+            question.option_2 = options_dict.get('B')
+            question.option_3 = options_dict.get('C')
+            question.option_4 = options_dict.get('D')
+            del request.data['options']  # Remove options from request data to avoid conflict
+        elif options:
+            return Response({"error": "Invalid options format"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(question, data=request.data, partial=partial)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def put(self, request, question_id):
+    #     question = get_object_or_404(QuizQuestions, id=question_id)
+    #     user = request.user
+
+    #     if user.role != "Admin":
+    #         return Response({"error": "Access Denied"}, status=status.HTTP_403_FORBIDDEN)
+
+    #     admin = AdminUser.objects.get(admin=user)
+    #     if not admin.is_active:
+    #         raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+    #     if str(admin.company.id) != str(question.quiz.document.department.company.id):
+    #         return Response({"Access Denied": "You are not allowed to edit this question"}, status=status.HTTP_403_FORBIDDEN)
+
+    #     serializer = self.serializer_class(question, data=request.data, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, question_id):
         question = get_object_or_404(QuizQuestions, id=question_id)
