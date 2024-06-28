@@ -908,7 +908,7 @@ class CreateQuizessApiView(APIView):
 
                 quiz.delete()
                 logger.info(f"Quiz with id {quiz.id} deleted successfully by {request.user.id}")
-                return Response({"message": "Quiz deleted successfully", "id": quiz.id}, status=status.HTTP_204_NO_CONTENT)
+                return Response({"message": "Quiz deleted successfully", "id": quiz_id}, status=status.HTTP_204_NO_CONTENT)
             else:
                 return Response({"Access Denied": "You are not allowed to delete quizzes"}, status=status.HTTP_401_UNAUTHORIZED)
         except serializers.ValidationError as e:
