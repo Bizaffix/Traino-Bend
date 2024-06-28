@@ -144,7 +144,7 @@ class QuizQuestionsListSerializer(serializers.ModelSerializer):
     options = serializers.SerializerMethodField()
     class Meta:
         model = QuizQuestions
-        fields = ['quiz' , 'id', 'question' , 'options']
+        fields = ['quiz' , 'id', 'question' , 'options', 'answer']
     
     def get_options(self , obj):
         return [{"A":obj.option_1 , "B":obj.option_2 , "C":obj.option_3 , "D":obj.option_4}]
