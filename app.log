@@ -1508,3 +1508,4 @@ INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: i
 INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 21:46:35 PKT)" (scheduled at 2024-06-28 21:45:35.405576+05:00)
 INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 21:46:35 PKT)" executed successfully
 INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\views.py changed, reloading.
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\serializers.py changed, reloading.
