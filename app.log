@@ -1131,3 +1131,318 @@ TypeError: Object of type DocumentQuiz is not JSON serializable
 INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:00:49 PKT)" (scheduled at 2024-06-27 19:00:49.840612+05:00)
 INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:01:49 PKT)" executed successfully
 INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\serializers.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:03:12 PKT)" (scheduled at 2024-06-27 19:02:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:03:12 PKT)" executed successfully
+WARNING:django.request:Not Found: /favicon.ico
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:04:12 PKT)" (scheduled at 2024-06-27 19:03:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:04:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:05:12 PKT)" (scheduled at 2024-06-27 19:04:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:05:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:06:12 PKT)" (scheduled at 2024-06-27 19:05:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:06:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:07:12 PKT)" (scheduled at 2024-06-27 19:06:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:07:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:08:12 PKT)" (scheduled at 2024-06-27 19:07:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:08:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:09:12 PKT)" (scheduled at 2024-06-27 19:08:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:09:12 PKT)" executed successfully
+WARNING:apscheduler.executors.default:Run time of job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:12:12 PKT)" was missed by 0:00:42.298050
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:13:12 PKT)" (scheduled at 2024-06-27 19:12:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:13:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:14:12 PKT)" (scheduled at 2024-06-27 19:13:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:14:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:15:12 PKT)" (scheduled at 2024-06-27 19:14:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:15:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:16:12 PKT)" (scheduled at 2024-06-27 19:15:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:16:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:17:12 PKT)" (scheduled at 2024-06-27 19:16:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:17:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:18:12 PKT)" (scheduled at 2024-06-27 19:17:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:18:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:19:12 PKT)" (scheduled at 2024-06-27 19:18:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:19:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:20:12 PKT)" (scheduled at 2024-06-27 19:19:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:20:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:21:12 PKT)" (scheduled at 2024-06-27 19:20:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 19:21:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:08:12 PKT)" (scheduled at 2024-06-27 20:07:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:08:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:09:12 PKT)" (scheduled at 2024-06-27 20:08:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:09:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:10:12 PKT)" (scheduled at 2024-06-27 20:09:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:10:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:11:12 PKT)" (scheduled at 2024-06-27 20:10:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:11:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:12:12 PKT)" (scheduled at 2024-06-27 20:11:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:12:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:13:12 PKT)" (scheduled at 2024-06-27 20:12:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:13:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:14:12 PKT)" (scheduled at 2024-06-27 20:13:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:14:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:15:12 PKT)" (scheduled at 2024-06-27 20:14:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:15:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:16:12 PKT)" (scheduled at 2024-06-27 20:15:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:16:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:16:12 PKT)" (scheduled at 2024-06-27 20:16:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:16:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:18:12 PKT)" (scheduled at 2024-06-27 20:17:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:18:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:19:12 PKT)" (scheduled at 2024-06-27 20:18:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:19:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:20:12 PKT)" (scheduled at 2024-06-27 20:19:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:20:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:21:12 PKT)" (scheduled at 2024-06-27 20:20:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:21:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:22:12 PKT)" (scheduled at 2024-06-27 20:21:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:22:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:23:12 PKT)" (scheduled at 2024-06-27 20:22:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:23:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:24:12 PKT)" (scheduled at 2024-06-27 20:23:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:24:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:25:12 PKT)" (scheduled at 2024-06-27 20:24:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:25:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:26:12 PKT)" (scheduled at 2024-06-27 20:25:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:26:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:27:12 PKT)" (scheduled at 2024-06-27 20:26:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:27:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:28:12 PKT)" (scheduled at 2024-06-27 20:27:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:28:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:29:12 PKT)" (scheduled at 2024-06-27 20:28:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:29:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:30:12 PKT)" (scheduled at 2024-06-27 20:29:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:30:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:31:12 PKT)" (scheduled at 2024-06-27 20:30:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:31:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:32:12 PKT)" (scheduled at 2024-06-27 20:31:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:32:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:33:12 PKT)" (scheduled at 2024-06-27 20:32:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:33:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:34:12 PKT)" (scheduled at 2024-06-27 20:33:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:34:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:35:12 PKT)" (scheduled at 2024-06-27 20:34:12.475353+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-27 20:35:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:17:26 PKT)" (scheduled at 2024-06-28 19:17:26.784908+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:18:26 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\urls.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:20:12 PKT)" (scheduled at 2024-06-28 19:19:12.962140+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:20:12 PKT)" executed successfully
+WARNING:django.request:Not Found: /favicon.ico
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:21:12 PKT)" (scheduled at 2024-06-28 19:20:12.962140+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:21:12 PKT)" executed successfully
+WARNING:django.security.csrf:Forbidden (CSRF cookie not set.): /api/quiz/dd6e2665-aa01-4d16-bd0f-7dc6cf6c6988
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:22:12 PKT)" (scheduled at 2024-06-28 19:21:12.962140+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:22:12 PKT)" executed successfully
+WARNING:django.security.csrf:Forbidden (CSRF cookie not set.): /api/quiz/dd6e2665-aa01-4d16-bd0f-7dc6cf6c6988
+ERROR:django.request:Internal Server Error: /api/quiz/dd6e2665-aa01-4d16-bd0f-7dc6cf6c6988/
+Traceback (most recent call last):
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: DeleteQuizApiView.delete() got an unexpected keyword argument 'id'
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:23:12 PKT)" (scheduled at 2024-06-28 19:22:12.962140+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:23:12 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\views.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:24:28 PKT)" (scheduled at 2024-06-28 19:23:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:24:28 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:25:28 PKT)" (scheduled at 2024-06-28 19:24:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:25:28 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:26:28 PKT)" (scheduled at 2024-06-28 19:25:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:26:28 PKT)" executed successfully
+ERROR:django.request:Internal Server Error: /api/quiz/dd6e2665-aa01-4d16-bd0f-7dc6cf6c6988/
+Traceback (most recent call last):
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: DeleteQuizApiView.delete() got an unexpected keyword argument 'id'
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:27:28 PKT)" (scheduled at 2024-06-28 19:26:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:27:28 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:28:28 PKT)" (scheduled at 2024-06-28 19:27:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:28:28 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:29:28 PKT)" (scheduled at 2024-06-28 19:28:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:29:28 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:30:28 PKT)" (scheduled at 2024-06-28 19:29:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:30:28 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:31:28 PKT)" (scheduled at 2024-06-28 19:30:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:31:28 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:32:28 PKT)" (scheduled at 2024-06-28 19:31:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:32:28 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:33:28 PKT)" (scheduled at 2024-06-28 19:32:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:33:28 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:34:28 PKT)" (scheduled at 2024-06-28 19:33:28.777846+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:34:28 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\views.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:36:12 PKT)" (scheduled at 2024-06-28 19:35:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:36:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:37:12 PKT)" (scheduled at 2024-06-28 19:36:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:37:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:38:12 PKT)" (scheduled at 2024-06-28 19:37:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:38:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:39:12 PKT)" (scheduled at 2024-06-28 19:38:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:39:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:40:12 PKT)" (scheduled at 2024-06-28 19:39:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:40:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:41:12 PKT)" (scheduled at 2024-06-28 19:40:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:41:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:42:12 PKT)" (scheduled at 2024-06-28 19:41:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:42:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:43:12 PKT)" (scheduled at 2024-06-28 19:42:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:43:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:44:12 PKT)" (scheduled at 2024-06-28 19:43:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:44:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:45:12 PKT)" (scheduled at 2024-06-28 19:44:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:45:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:46:12 PKT)" (scheduled at 2024-06-28 19:45:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:46:12 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:47:12 PKT)" (scheduled at 2024-06-28 19:46:12.709107+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:47:12 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\views.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:49:11 PKT)" (scheduled at 2024-06-28 19:48:11.056453+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:49:11 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:50:11 PKT)" (scheduled at 2024-06-28 19:49:11.056453+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:50:11 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:51:11 PKT)" (scheduled at 2024-06-28 19:50:11.056453+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:51:11 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\views.py changed, reloading.
+ERROR:django.request:Internal Server Error: /api/quiz/dd6e2665-aa01-4d16-bd0f-7dc6cf6c6988/
+Traceback (most recent call last):
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\generics.py", line 221, in delete
+    return self.destroy(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: DeleteQuizApiView.destroy() got an unexpected keyword argument 'id'
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:52:04 PKT)" (scheduled at 2024-06-28 19:52:04.445588+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:53:04 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\urls.py changed, reloading.
+ERROR:django.request:Internal Server Error: /api/quiz/dd6e2665-aa01-4d16-bd0f-7dc6cf6c6988/
+Traceback (most recent call last):
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "E:\Computing Yard\traino-ai\traino_ai\traino_env\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CreateQuizessApiView.delete() got an unexpected keyword argument 'id'
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:53:15 PKT)" (scheduled at 2024-06-28 19:53:15.498091+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:54:15 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:55:15 PKT)" (scheduled at 2024-06-28 19:54:15.498091+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:55:15 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\urls.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:56:47 PKT)" (scheduled at 2024-06-28 19:55:47.363381+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:56:47 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:57:47 PKT)" (scheduled at 2024-06-28 19:56:47.363381+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:57:47 PKT)" executed successfully
+WARNING:django.request:Not Found: /api/quiz/dd6e2665-aa01-4d16-bd0f-7dc6cf6c6988/
+WARNING:django.request:Not Found: /api/quiz/
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:58:47 PKT)" (scheduled at 2024-06-28 19:57:47.363381+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:58:47 PKT)" executed successfully
+INFO:api.views:Decoded content: Oracle® Database
+SQL Language Quick Reference
+19c
+E96311-16
+November 2023
+Oracle Database SQL Langua
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:59:47 PKT)" (scheduled at 2024-06-28 19:58:47.363381+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 19:59:47 PKT)" executed successfully
+INFO:api.views:Decoded content: Oracle® Database
+SQL Language Quick Reference
+19c
+E96311-16
+November 2023
+Oracle Database SQL Langua
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:00:47 PKT)" (scheduled at 2024-06-28 19:59:47.363381+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:00:47 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\views.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:02:52 PKT)" (scheduled at 2024-06-28 20:01:52.706484+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:02:52 PKT)" executed successfully
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:03:52 PKT)" (scheduled at 2024-06-28 20:02:52.706484+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:03:52 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\views.py changed, reloading.
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:05:57 PKT)" (scheduled at 2024-06-28 20:04:57.005730+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:05:57 PKT)" executed successfully
+INFO:api.views:Decoded content: Oracle® Database
+SQL Language Quick Reference
+19c
+E96311-16
+November 2023
+Oracle Database SQL Langua
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:06:57 PKT)" (scheduled at 2024-06-28 20:05:57.005730+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:06:57 PKT)" executed successfully
+INFO:api.views:Quiz with id None deleted successfully by b6b624f9-f350-48b5-bf61-43cc79a61031
+INFO:apscheduler.executors.default:Running job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:07:57 PKT)" (scheduled at 2024-06-28 20:06:57.005730+05:00)
+INFO:apscheduler.executors.default:Job "activate_scheduled_documents (trigger: interval[0:01:00], next run at: 2024-06-28 20:07:57 PKT)" executed successfully
+INFO:django.utils.autoreload:E:\Computing Yard\traino-ai\traino_ai\api\views.py changed, reloading.

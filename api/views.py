@@ -701,6 +701,8 @@ class QuestionsofQuiz(ListAPIView):
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)    
     
+    
+from django.core.exceptions import PermissionDenied
 class CreateQuizessApiView(APIView):
     serializer_class = CreateQuizesSerializer
     authentication_classes = [JWTAuthentication]
@@ -887,7 +889,50 @@ class CreateQuizessApiView(APIView):
             return Response({"id":created_quiz.id , "quiz":f"{created_quiz.quiz}"}, status=status.HTTP_200_OK)
         return Response({"Access Denied":"You Are not Allowed to create quiz"}, status=status.HTTP_401_UNAUTHORIZED)
 
+    def delete(self, request, quiz_id):
+        try:
+            if request.user.role == 'Admin':
+                if not quiz_id:
+                    return Response({"error": "quiz_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
+                try:
+                    quiz = DocumentQuiz.objects.get(id=quiz_id)
+                except DocumentQuiz.DoesNotExist:
+                    return Response({"error": "No Quiz Found"}, status=status.HTTP_404_NOT_FOUND)
+
+                admin = AdminUser.objects.get(admin=request.user)
+                if not admin.is_active:
+                    raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+                if str(admin.company.id) != str(quiz.document.department.company.id):
+                    return Response({"Access Denied": "You are not allowed to delete this quiz"}, status=status.HTTP_401_UNAUTHORIZED)
+
+                quiz.delete()
+                logger.info(f"Quiz with id {quiz.id} deleted successfully by {request.user.id}")
+                return Response({"message": "Quiz deleted successfully", "id": quiz.id}, status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response({"Access Denied": "You are not allowed to delete quizzes"}, status=status.HTTP_401_UNAUTHORIZED)
+        except serializers.ValidationError as e:
+            logger.error(f"Validation error: {e.detail}")
+            return Response(e.detail, status=status.HTTP_403_FORBIDDEN)
+        except PermissionDenied as e:
+            logger.error(f"Permission denied: {str(e)}")
+            return Response({"Access Denied": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            logger.error(f"Internal server error: {str(e)}", exc_info=True)
+            return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class DeleteQuizApiView(DestroyAPIView):
+    serializer_class = CreateQuizesSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUserOrReadOnly]
+    queryset = DocumentQuiz.objects.all()
+    lookup_field = 'id'
+    
+    def destroy(self):
+        quiz = self.get_object()
+        id = DocumentQuiz.objects.filter(id=quiz)
+        quiz.delete()
+        return Response({"Delete Message":"Quiz Deleted Successfully" , "id": id.id} , status=status.HTTP_200_OK)
+    
 class UploadQuiz(APIView):
     serializer_class = CreateQuizesSerializer
     authentication_classes = [JWTAuthentication]

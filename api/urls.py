@@ -13,7 +13,8 @@ from .views import (DepartmentCreateApiview,
                     SubmitQuizView,
                     UploadQuiz,
                     EditQuizes,
-                    QuestionsofQuiz)
+                    QuestionsofQuiz,
+                    DeleteQuizApiView)
 
 router = DefaultRouter()
 
@@ -31,6 +32,7 @@ urlpatterns = [
     path('quiz/upload/' ,UploadQuiz.as_view() , name="uploadQuiz"),
     path('question/<uuid:question_id>/' ,EditQuizes.as_view() , name="EditQuestion"),
     path('quiz/', CreateQuizessApiView.as_view() , name='create-keypoints'),
+    path("quiz/<str:quiz_id>/" , CreateQuizessApiView.as_view() , name='delete_quiz'),
     path('questions/', QuestionsofQuiz.as_view() , name='questions-of-quiz'),
     path('department/<str:id>/', DepartmentRetrieveApiView.as_view(), name='department-RUD'),
     path('departments/', DepartmentListApiView.as_view(), name='departments-List'),

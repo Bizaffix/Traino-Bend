@@ -94,6 +94,9 @@ class DocumentQuiz(models.Model):
     def __str__(self):
         return self.name
     
+    def delete_quiz(self):
+        self.delete()
+        
     class Meta:
         verbose_name = ("Quiz")
         verbose_name_plural = ("Quizes")
