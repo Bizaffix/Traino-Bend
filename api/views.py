@@ -720,7 +720,7 @@ class QuizResultsApiView(APIView):
 
             quiz_results = QuizResult.objects.filter(quiz=quiz)
             if not quiz_results:
-                return Response({"error": "No results found for this quiz"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"results":[]}, status=status.HTTP_200_OK)
 
             response_data = []
             for result in quiz_results:
@@ -732,7 +732,7 @@ class QuizResultsApiView(APIView):
                     "status": result.status
                 })
 
-            return Response(response_data, status=status.HTTP_200_OK)
+            return Response({"results":response_data}, status=status.HTTP_200_OK)
 
 from django.core.exceptions import PermissionDenied
 class CreateQuizessApiView(APIView):
