@@ -700,8 +700,37 @@ class QuestionsofQuiz(ListAPIView):
         queryset = self.get_queryset()
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)    
-    
-    
+
+
+#nsm
+class QuizResultsApiView(APIView):
+    def get(self, request):
+        quiz_id = request.query_params.get('quiz_id')  # Retrieve quiz_id from query parameters
+        
+        if not quiz_id:
+            return Response({"error": "quiz_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            quiz = DocumentQuiz.objects.get(id=quiz_id)
+        except DocumentQuiz.DoesNotExist:
+            return Response({"error": "Quiz not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        quiz_results = QuizResult.objects.filter(quiz=quiz)
+        if not quiz_results:
+            return Response({"error": "No results found for this quiz"}, status=status.HTTP_404_NOT_FOUND)
+
+        response_data = []
+        for result in quiz_results:
+            user = result.user.members
+            response_data.append({
+                "user_id": user.id,
+                "user_name": user.get_full_name(),
+                "score": result.score,
+                "status": result.status
+            })
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
 from django.core.exceptions import PermissionDenied
 class CreateQuizessApiView(APIView):
     serializer_class = CreateQuizesSerializer
@@ -920,6 +949,8 @@ class CreateQuizessApiView(APIView):
         except Exception as e:
             logger.error(f"Internal server error: {str(e)}", exc_info=True)
             return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class DeleteQuizApiView(DestroyAPIView):
     serializer_class = CreateQuizesSerializer
     authentication_classes = [JWTAuthentication]
