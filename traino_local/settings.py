@@ -110,6 +110,7 @@ DATABASES = {
 }
 
 
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -243,14 +244,24 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Email Configurations
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "mail.privateemail.com"
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'no-reply@traino.ai' #os.environ.get('EMAIL_USER')
-EMAIL_HOST_PASSWORD = 'hello123!@' #os.environ.get('EMAIL_PASS')
-EMAIL_DEFAULT_FROM = 'no-reply@traino.ai' # os.environ.get('EMAIL_USER')  # your sender email addreass
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "mail.privateemail.com" #nsm TODO: Remove/Replace it
+# EMAIL_PORT = 465
+# EMAIL_HOST_USER = 'no-reply@traino.ai' #os.environ.get('EMAIL_USER')
+# EMAIL_HOST_PASSWORD = 'hello123!@' #os.environ.get('EMAIL_PASS')
+# EMAIL_DEFAULT_FROM = 'no-reply@traino.ai' # os.environ.get('EMAIL_USER')  # your sender email addreass
+# EMAIL_USE_TLS = False
+# EMAIL_USE_SSL = True
+# DEFAULT_FROM_EMAIL = 'no-reply@traino.ai'
+
+#nsm
+# Set your AWS SES SMTP credentials
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'email-smtp.us-east-1.amazonaws.com'  # Replace {region} with your AWS SES region
+EMAIL_PORT = 587  # 25, 587 or 2587
+EMAIL_HOST_USER = 'AKIAVIMMZLH3BTHFTKMK'  # SES SMTP username
+EMAIL_HOST_PASSWORD = 'BDsJw26hIA6Bm6QBX7xk+vQdAc1ZODMOYtpADd4HDUKv'  # SES SMTP password
 DEFAULT_FROM_EMAIL = 'no-reply@traino.ai'
 
 # SeS Emails Configurations
