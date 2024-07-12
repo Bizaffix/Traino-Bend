@@ -154,8 +154,8 @@ class CustomUserUpdateAPIView(UpdateAPIView):
         if 'password' in request.data:
             password = request.data.pop('password')
             instance.set_password(password)
-        
-        
+            #instance.save()
+
         if instance.role == 'Admin':
             serializer = CustomAdminUpdateSerializer(instance, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
@@ -177,7 +177,7 @@ class CustomUserUpdateAPIView(UpdateAPIView):
             elif instance.role == 'User':
                 company_id = request.data.get('company')
                 new_department_ids = request.data.get('department_ids', [])
-                
+
                 if company_id:
                     member_instance = CompaniesTeam.objects.get(members__id=instance.id)
                     member_instance.company_id = company_id
@@ -209,6 +209,16 @@ class CustomUserUpdateAPIView(UpdateAPIView):
                             # No operation needed for kept departments
                             pass
 
+                        # Fetch updated department names
+                        updated_departments = Departments.objects.filter(id__in=new_department_ids, is_active=True)
+                        department_names = [dept.name for dept in updated_departments]
+
+                        # Return updated data
+                        response_data = serializer.data
+                        response_data['department_ids'] = new_department_ids
+                        response_data['department_names'] = department_names
+
+                        return Response(response_data, status=status.HTTP_200_OK)
                     else:
                         return Response({"not found": "Departments Not Found"}, status=status.HTTP_404_NOT_FOUND)
 
