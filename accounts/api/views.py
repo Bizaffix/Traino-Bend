@@ -20,6 +20,7 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.conf import settings
 
+#nsm
 class CustomUserCreateAPIView(CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -37,8 +38,8 @@ class CustomUserCreateAPIView(CreateAPIView):
         request.data['added_by'] = request.user.id
         new_user_role = request.data.get('role')
         email = request.data.get('email')
-        department_ids = request.data.get('department_ids', [])
-        
+        department_ids = request.data.get('departments', [])
+
         try:
             user_data = CustomUser.objects.filter(email=email).exists()
             if user_data:
@@ -50,13 +51,13 @@ class CustomUserCreateAPIView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save(password=make_password(password))
-        
+
         if new_user_role == 'Admin':
             company_id = request.data.get('company')
             if not company_id:
                 user.delete()
                 raise serializers.ValidationError({"Bad Request": "Company id is required"})
-            
+
             admin_data = {'email': email, 'company': company_id}
             admin_create = AdminSerializer(data=admin_data)
             if admin_create.is_valid(raise_exception=True):
@@ -71,7 +72,7 @@ class CustomUserCreateAPIView(CreateAPIView):
             if not company_id:
                 user.delete()
                 raise serializers.ValidationError({"Bad Request": "Company id is required"})
-            
+
             member_data = {'members': user.id, 'company': company_id}
             member = CompaniesTeamSerializer(data=member_data)
             if member.is_valid(raise_exception=True):
@@ -79,19 +80,29 @@ class CustomUserCreateAPIView(CreateAPIView):
             else:
                 user.delete()
                 return Response(member.errors, status=status.HTTP_400_BAD_REQUEST)
-            
+
+            department_names = []
+            valid_department_ids = []
             for department_id in department_ids:
                 department = Departments.objects.filter(id=department_id, is_active=True).first()
                 if department:
                     department.users.add(member_instance)
+                    valid_department_ids.append(department_id)
+                    department_names.append(department.name)
                 else:
-                    return Response({"Not Found": f"Department with id {department_id} is not found"}, status=status.HTTP_404_NOT_FOUND)
-            
+                    user.delete()
+                    return Response({"Not Found": f"Department with id {department_id} is not found or is inactive"}, status=status.HTTP_404_NOT_FOUND)
+
             self.send_welcome_email(email, password, new_user_role)
-        
+
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        response_data = serializer.data
+        response_data['department_ids'] = valid_department_ids
+        response_data['department_names'] = department_names
+
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def send_welcome_email(self, email, password, role):
         if settings.DEBUG:
@@ -119,7 +130,8 @@ Traino-ai.''',
             fail_silently=False,
         )
         
-        
+
+#nsm
 from .serializers import CustomAdminUpdateSerializer , CustomUserUpdateSerializer
 class CustomUserUpdateAPIView(UpdateAPIView):
     queryset = CustomUser.objects.all()
