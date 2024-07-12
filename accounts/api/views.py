@@ -81,14 +81,15 @@ class CustomUserCreateAPIView(CreateAPIView):
                 user.delete()
                 return Response(member.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            department_names = []
-            valid_department_ids = []
+            department_data = []
             for department_id in department_ids:
                 department = Departments.objects.filter(id=department_id, is_active=True).first()
                 if department:
                     department.users.add(member_instance)
-                    valid_department_ids.append(department_id)
-                    department_names.append(department.name)
+                    department_data.append({
+                        "department_id": department_id,
+                        "department_name": department.name
+                    })
                 else:
                     user.delete()
                     return Response({"Not Found": f"Department with id {department_id} is not found or is inactive"}, status=status.HTTP_404_NOT_FOUND)
@@ -99,8 +100,7 @@ class CustomUserCreateAPIView(CreateAPIView):
         headers = self.get_success_headers(serializer.data)
 
         response_data = serializer.data
-        response_data['department_ids'] = valid_department_ids
-        response_data['department_names'] = department_names
+        response_data['departments'] = department_data
 
         return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
 
