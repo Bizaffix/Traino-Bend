@@ -141,7 +141,7 @@ class CustomUserUpdateAPIView(UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        
+
         # Check if Admin is trying to update a Super Admin
         if request.user.role == 'Admin' and instance.role == 'Super Admin':
             return Response({"error": "Admin cannot update Super Admins."}, status=status.HTTP_403_FORBIDDEN)
@@ -154,7 +154,6 @@ class CustomUserUpdateAPIView(UpdateAPIView):
         if 'password' in request.data:
             password = request.data.pop('password')
             instance.set_password(password)
-            #instance.save()
 
         if instance.role == 'Admin':
             serializer = CustomAdminUpdateSerializer(instance, data=request.data, partial=True)
@@ -209,14 +208,13 @@ class CustomUserUpdateAPIView(UpdateAPIView):
                             # No operation needed for kept departments
                             pass
 
-                        # Fetch updated department names
+                        # Fetch updated department details
                         updated_departments = Departments.objects.filter(id__in=new_department_ids, is_active=True)
-                        department_names = [dept.name for dept in updated_departments]
+                        department_data = [{"department_id": dept.id, "department_name": dept.name} for dept in updated_departments]
 
                         # Return updated data
                         response_data = serializer.data
-                        response_data['department_ids'] = new_department_ids
-                        response_data['department_names'] = department_names
+                        response_data['departments'] = department_data
 
                         return Response(response_data, status=status.HTTP_200_OK)
                     else:
@@ -225,7 +223,7 @@ class CustomUserUpdateAPIView(UpdateAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response({"Access Denied": "You do not have access to this action"}, status=status.HTTP_401_UNAUTHORIZED)
-    
+
     # def update(self, request, *args, **kwargs):
     #     instance = self.get_object()
     #     if request.user.role == 'Admin' and instance.role == 'Super Admin':
