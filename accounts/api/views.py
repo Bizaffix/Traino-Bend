@@ -87,8 +87,8 @@ class CustomUserCreateAPIView(CreateAPIView):
                 if department:
                     department.users.add(member_instance)
                     department_data.append({
-                        "department_id": department_id,
-                        "department_name": department.name
+                        "id": department_id,
+                        "name": department.name
                     })
                 else:
                     user.delete()
@@ -210,7 +210,7 @@ class CustomUserUpdateAPIView(UpdateAPIView):
 
                         # Fetch updated department details
                         updated_departments = Departments.objects.filter(id__in=new_department_ids, is_active=True)
-                        department_data = [{"department_id": dept.id, "department_name": dept.name} for dept in updated_departments]
+                        department_data = [{"id": dept.id, "name": dept.name} for dept in updated_departments]
 
                         # Return updated data
                         response_data = serializer.data
