@@ -38,7 +38,7 @@ class CustomUserCreateAPIView(CreateAPIView):
         request.data['added_by'] = request.user.id
         new_user_role = request.data.get('role')
         email = request.data.get('email')
-        department_ids = request.data.get('departments', [])
+        department_ids = request.data.get('department_ids', [])
 
         try:
             user_data = CustomUser.objects.filter(email=email).exists()
