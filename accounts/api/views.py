@@ -52,6 +52,8 @@ class CustomUserCreateAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save(password=make_password(password))
 
+        department_data = []
+        
         if new_user_role == 'Admin':
             company_id = request.data.get('company')
             if not company_id:
@@ -81,7 +83,7 @@ class CustomUserCreateAPIView(CreateAPIView):
                 user.delete()
                 return Response(member.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            department_data = []
+            
             for department_id in department_ids:
                 department = Departments.objects.filter(id=department_id, is_active=True).first()
                 if department:
