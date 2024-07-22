@@ -33,7 +33,7 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
         return obj.created_at
     
     def get_assigned_users(self, obj):
-        return [{"id": user.id, "name": user.members.first_name + " "+ user.members.first_name} for user in obj.assigned_users.all()]
+        return [{"id": user.id, "name": user.members.first_name + " "+ user.members.last_name} for user in obj.assigned_users.all()]
 
 
 
