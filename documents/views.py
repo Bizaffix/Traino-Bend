@@ -538,7 +538,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
             queryset = queryset.annotate(
                 is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
                 is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id'))),
-                # is_quiz=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))
+                is_quizzes=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))
             )
             # is_quiz=Exists(DocumentQuiz.objects.filter(document=OuterRef('id')))
             return queryset

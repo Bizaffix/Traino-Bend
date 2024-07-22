@@ -12,6 +12,7 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     assigned_users = serializers.SerializerMethodField(read_only=True)
     is_summary = serializers.BooleanField(read_only=True)
     is_keypoints = serializers.BooleanField(read_only=True)
+    is_quizzes = serializers.BooleanField(read_only=True)
     class Meta:
         model = DepartmentsDocuments
         fields = '__all__'
