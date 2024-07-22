@@ -540,7 +540,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                 is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id'))),
                 is_quizzes=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))
             )
-            # is_quiz=Exists(DocumentQuiz.objects.filter(document=OuterRef('id')))
+            
             return queryset
 
         if user.role == "User":
@@ -560,9 +560,9 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                 queryset = queryset.distinct().annotate(
                     is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
                     is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id'))),
-                    # is_quiz=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))
+                    is_quizzes=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))
                 )    
-                # is_quiz=Exists(DocumentQuiz.objects.filter(document=OuterRef('id')))
+                
                 return queryset
             except CompaniesTeam.DoesNotExist:
                 raise serializers.ValidationError({"Unauthorized": "The specified team does not exist or you are blocked"})
