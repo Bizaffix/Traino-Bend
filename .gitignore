@@ -22,3 +22,4 @@ traino_env/*
 media/*
 db/db.sqlite3
 db.sqlite3
+app.log
