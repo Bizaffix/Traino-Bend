@@ -2,6 +2,16 @@ from rest_framework import serializers
 from departments.models import DepartmentsDocuments , Departments
 from django.utils import timezone
 from teams.models import CompaniesTeam
+from enum import Enum
+from django_enum_choices.fields import EnumChoiceField
+
+class ScheduleSerializer(serializers.Serializer):
+    SCHEDULE_TYPES =(
+        ("daily","daily"),
+    ("three_days_a_week" ,"3_days_a_week"),
+    ("weekly" ,"weekly"),
+    ("monthly" ,"monthly"),
+    )
 
 class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField(read_only=True)
@@ -55,6 +65,7 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
     created_at = serializers.SerializerMethodField(read_only=True)
     assigned_users_details = serializers.SerializerMethodField(read_only=True)
     all = serializers.BooleanField(required=False, write_only=True)
+    schedule_frequency = serializers.CharField(required=False)
     class Meta:
         model = DepartmentsDocuments
         fields = '__all__'
