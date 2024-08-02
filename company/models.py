@@ -13,7 +13,7 @@ class company(models.Model):
     company_id = models.CharField(max_length=50, null=True, blank=True)
     logo = models.ImageField(upload_to='media/company_logos', null=True, blank=True)
     country = CountryField()
-    phone = PhoneNumberField()
+    phone = PhoneNumberField( blank=True, null=True)
     address = models.CharField(max_length=300)
     city = models.CharField(max_length=100)
     fax = models.CharField(max_length=100, null=True, blank=True)

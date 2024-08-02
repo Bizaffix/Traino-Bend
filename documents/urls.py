@@ -6,4 +6,5 @@ urlpatterns = [
     path('documents/', DepartmentsDocumentsListAPIView.as_view(), name="documents-lists"),
     path('document/<str:id>/', DepartmentsDocumentsUpdateDestroyRetrieveAPIView.as_view(), name="documents-RUD"),
     path('assign-document/<int:id>/', AssignDocumentsToUsersAPIView.as_view(), name='assign_document_to_users'),
+    path('update-assigned-users/', UpdateUserAssignment.as_view(), name='update_assigned_users_data')
 ]

@@ -500,12 +500,12 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
 from rest_framework import serializers
 from rest_framework.filters import SearchFilter, OrderingFilter 
 import logging
+from django.db.models import OuterRef, Exists, Count, Case, When, Value, IntegerField
 from documents.models import DocumentKeyPoints , DocumentSummary, DocumentQuiz
 
 logger = logging.getLogger(__name__)
 
 
-from django.db.models import Exists, OuterRef
 
 class DepartmentsDocumentsListAPIView(generics.ListAPIView):
     serializer_class = DepartmentsDocumentsSerializer
@@ -538,7 +538,15 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
             queryset = queryset.annotate(
                 is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
                 is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id'))),
-                is_quizzes=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))
+                is_quizzes=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True)),
+                quizzes= Case(
+                    When(
+                        Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True)),
+                        then=Count('documentquiz', filter=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))),
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
             )
             
             return queryset
@@ -560,7 +568,16 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                 queryset = queryset.distinct().annotate(
                     is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
                     is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id'))),
-                    is_quizzes=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))
+                    is_quizzes=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True)),
+                    quizzes= Case(
+                        When(
+                            Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True)),
+                            then=Count('documentquiz', filter=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))),
+                        ),
+                        default=Value(0),
+                        output_field=IntegerField()
+                    )
+
                 )    
                 
                 return queryset
@@ -583,9 +600,25 @@ class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDe
             raise serializers.ValidationError({"Access Denied": "You do not have permission to update documents."})
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        document_id = kwargs["id"]
+        is_summary = DocumentSummary.objects.filter(document=document_id).exists(),
+        is_keypoints = DocumentKeyPoints.objects.filter(document=document_id).exists(),
+        is_quizzes = DocumentQuiz.objects.filter(document=document_id, upload=True).count()
+        quizzes = 0
+        if is_quizzes:
+            quizzes = is_quizzes
+        update_response = self.update(request, *args, **kwargs)
+        if update_response.status_code == status.HTTP_200_OK:
+            updated_data = update_response.data
+            combined_data = {
+                **updated_data,
+                'is_summary': is_summary[0],
+                'is_keypoints': is_keypoints[0],
+                'is_quizzes': is_quizzes, 
+                'quizzes': quizzes
+            }
 
-        # Process the update
-        return self.update(request, *args, **kwargs)
+            return Response(combined_data, status=status.HTTP_200_OK)
     
     def delete(self, request, *args, **kwargs):
         if request.user.role == "User":
@@ -610,3 +643,37 @@ class AssignDocumentsToUsersAPIView(APIView):
                 return Response({"message": "Users not found."}, status=status.HTTP_404_NOT_FOUND)
         
         return Response({"message": "Document assigned to users successfully."}, status=status.HTTP_200_OK)
+
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from departments.models import DepartmentsDocuments, UserAssignment
+from documents.models import DocumentQuiz, QuizQuestions
+from .serializers import UserAssignmentUpdateSerializer,UserAssignmentSerializer
+
+class UpdateUserAssignment(APIView):
+    def put(self, request, *args, **kwargs):
+        document_id = request.data.get('document_id')
+        user_id = request.data.get('user_id')
+        question_id = request.data.get('question_id')
+        quiz_id = request.data.get('quiz_id')
+        department_id = request.data.get('department_id')
+
+        if not all([document_id, user_id, question_id, quiz_id]):
+            return Response({"error": "All fields (document_id, user_id, question_id, quiz_id) are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            document = DepartmentsDocuments.objects.get(id=document_id)
+        except DepartmentsDocuments.DoesNotExist:
+            return Response({"error": "Document not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            user_assignment = UserAssignment.objects.filter(user_id=user_id, document_id=document_id).first()
+        except UserAssignment.DoesNotExist:
+            return Response({"error": "UserAssignment not found."}, status=status.HTTP_404_NOT_FOUND)
+        user_assignment.question_id = question_id
+        user_assignment.quiz_id = quiz_id
+        user_assignment.save()
+
+        serializer = UserAssignmentSerializer(user_assignment)
+        return Response(serializer.data, status=status.HTTP_200_OK)

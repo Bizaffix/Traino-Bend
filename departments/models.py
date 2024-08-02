@@ -24,6 +24,18 @@ class Departments(models.Model):
         verbose_name = ("Company Department")
         verbose_name_plural = ("Company Departments")
 
+class UserAssignment(models.Model):
+    user_id = models.CharField(max_length=255)
+    email = models.EmailField()
+    quiz_id = models.CharField(max_length=255)
+    question_id = models.CharField(max_length=255)
+    document_id = models.CharField(max_length=255,null=True)
+    department_id = models.CharField(max_length=255,null=True)
+    first_name = models.CharField(max_length=255,null=True)
+    last_name = models.CharField(max_length=255,null=True)
+
+    def __str__(self):
+        return self.user_id
 class DepartmentsDocuments(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True , unique=True)
     name = models.CharField(max_length=100, null=True, blank=True)
@@ -36,7 +48,7 @@ class DepartmentsDocuments(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True)
     added_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="document_departments_added_by", null=True, blank=True)
     is_active= models.BooleanField(default=True)
-
+    assigned_users_data=models.ManyToManyField(UserAssignment, null=True)
 
     REQUIRED_FIELDS = ['name', 'file', 'department']
 

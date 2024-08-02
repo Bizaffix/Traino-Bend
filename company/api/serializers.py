@@ -137,6 +137,7 @@ class CompanySerializer(serializers.ModelSerializer):
     # departments = serializers.SerializerMethodField(read_only=True)
     # admin = serializers.SerializerMethodField(read_only=True)
     id = serializers.SerializerMethodField(read_only=True)
+    phone = serializers.CharField(required=False, allow_blank=True)
     class Meta:
         model = company
         fields = '__all__'
