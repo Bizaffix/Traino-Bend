@@ -4,7 +4,14 @@ from company.models import company , AdminUser
 from teams.models import CompaniesTeam
 import uuid
 from django.utils import timezone
+from enum import Enum
+from django_enum_choices.fields import EnumChoiceField
 
+class Schedule_Types(Enum):
+    daily = "daily"
+    three_days_a_week = "3_days_a_week"
+    weekly = "weekly"
+    monthly = "monthly"
 class Departments(models.Model):
     id = models.UUIDField(default=uuid.uuid4 , primary_key=True , unique=True)
     name = models.CharField(max_length = 100)
@@ -42,7 +49,7 @@ class DepartmentsDocuments(models.Model):
     file = models.FileField(upload_to='media/documents/', null=True, blank=True)
     department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='document_departments', null=True, blank=True)
     assigned_users = models.ManyToManyField(CompaniesTeam, related_name='assigned_documents', blank=True)
-    scheduled_time  = models.DateTimeField(null=True, blank=True)
+    schedule_frequency = models.CharField(max_length=40,null=True,blank=True)
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)

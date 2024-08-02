@@ -7,6 +7,8 @@ from django.conf import settings
 from documents.models import DocumentQuiz, QuizQuestions
 from departments.models import UserAssignment
 
+
+
 class UserAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAssignment
@@ -71,7 +73,7 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
     is_keypoints = serializers.BooleanField(read_only=True)
     is_quizzes = serializers.BooleanField(read_only=True)
     assigned_users_data = UserAssignmentSerializer(many=True, read_only=True)
-
+    schedule_frequency = serializers.CharField(required=False)
     class Meta:
         model = DepartmentsDocuments
         fields = '__all__'
