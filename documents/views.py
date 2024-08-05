@@ -423,12 +423,6 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         documents = serializer.save(added_by=self.request.user)
-        schedule_time = serializer.validated_data.get('scheduled_time', timezone.now())
-
-        for document in documents:
-            document.scheduled_time = schedule_time
-            document.save()
-
         return documents
 
     def create(self, request, *args, **kwargs):
@@ -444,8 +438,6 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
         failure_departments = []
         created_documents = []
         
-        scheduled_time = validated_data.get('schedule_time')
-
         for department_id in department_ids:
             try:
                 department = Departments.objects.get(id=department_id, is_active=True)
@@ -461,7 +453,6 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                     added_by=request.user,
                     file=validated_data['file'],
                     department=department,
-                    scheduled_time=scheduled_time,
                     published=validated_data.get('published', False)
                 )
                 valid_team_ids = []
@@ -647,33 +638,5 @@ class AssignDocumentsToUsersAPIView(APIView):
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from departments.models import DepartmentsDocuments, UserAssignment
+from departments.models import DepartmentsDocuments
 from documents.models import DocumentQuiz, QuizQuestions
-from .serializers import UserAssignmentUpdateSerializer,UserAssignmentSerializer
-
-class UpdateUserAssignment(APIView):
-    def put(self, request, *args, **kwargs):
-        document_id = request.data.get('document_id')
-        user_id = request.data.get('user_id')
-        question_id = request.data.get('question_id')
-        quiz_id = request.data.get('quiz_id')
-        department_id = request.data.get('department_id')
-
-        if not all([document_id, user_id, question_id, quiz_id]):
-            return Response({"error": "All fields (document_id, user_id, question_id, quiz_id) are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            document = DepartmentsDocuments.objects.get(id=document_id)
-        except DepartmentsDocuments.DoesNotExist:
-            return Response({"error": "Document not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        try:
-            user_assignment = UserAssignment.objects.filter(user_id=user_id, document_id=document_id).first()
-        except UserAssignment.DoesNotExist:
-            return Response({"error": "UserAssignment not found."}, status=status.HTTP_404_NOT_FOUND)
-        user_assignment.question_id = question_id
-        user_assignment.quiz_id = quiz_id
-        user_assignment.save()
-
-        serializer = UserAssignmentSerializer(user_assignment)
-        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -4,7 +4,7 @@ from departments.models import DepartmentsDocuments
 
 def activate_scheduled_documents():
     now = timezone.now()
-    documents = DepartmentsDocuments.objects.filter(is_active=True, published=False, scheduled_time__lte=now)
+    documents = DepartmentsDocuments.objects.filter(is_active=True, published=False)
     for document in documents:
         document.published = True
         document.save()

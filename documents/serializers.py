@@ -5,14 +5,7 @@ from teams.models import CompaniesTeam
 from django.core.mail import send_mail
 from django.conf import settings
 from documents.models import DocumentQuiz, QuizQuestions
-from departments.models import UserAssignment
 
-
-
-class UserAssignmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserAssignment
-        fields = ['user_id', 'email', 'quiz_id', 'question_id', "document_id", "first_name", "last_name"]
 class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField(read_only=True)
     last_name = serializers.SerializerMethodField(read_only=True)
@@ -24,7 +17,8 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     is_keypoints = serializers.BooleanField(read_only=True)
     is_quizzes = serializers.BooleanField(read_only=True)
     quizzes = serializers.SerializerMethodField(read_only=True)
-    assigned_users_data = UserAssignmentSerializer(many=True, read_only=True)
+    assigned_users_details = serializers.SerializerMethodField(read_only=True)
+    
     class Meta:
         model = DepartmentsDocuments
         fields = '__all__'
@@ -49,6 +43,9 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     
     def get_assigned_users(self, obj):
         return [user.id for user in obj.assigned_users.all()]
+    
+    def get_assigned_users_details(self, obj):
+        return [{"id": user.id, "first_name": user.members.first_name, "last_name":user.members.last_name, "email":user.members.email} for user in obj.assigned_users.all()]
 
 
 class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
@@ -67,12 +64,11 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
     email = serializers.SerializerMethodField(read_only=True)
     phone = serializers.SerializerMethodField(read_only=True)
     created_at = serializers.SerializerMethodField(read_only=True)
-    # assigned_users_details = serializers.SerializerMethodField(read_only=True)
+    assigned_users_details = serializers.SerializerMethodField(read_only=True)
     all = serializers.BooleanField(required=False, write_only=True)
     is_summary = serializers.BooleanField(read_only=True)
     is_keypoints = serializers.BooleanField(read_only=True)
     is_quizzes = serializers.BooleanField(read_only=True)
-    assigned_users_data = UserAssignmentSerializer(many=True, read_only=True)
     schedule_frequency = serializers.CharField(required=False)
     class Meta:
         model = DepartmentsDocuments
@@ -93,8 +89,8 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
     def get_created_at(self, obj):
         return obj.created_at
 
-    # def get_assigned_users_details(self, obj):
-    #     return [{"id": user.id, "first_name": user.members.first_name, "last_name":user.members.last_name,"email":user.members.email} for user in obj.assigned_users.all()]
+    def get_assigned_users_details(self, obj):
+        return [{"id": user.id, "first_name": user.members.first_name, "last_name":user.members.last_name,"email":user.members.email} for user in obj.assigned_users.all()]
 
     def update(self, instance, validated_data):
         #get data from body
@@ -132,21 +128,7 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
             firstQuiz= DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first()
             first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first()
 
-            assigned_users_data = [
-                UserAssignment(
-                    user_id=user.id,
-                    email=user.members.email,
-                    quiz_id=firstQuiz.id,
-                    question_id=first_question.id,
-                    document_id=instance.id,
-                    first_name=user.members.first_name,
-                    last_name=user.members.last_name
-                )
-                for user in assigned_users.all()
-            ]
-            UserAssignment.objects.bulk_create(assigned_users_data)
             instance.assigned_users_data.set(assigned_users_data)
-
 
             instance.assigned_users.set(assigned_users)
             
@@ -163,7 +145,6 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
 
         else:
             for user_id in users_to_remove:
-                deleteUsers = UserAssignment.objects.filter(user_id=user_id)
                 user_instance = CompaniesTeam.objects.get(id=user_id)
        
                 instance.assigned_users.remove(user_instance)
@@ -190,21 +171,6 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
                 
                     firstQuiz= DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first()
                     first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first()
-                    assigned_users_data = UserAssignment(
-                        user_id=user_id,
-                        first_name=user_instance.members.first_name, 
-                        last_name=user_instance.members.last_name, 
-                        email=user_instance.members.email,
-                        quiz_id=firstQuiz.id,
-                        question_id=first_question.id,
-                        document_id=instance.id
-                    )
-                    
-                    if not instance.assigned_users_data.filter(id=user_id):
-                        UserAssignment.objects.bulk_create([assigned_users_data])
-                        instance.assigned_users_data.add(assigned_users_data)
-
-
 
 
                 subject = 'Assigning Document'
@@ -287,13 +253,3 @@ class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
             documents.append(document)
 
         return documents
-
-
-
-
-class UserAssignmentUpdateSerializer(serializers.Serializer):
-    document_id = serializers.UUIDField()
-    user_id = serializers.UUIDField()
-    question_id = serializers.UUIDField()
-    quiz_id = serializers.UUIDField()
-    email = serializers.EmailField()
