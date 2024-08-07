@@ -3,12 +3,11 @@ import openai
 import os 
 import chardet
 import pdfplumber
-openai_api_key =  'sk-proj-9FtVgsRK5a0YMObo5yMhT3BlbkFJYxPy0J1KInGdltTTYtQM'#'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'
-os.environ['OPENAI_API_KEY'] = 'sk-proj-9FtVgsRK5a0YMObo5yMhT3BlbkFJYxPy0J1KInGdltTTYtQM'#'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'
-
 logging.basicConfig(filename='app.log', level=logging.INFO)
 logger = logging.getLogger(__name__)
-
+from dotenv import load_dotenv
+load_dotenv()
+openai_api_key= os.getenv('OPENAI_API_KEY')
 # Summary Generations from gpt
 def generate_summary_from_gpt(content , prompt):
     # print(openai_api_key)

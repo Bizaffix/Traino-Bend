@@ -8,7 +8,6 @@ from teams.models import CompaniesTeam
 from rest_framework.permissions import IsAuthenticated
 from .permissions import IsAdminUserOrReadOnly, IsAdminUserOfCompany
 from rest_framework_simplejwt.authentication import JWTAuthentication
-import base64
 from company.models import AdminUser
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -28,9 +27,9 @@ from django.shortcuts import redirect
 from django.template.loader import render_to_string
 from django.contrib import messages
 from departments.models import DepartmentsDocuments
-
-openai_api_key = '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'
-os.environ['OPENAI_API_KEY'] = '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'
+from dotenv import load_dotenv
+load_dotenv()
+openai_api_key= os.getenv('OPENAI_API_KEY')
 
 def readPDFFile(pdf_file_path):
     pdf_reader = PdfReader(pdf_file_path)
@@ -62,15 +61,12 @@ def generateDocumentSummary(request):
             if document.file.path is not None:
                 try:
                     print("test: 1")
-                    # Instantiate the LLM model
-                    #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
                     llm = ChatOpenAI(model_name='gpt-3.5-turbo')
                     print("test: 2")
                     print(document.file.path)
 
                     loader = PyPDFLoader(document.file.path)
-                    #docs = loader.load_and_split()
-                    
+                 
                     pages = loader.load()
                     text = ""
                     for page in pages:
@@ -137,9 +133,7 @@ def generateDocumentKeypoints(request):
             document = DepartmentsDocuments.objects.get(id=document_id)
             if document.file.path is not None:
                 try:
-                    #print("test: 1")
-                    # Instantiate the LLM model
-                    #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+            
                     llm = ChatOpenAI(model_name='gpt-3.5-turbo')
                     #print("test: 2")
                     print(document.file.path)
@@ -302,9 +296,6 @@ def generateDocumentQuiz(request):
             document = DepartmentsDocuments.objects.get(id=document_id)
             if document.file.path is not None:
                 try:
-                    #print("test: 1")
-                    # Instantiate the LLM model
-                    #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
                     llm = ChatOpenAI(model_name='gpt-3.5-turbo')
                     #print("test: 2")
                     print(document.file.path)

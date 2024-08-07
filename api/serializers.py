@@ -5,7 +5,10 @@ from documents.serializers import DepartmentsDocumentsSerializer
 from documents.models import UserDocuments, DocumentKeyPoints, DocumentQuiz, DocumentSummary, QuizQuestions
 from rest_framework import  serializers
 from django.db.models import Q
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
+openai_api_key= os.getenv('OPENAI_API_KEY')
 class UserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = CustomUser
@@ -209,7 +212,6 @@ class ReadOnlyDocumentSerializer(serializers.ModelSerializer):
 import openai
 import PyPDF2
 from django.core.files.storage import default_storage
-openai_api_key = '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'
 class DocumentSummarySerializer(serializers.ModelSerializer):
     added_by = UserCreateSerializer(many=False, read_only=True)
     document = serializers.UUIDField(write_only=True)
@@ -233,31 +235,7 @@ class DocumentSummarySerializer(serializers.ModelSerializer):
         document_summary = DocumentSummary.objects.create(id=document_id, **validated_data)
         return document_summary
     
-    # def extract_text(self, file):
-    #     if not file:
-    #         raise serializers.ValidationError("No file provided.")
 
-    #     file_content = ""
-    #     if file.name.endswith('.pdf'):
-    #         reader = PyPDF2.PdfReader(file)
-    #         file_content = ''.join(page.extract_text() for page in reader.pages)
-    #     elif file.name.endswith('.txt'):
-    #         file_content = file.read().decode('utf-8')
-    #     else:
-    #         raise serializers.ValidationError("Unsupported file type. Please upload a PDF or TXT file.")
-
-    #     return file_content
-
-    # def generate_summary(self, content):
-    #     # This function assumes that you have imported openai and configured your API key
-    #     openai.api_key= openai_api_key
-    #     response = openai.Completion.create(
-    #         engine="gpt-3.5-turbo",
-    #         prompt=f"Summarize this document: {content}",
-    #         max_tokens=150
-    #     )
-    #     summary = response.choices[0].text.strip()
-    #     return summary
 
 class DocumentKeyPointsSerializer(serializers.ModelSerializer):
     added_by = UserCreateSerializer(many=False, read_only=True)

@@ -24,8 +24,6 @@ from PyPDF2 import PdfReader
 from company.models import AdminUser
 from teams.models import CompaniesTeam
 from langchain.prompts import PromptTemplate
-openai_api_key =  'sk-proj-5m3pZh3gAS9jirwIgprkT3BlbkFJZOesj9cbny2zc18nvQXo'#'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'
-os.environ['OPENAI_API_KEY'] = 'sk-proj-5m3pZh3gAS9jirwIgprkT3BlbkFJZOesj9cbny2zc18nvQXo'#'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'
 from departments.models import DepartmentsDocuments
 
 
@@ -62,7 +60,6 @@ def generateDocumentSummary(request):
         try:
             # print("test: 1")
             # Instantiate the LLM model
-            #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
             llm = ChatOpenAI(model_name='gpt-3.5-turbo')
             # print("test: 2")
             # print(document.file.path)
@@ -133,18 +130,13 @@ def generateDocumentKeypoints(keypoint_id, document_id, prompt_text):
     document = UserDocuments.objects.get(id=document_id)
     if document.file.path is not None:
         try:
-            #print("test: 1")
-            # Instantiate the LLM model
-            #llm = OpenAI(temperature=0, openai_api_key=openai_api_key)
+
             llm = ChatOpenAI(model_name='gpt-3.5-turbo')
-            #print("test: 2")
-            # print(document.file.path)
+
             text = readPDFFile(document.file.path)
-            #print("test: 3")
+
 
             loader = PyPDFLoader(document.file.path)
-            # text = loader.load_and_split()
-            # print(text)
 
             pages = loader.load()
             text = ""
