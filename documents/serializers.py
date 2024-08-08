@@ -4,7 +4,7 @@ from django.utils import timezone
 from teams.models import CompaniesTeam
 from django.core.mail import send_mail
 from django.conf import settings
-from documents.models import DocumentQuiz, QuizQuestions
+from documents.models import DocumentQuiz, QuizQuestions, ScheduleDetail
 
 class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField(read_only=True)
@@ -47,18 +47,29 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     def get_assigned_users_details(self, obj):
         return [{"id": user.id, "first_name": user.members.first_name, "last_name":user.members.last_name, "email":user.members.email} for user in obj.assigned_users.all()]
 
+# class UserDetailSerializer(serializers.Serializer):
+#     id = serializers.UUIDField(format='hex_verbose')
+#     quiz_id = serializers.UUIDField(format='hex_verbose')
+#     question_id = serializers.UUIDField(format='hex_verbose')
+
+class UserDetailSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    quiz_id = serializers.CharField()
+    question_id = serializers.CharField()
 
 class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
     department_ids = serializers.ListField(
         child=serializers.UUIDField(format='hex_verbose'), required=True, write_only=True,
     )
-    user_ids = serializers.ListField(
-        child=serializers.UUIDField(format='hex_verbose'),
-        required=False,
-        write_only=True,
-        # error_messages={'required': 'This field is required.'}
-    )
-
+    # users = serializers.ListField(
+    #     child=serializers.UUIDField(format='hex_verbose'),
+    #     required=False,
+    #     write_only=True,
+    #     # error_messages={'required': 'This field is required.'}
+    # )
+    # users = serializers.ListField(
+    #     child=UserDetailSerializer(), required=False, write_only=True,
+    # )
     first_name = serializers.SerializerMethodField(read_only=True)
     last_name = serializers.SerializerMethodField(read_only=True)
     email = serializers.SerializerMethodField(read_only=True)
@@ -70,6 +81,10 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
     is_keypoints = serializers.BooleanField(read_only=True)
     is_quizzes = serializers.BooleanField(read_only=True)
     schedule_frequency = serializers.CharField(required=False)
+    quiz_id = serializers.UUIDField(required=False, allow_null=True)  # New field
+    question_id = serializers.UUIDField(required=False, allow_null=True)  # New field
+
+
     class Meta:
         model = DepartmentsDocuments
         fields = '__all__'
@@ -93,10 +108,14 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         return [{"id": user.id, "first_name": user.members.first_name, "last_name":user.members.last_name,"email":user.members.email} for user in obj.assigned_users.all()]
 
     def update(self, instance, validated_data):
+        users = validated_data.pop('users', None)
+        # print("quiz_id", quiz_id)
+        instance.users = users
+        # instance.question_id = question_id
         #get data from body
         new_department_ids = validated_data.pop('department_ids', [])
         all_flag = validated_data.pop('all', False)
-        new_user_ids = CompaniesTeam.objects.filter(departments__id__in=new_department_ids) if all_flag else validated_data.pop('user_ids', [])
+        new_user_ids = CompaniesTeam.objects.filter(departments__id__in=new_department_ids) if all_flag else validated_data.pop('users', [])
         name = validated_data.pop('name', "")
 
         # Get current department and user associations
@@ -121,14 +140,13 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         for department_id in departments_to_add:
             instance.department = Departments.objects.get(id=department_id)
             instance.save()
-
         # Handle user assignment
         if all_flag:
             assigned_users = CompaniesTeam.objects.filter(departments__id__in=new_department_ids)
             firstQuiz= DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first()
             first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first()
 
-            instance.assigned_users_data.set(assigned_users_data)
+            instance.assigned_users.set(assigned_users)
 
             instance.assigned_users.set(assigned_users)
             
@@ -165,29 +183,46 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
 
 
             for user_id in users_to_add:
-                if CompaniesTeam.objects.filter(id=user_id, departments__id__in=new_department_ids).exists():
-                    user_instance = CompaniesTeam.objects.filter(id=user_id).first()
-                    instance.assigned_users.add(user_instance)
-                
-                    firstQuiz= DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first()
-                    first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first()
-
-
-                subject = 'Assigning Document'
-                from_email = 'no-reply@traino.ai'
-                recipient_list=[str(CompaniesTeam.objects.get(id=user_id)).split(" with role User")[0]]
-                message = f'The document {name} has been assigned to you by the admin'
                 try:
-                    send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list, fail_silently=False)
-                    print("Successfully Sent")
-                except Exception as e:
-                    print(f'Something went wrong: {e}')
+                    if CompaniesTeam.objects.filter(id=user_id, departments__id__in=new_department_ids).exists():
+                        user_instance = CompaniesTeam.objects.get(id=user_id)
+                        instance.assigned_users.add(user_instance)
+
+                        # firstQuiz = DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first()
+                        # first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first()
+
+                    subject = 'Assigning Document'
+                    from_email = 'no-reply@traino.ai'
+                    recipient_list = [user_instance.email]  # Assuming `email` field exists
+                    message = f'The document {name} has been assigned to you by the admin'
+                    try:
+                        send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list, fail_silently=False)
+                        print("Successfully Sent")
+                    except Exception as e:
+                        print(f'Something went wrong: {e}')
+                except CompaniesTeam.DoesNotExist:
+                     print(f'User with id {user_id} does not exist.')
             
        
         # Update other fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
+        instance.save()
+        schedule_details_list = []
+        for user_data in new_user_ids:
+            schedule_detail = ScheduleDetail.objects.create(
+                quiz_id=user_data['quiz_id'],
+                question_id=user_data['question_id'],
+                user_id=user_data['id'],
+                department_id=instance.department.id if instance.department else None,
+            )
+            schedule_details_list.append({
+                "quiz_id": schedule_detail.quiz_id,
+                "question_id": schedule_detail.question_id,
+                "user_id": schedule_detail.user_id.id,
+                "department_id": schedule_detail.department_id.id,
+            })
         instance.save()
         return instance
 

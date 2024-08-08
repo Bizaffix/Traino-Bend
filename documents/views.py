@@ -589,11 +589,13 @@ class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDe
         quizzes = 0
         if is_quizzes:
             quizzes = is_quizzes
+        print("requets", request.data)
         update_response = self.update(request, *args, **kwargs)
         if update_response.status_code == status.HTTP_200_OK:
             updated_data = update_response.data
             combined_data = {
                 **updated_data,
+                'users':request.data['users'],
                 'is_summary': is_summary[0],
                 'is_keypoints': is_keypoints[0],
                 'is_quizzes': is_quizzes, 

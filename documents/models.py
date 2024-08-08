@@ -145,4 +145,14 @@ class KeypointsCount(models.Model):
     
     def __str__(self):
         return f"{self.admin.admin.first_name} has summary count {self.request_count} for {self.document}"
+
+class ScheduleDetail(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
+    quiz_id = models.UUIDField()
+    question_id = models.UUIDField()
+    user_id = models.UUIDField()
+    department_id =models.UUIDField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     
