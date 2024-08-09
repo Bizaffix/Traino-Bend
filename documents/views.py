@@ -595,7 +595,7 @@ class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDe
             updated_data = update_response.data
             combined_data = {
                 **updated_data,
-                'users':request.data['users'],
+                'users': request.data['users'] if 'users' in request.data and request.data['users'] else None,
                 'is_summary': is_summary[0],
                 'is_keypoints': is_keypoints[0],
                 'is_quizzes': is_quizzes, 

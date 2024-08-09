@@ -61,6 +61,13 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
     department_ids = serializers.ListField(
         child=serializers.UUIDField(format='hex_verbose'), required=True, write_only=True,
     )
+    users = serializers.ListField(
+        child=serializers.DictField(
+            child=serializers.CharField()
+        ), 
+        required=False, 
+        write_only=True,
+    )
     # users = serializers.ListField(
     #     child=serializers.UUIDField(format='hex_verbose'),
     #     required=False,
@@ -108,8 +115,7 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         return [{"id": user.id, "first_name": user.members.first_name, "last_name":user.members.last_name,"email":user.members.email} for user in obj.assigned_users.all()]
 
     def update(self, instance, validated_data):
-        users = validated_data.pop('users', None)
-        # print("quiz_id", quiz_id)
+        users = validated_data.pop('users', [])
         instance.users = users
         # instance.question_id = question_id
         #get data from body
@@ -210,7 +216,8 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
 
         instance.save()
         schedule_details_list = []
-        for user_data in new_user_ids:
+        print("new_user_ids",validated_data)
+        for user_data in users:
             schedule_detail = ScheduleDetail.objects.create(
                 quiz_id=user_data['quiz_id'],
                 question_id=user_data['question_id'],
@@ -220,8 +227,8 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
             schedule_details_list.append({
                 "quiz_id": schedule_detail.quiz_id,
                 "question_id": schedule_detail.question_id,
-                "user_id": schedule_detail.user_id.id,
-                "department_id": schedule_detail.department_id.id,
+                "user_id": schedule_detail.user_id,
+                "department_id": schedule_detail.department_id,
             })
         instance.save()
         return instance
