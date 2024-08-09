@@ -121,7 +121,18 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         #get data from body
         new_department_ids = validated_data.pop('department_ids', [])
         all_flag = validated_data.pop('all', False)
-        new_user_ids = CompaniesTeam.objects.filter(departments__id__in=new_department_ids) if all_flag else validated_data.pop('users', [])
+            # Step 1: Extract the user IDs from the users list
+        extracted_user_ids = [user['id'] for user in users]
+
+        # Step 2: Perform the query based on the all_flag
+        if all_flag:
+            # Query CompaniesTeam based on the extracted user IDs and department IDs
+            new_user_ids = CompaniesTeam.objects.filter(departments__id__in=new_department_ids).values_list('id', flat=True)
+        else:
+            # Use the extracted user IDs directly
+            new_user_ids = extracted_user_ids
+
+        # Step 3: Print the results for debugging
         name = validated_data.pop('name', "")
 
         # Get current department and user associations
