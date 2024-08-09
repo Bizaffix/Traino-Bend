@@ -216,31 +216,29 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
 
         instance.save()
         schedule_details_list = []
-        print("new_user_ids",validated_data)
         for user_data in users:
-            # Check if the ScheduleDetail with the same user_id, quiz_id, and question_id already exists
-            exists = ScheduleDetail.objects.filter(
+            # Update existing ScheduleDetail if document_id and user_id match, or create a new one
+            schedule_detail, created = ScheduleDetail.objects.update_or_create(
                 user_id=user_data['id'],
                 department_id=instance.department.id if instance.department else None,
-            ).exists()
-
-            # If it doesn't exist, create and append to the schedule_details_list
-            if not exists:
-                schedule_detail = ScheduleDetail.objects.create(
-                    quiz_id=user_data['quiz_id'],
-                    question_id=user_data['question_id'],
-                    user_id=user_data['id'],
-                    department_id=instance.department.id if instance.department else None,
-                )
-                schedule_details_list.append({
-                    "quiz_id": schedule_detail.quiz_id,
-                    "question_id": schedule_detail.question_id,
-                    "user_id": schedule_detail.user_id,
-                    "department_id": schedule_detail.department_id,
-                })
+                defaults={
+                    "quiz_id": user_data['quiz_id'],
+                    "question_id": user_data['question_id'],
+                    "department_id": instance.department.id if instance.department else None,
+                }
+            )
+            
+            # Add the schedule detail to the list
+            schedule_details_list.append({
+                "quiz_id": schedule_detail.quiz_id,
+                "question_id": schedule_detail.question_id,
+                "user_id": schedule_detail.user_id,
+                "department_id": schedule_detail.department_id,
+            })
 
         instance.save()
         return instance
+
 
 
         
