@@ -478,17 +478,17 @@ class DocumentQuizAdmin(ModelAdmin):
     
 class ScheduleDetailAdmin(admin.ModelAdmin):
     # Specify which fields to display in the list view
-    list_display = ('id', 'quiz_id', 'question_id', 'user_id', 'department_id', 'created_at', 'updated_at')
+    list_display = ('id', 'quiz_id', 'question_id', 'user_id', 'document_id', 'created_at', 'updated_at')
     
     # Add filters for the list view
-    list_filter = ('quiz_id', 'question_id', 'user_id', 'department_id')
+    list_filter = ('quiz_id', 'question_id', 'user_id', 'document_id')
     
     # Add search functionality
-    search_fields = ('quiz_id', 'question_id', 'user_id', 'department_id')
+    search_fields = ('quiz_id', 'question_id', 'user_id', 'document_id')
     
     # Set up how fields should be grouped in the admin form
     fieldsets = (
-        (None, {'fields': ('quiz_id', 'question_id', 'user_id', 'department_id')}),
+        (None, {'fields': ('quiz_id', 'question_id', 'user_id', 'document_id')}),
         ('Timestamps', {'fields': ('created_at', 'updated_at')}),
     )
     

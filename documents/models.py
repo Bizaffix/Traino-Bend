@@ -151,7 +151,7 @@ class ScheduleDetail(models.Model):
     quiz_id = models.UUIDField()
     question_id = models.UUIDField()
     user_id = models.UUIDField()
-    department_id =models.UUIDField()
+    document_id = models.UUIDField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
