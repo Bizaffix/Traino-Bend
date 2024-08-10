@@ -201,16 +201,17 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
 
             for user_id in users_to_add:
                 try:
+                    recipient_list=[]
                     if CompaniesTeam.objects.filter(id=user_id, departments__id__in=new_department_ids).exists():
                         user_instance = CompaniesTeam.objects.get(id=user_id)
                         instance.assigned_users.add(user_instance)
 
                         # firstQuiz = DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first()
                         # first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first()
-
+                        recipient_list = [user_instance.email]  # Assuming `email` field exists
                     subject = 'Assigning Document'
                     from_email = 'no-reply@traino.ai'
-                    recipient_list = [user_instance.email]  # Assuming `email` field exists
+                    
                     message = f'The document {name} has been assigned to you by the admin'
                     try:
                         send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list, fail_silently=False)
