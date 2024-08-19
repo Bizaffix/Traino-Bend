@@ -62,10 +62,8 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         child=serializers.UUIDField(format='hex_verbose'), required=True, write_only=True,
     )
     users = serializers.ListField(
-        child=serializers.DictField(
-            child=serializers.CharField()
-        ), 
-        required=False, 
+        child=serializers.CharField(),
+        required=False,
         write_only=True,
     )
     first_name = serializers.SerializerMethodField(read_only=True)
@@ -113,7 +111,7 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         new_department_ids = validated_data.pop('department_ids', [])
         all_flag = validated_data.pop('all', False)
             # Step 1: Extract the user IDs from the users list
-        extracted_user_ids = [user['id'] for user in users]
+        extracted_user_ids = [user for user in users]
 
         # Step 2: Perform the query based on the all_flag
         if all_flag:
@@ -150,53 +148,100 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
             instance.save()
         # Handle user assignment
        
+        firstQuiz= DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first().id
+        first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first().id
         if all_flag:
             assigned_users = CompaniesTeam.objects.filter(departments__id__in=new_department_ids)
-            firstQuiz= DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first()
-            first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first()
 
             instance.assigned_users.set(assigned_users)
+            schedule_details_list = []
+            for user_data in assigned_users:
+                if user_data.id in current_user_ids:
+                    print("user already present")
+                else:
+                    schedule_detail, created = ScheduleDetail.objects.update_or_create(
+                        user_id=user_data.id,
+                        document_id=instance.id,
+                        defaults={
+                            "quiz_id": firstQuiz,
+                            "question_id": first_question,
+                            "document_id": instance.id,
+                        }
+                    )
+                    
+                    # Add the schedule detail to the list
+                    schedule_details_list.append({
+                        "quiz_id": schedule_detail.quiz_id,
+                        "question_id": schedule_detail.question_id,
+                        "user_id": schedule_detail.user_id,
+                        "document_id": schedule_detail.document_id,
+                    })
+                    print("new user id added.")
+                # Update existing ScheduleDetail if document_id and user_id match, or create a new one
 
-            instance.assigned_users.set(assigned_users)
-            
+            instance.save()
+
             subject = 'Assigning Document'
             from_email = 'no-reply@traino.ai'
             message = f'The document {name} has been assigned to you by the admin'
             for user_id in users_to_add:
                 recipient_list=[str(user_id).split(" with role User")[0]]
-                try:
-                    send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list, fail_silently=False)
-                    print("Successfully Sent")
-                except Exception as e:
-                    print(f'Something went wrong: {e}')
+                # try:
+                #     send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list, fail_silently=False)
+                #     print("Successfully Sent")
+                # except Exception as e:
+                #     print(f'Something went wrong: {e}')
 
         else:
             for user_id in users_to_remove:
                 user_instance = CompaniesTeam.objects.get(id=user_id)
-       
                 instance.assigned_users.remove(user_instance)
+                instance.save()  
+
+                deleteUsers = ScheduleDetail.objects.filter(user_id=user_id,document_id=instance.id)
                 for deleteUser in deleteUsers:
                     deleteUser.delete()
-                    instance.assigned_users_data.remove(deleteUser)
 
-
+    
                 subject = 'Un-Assigning Document'
                 from_email = 'no-reply@traino.ai'
                 recipient_list=[str(CompaniesTeam.objects.get(id=user_id)).split(" with role User")[0]]
                 message = f'The document {name} has been un-assigned to you by the admin'
-                try:
-                    send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list, fail_silently=False)
-                    print("Successfully Sent")
-                except Exception as e:
-                    print(f'Something went wrong: {e}')
+                # try:
+                #     send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list, fail_silently=False)
+                #     print("Successfully Sent")
+                # except Exception as e:
+                #     print(f'Something went wrong: {e}')
 
 
             for user_id in users_to_add:
+                print('users_to_add:',user_id)
                 try:
                     user_instance = CompaniesTeam.objects.filter(id=user_id).first()
                     if CompaniesTeam.objects.filter(id=user_id, departments__id__in=new_department_ids).exists():
                         user_instance = CompaniesTeam.objects.filter(id=user_id).first()
                         instance.assigned_users.add(user_instance)
+
+                        schedule_details_list = []
+                        
+                        # Update existing ScheduleDetail if document_id and user_id match, or create a new one
+                        schedule_detail, created = ScheduleDetail.objects.update_or_create(
+                            user_id=user_id,
+                            document_id=instance.id,
+                            defaults={
+                                "quiz_id": firstQuiz,
+                                "question_id": first_question,
+                                "document_id": instance.id,
+                            }
+                        )
+                        
+                        # Add the schedule detail to the list
+                        schedule_details_list.append({
+                            "quiz_id": schedule_detail.quiz_id,
+                            "question_id": schedule_detail.question_id,
+                            "user_id": schedule_detail.user_id,
+                            "document_id": schedule_detail.document_id,
+                        })
 
                         # firstQuiz = DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first()
                         # first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first()
@@ -204,11 +249,11 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
                     from_email = 'no-reply@traino.ai'
                     recipient_list=[str(CompaniesTeam.objects.get(id=user_id)).split(" with role User")[0]]
                     message = f'The document {name} has been assigned to you by the admin'
-                    try:
-                        send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list, fail_silently=False)
-                        print("Successfully Sent")
-                    except Exception as e:
-                        print(f'Something went wrong: {e}')
+                    # try:
+                    #     send_mail(subject=subject, message=message, from_email=from_email, recipient_list=recipient_list, fail_silently=False)
+                    #     print("Successfully Sent")
+                    # except Exception as e:
+                    #     print(f'Something went wrong: {e}')
                 except CompaniesTeam.DoesNotExist:
                      print(f'User with id {user_id} does not exist.')
             
@@ -216,28 +261,6 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         # Update other fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-
-        instance.save()
-        schedule_details_list = []
-        for user_data in users:
-            # Update existing ScheduleDetail if document_id and user_id match, or create a new one
-            schedule_detail, created = ScheduleDetail.objects.update_or_create(
-                user_id=user_data['id'],
-                document_id=instance.id,
-                defaults={
-                    "quiz_id": user_data['quiz_id'],
-                    "question_id": user_data['question_id'],
-                    "document_id": instance.id,
-                }
-            )
-            
-            # Add the schedule detail to the list
-            schedule_details_list.append({
-                "quiz_id": schedule_detail.quiz_id,
-                "question_id": schedule_detail.question_id,
-                "user_id": schedule_detail.user_id,
-                "document_id": schedule_detail.document_id,
-            })
 
         instance.save()
         return instance
