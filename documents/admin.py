@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
-from .models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, QuizQuestions, DocumentTeam, QuizResult
+from .models import UserDocuments, DocumentSummary, DocumentKeyPoints, DocumentQuiz, QuizQuestions, DocumentTeam, QuizResult, ScheduleDetail
 from accounts.models import CompanyTeam, Departments
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
@@ -476,7 +476,26 @@ class DocumentQuizAdmin(ModelAdmin):
             print("quiz already there")
             # print(len(dquiz))
     
+class ScheduleDetailAdmin(admin.ModelAdmin):
+    # Specify which fields to display in the list view
+    list_display = ('id', 'quiz_id', 'question_id', 'user_id', 'document_id', 'created_at', 'updated_at')
+    
+    # Add filters for the list view
+    list_filter = ('quiz_id', 'question_id', 'user_id', 'document_id')
+    
+    # Add search functionality
+    search_fields = ('quiz_id', 'question_id', 'user_id', 'document_id')
+    
+    # Set up how fields should be grouped in the admin form
+    fieldsets = (
+        (None, {'fields': ('quiz_id', 'question_id', 'user_id', 'document_id')}),
+        ('Timestamps', {'fields': ('created_at', 'updated_at')}),
+    )
+    
+    # Make timestamps read-only
+    readonly_fields = ('created_at', 'updated_at')
 
+admin.site.register(ScheduleDetail, ScheduleDetailAdmin)
 admin.site.register(UserDocuments, CustomDocumentAdmin)
 admin.site.register(DocumentSummary)
 admin.site.register(DocumentKeyPoints)#, DocumentKeyPointsAdmin

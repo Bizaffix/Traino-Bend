@@ -60,10 +60,7 @@ def generateDocumentSummary(request):
             document = DepartmentsDocuments.objects.get(id=document_id)
             if document.file.path is not None:
                 try:
-                    print("test: 1")
                     llm = ChatOpenAI(model_name='gpt-3.5-turbo')
-                    print("test: 2")
-                    print(document.file.path)
 
                     loader = PyPDFLoader(document.file.path)
                  
@@ -92,7 +89,6 @@ def generateDocumentSummary(request):
                     # print(len(docs))
                     # print(docs)
 
-                    print("test: 4")
 
                     # Define prompt
                     prompt_template = """You are required to generate """+prompt_text+""" based on the provided text:
@@ -105,9 +101,7 @@ def generateDocumentSummary(request):
 
                     # Text summarization
                     chain = load_summarize_chain(llm, chain_type='stuff', prompt=prompt_template)
-                    print("test: 5")
                     data['document_summary'] = chain.run(text)
-                    print("test: 6")
                 except Exception as error:
                     if error.code == 'insufficient_quota':
                         data['msg'] = 'You exceeded your current quota, please check your plan and billing details.'
@@ -435,7 +429,7 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
             except Departments.DoesNotExist:
                 continue  # Skip invalid departments
 
-            existing_document = DepartmentsDocuments.objects.filter(name=name, department=department, is_active=True).exists()
+            existing_document = DepartmentsDocuments.objects.filter(name=name, departments__id=department.id, is_active=True).exists()
             if existing_document:
                 failure_departments.append(department_id)
             else:
@@ -443,9 +437,10 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                     name=name,
                     added_by=request.user,
                     file=validated_data['file'],
-                    department=department,
                     published=validated_data.get('published', False)
                 )
+                if department:  # Ensure department is provided
+                    document.departments.add(department)  
                 valid_team_ids = []
                 
                 if all_users:
@@ -494,9 +489,9 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['id', 'name', 'file', 'department__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
-    ordering_fields = ['id', 'name', 'file', 'department__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
-    ordering = ['id', 'name', 'file', 'department__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
+    search_fields = ['id', 'name', 'file', 'departments__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
+    ordering_fields = ['id', 'name', 'file', 'departments__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
+    ordering = ['id', 'name', 'file', 'departments__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
 
     def get_queryset(self):
@@ -507,12 +502,12 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
         if user.role in ["Super Admin", "Admin"]:
             queryset = DepartmentsDocuments.objects.filter(is_active=True)
             if department_id:
-                queryset = queryset.filter(department__id=department_id)
+                queryset = DepartmentsDocuments.objects.filter(is_active=True, departments__id=department_id)
 
             if user.role == "Admin":
                 try:
                     admin_company = AdminUser.objects.get(admin=user, is_active=True).company
-                    queryset = queryset.filter(department__company=admin_company)
+                    queryset = queryset.filter(departments__company=admin_company)
                 except AdminUser.DoesNotExist:
                     raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
 
@@ -530,7 +525,6 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                     output_field=IntegerField()
                 )
             )
-            
             return queryset
 
         if user.role == "User":
@@ -545,7 +539,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                 )
                 
                 if department_id:
-                    queryset = queryset.filter(department__id=department_id)
+                    queryset = queryset.filter(departments__id=department_id)
 
                 queryset = queryset.distinct().annotate(
                     is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
@@ -594,6 +588,7 @@ class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDe
             updated_data = update_response.data
             combined_data = {
                 **updated_data,
+                'users': request.data['users'] if 'users' in request.data and request.data['users'] else None,
                 'is_summary': is_summary[0],
                 'is_keypoints': is_keypoints[0],
                 'is_quizzes': is_quizzes, 

@@ -483,7 +483,7 @@ class CreateSummaryApiView(APIView):
         elif user.role == "Admin":
             admin = AdminUser.objects.get(admin=user)
             if admin.is_active == True:
-                if str(admin.company.id) != str(document.department.company.id):
+                if not document.departments.filter(company=admin.company).exists():
                     return Response({"Access Denied":"You are not allowed to view the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
             else:
                 raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
@@ -495,7 +495,7 @@ class CreateSummaryApiView(APIView):
                     return Response({"No Association": "You are no longer associated with this department"}, status=status.HTTP_403_FORBIDDEN)
             else:
                 raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
-            if not user_departments.filter(id=document.department.id).exists():
+            if not user_departments.filter(id__in=document.departments.values_list('id', flat=True)).exists():
                 return Response({"Access Denied": "You are not allowed to view the summary of this department"}, status=status.HTTP_403_FORBIDDEN)
         try:
             summary = DocumentSummary.objects.filter(document=document).first()
@@ -525,7 +525,7 @@ class CreateSummaryApiView(APIView):
             if user.role == "Admin":
                 admin = AdminUser.objects.get(admin=user, is_active=True)
                 if admin.is_active == True:
-                    if str(admin.company.id) != str(document.department.company.id):
+                    if not document.departments.filter(company=admin.company).exists():
                         return Response({"Access Denied":"You are not allowed to create the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
                 else:
                     raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
@@ -588,7 +588,7 @@ class CreateKeypointsApiView(APIView):
         elif user.role == "Admin":
             admin = AdminUser.objects.get(admin=user)
             if admin.is_active == True:
-                if str(admin.company.id) != str(document.department.company.id):
+                if not document.departments.filter(company=admin.company).exists():
                     return Response({"Access Denied":"You are not allowed to view the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
             else:
                 raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
@@ -600,11 +600,13 @@ class CreateKeypointsApiView(APIView):
                     return Response({"No Association": "You are no longer associated with this department"}, status=status.HTTP_403_FORBIDDEN)
             else:
                 raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
-            if not user_departments.filter(id=document.department.id).exists():
+            if not user_departments.filter(id__in=document.departments.values_list('id', flat=True)).exists():
                 return Response({"Access Denied": "You are not allowed to view the summary of this department"}, status=status.HTTP_403_FORBIDDEN)
             
         try:
             keypoints = DocumentKeyPoints.objects.filter(document=document).first()
+            if keypoints is None:
+                return Response({"error": "No keypoints found for this document"}, status=status.HTTP_404_NOT_FOUND)
             if user.role == 'User':
                 return Response({"id": keypoints.id, "keypoints": keypoints.keypoints}, status=status.HTTP_200_OK)
             return Response({"id": keypoints.id, "keypoints": keypoints.keypoints, "prompt":keypoints.prompt}, status=status.HTTP_200_OK)            
@@ -628,7 +630,7 @@ class CreateKeypointsApiView(APIView):
             if user.role == "Admin":
                 admin = AdminUser.objects.get(admin=user)
                 if admin.is_active == True:
-                    if str(admin.company.id) != str(document.department.company.id):
+                    if not document.departments.filter(company=admin.company).exists():
                         return Response({"Access Denied":"You are not allowed to create the summary of this document"}, status=status.HTTP_401_UNAUTHORIZED)
                 else:
                     raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
@@ -737,7 +739,6 @@ class CreateQuizessApiView(APIView):
         document_id = request.query_params.get('document_id')
         if not document_id:
             return Response({"error": "document_id is required"}, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
             document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
         except DepartmentsDocuments.DoesNotExist:
@@ -750,7 +751,7 @@ class CreateQuizessApiView(APIView):
         elif user.role == "Admin":
             admin = AdminUser.objects.get(admin=user)
             if admin.is_active:
-                if str(admin.company.id) == str(document.department.company.id):
+                if document.departments.filter(company=admin.company).exists():
                     quizzes = DocumentQuiz.objects.filter(document=document)
                 else:
                     return Response({"Access Denied": "You are not allowed to view quizzes for this document"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -759,7 +760,7 @@ class CreateQuizessApiView(APIView):
         else:  # Regular User
             member = CompaniesTeam.objects.filter(members=user).first()
             if member and member.is_active:
-                assigned_documents = DepartmentsDocuments.objects.filter(department__users=member, is_active=True)
+                assigned_documents = DepartmentsDocuments.objects.filter(departments__users=member, is_active=True)
                 if document in assigned_documents:
                     quizzes = DocumentQuiz.objects.filter(document=document, upload=True)
                 else:
@@ -823,7 +824,7 @@ class CreateQuizessApiView(APIView):
             if user.role == "Admin":
                 admin = AdminUser.objects.get(admin=user)
                 if admin.is_active == True:
-                    if str(admin.company.id) != str(document.department.company.id):
+                    if not document.departments.filter(company=admin.company).exists():
                         return Response({"Access Denied":"You are not allowed to create the Quiz of this document"}, status=status.HTTP_401_UNAUTHORIZED)
                 else:
                     raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
