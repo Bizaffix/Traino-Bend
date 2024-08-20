@@ -28,7 +28,7 @@ class DepartmentsDocuments(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True , unique=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     file = models.FileField(upload_to='media/documents/', null=True, blank=True)
-    department = models.ForeignKey(Departments, on_delete=models.CASCADE, related_name='document_departments', null=True, blank=True)
+    departments = models.ManyToManyField(Departments, related_name='document_departments', blank=True)
     assigned_users = models.ManyToManyField(CompaniesTeam, related_name='assigned_documents', blank=True)
     schedule_frequency = models.CharField(max_length=40,null=True,blank=True)
     published = models.BooleanField(default=False)
@@ -37,7 +37,7 @@ class DepartmentsDocuments(models.Model):
     added_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="document_departments_added_by", null=True, blank=True)
     is_active= models.BooleanField(default=True)
 
-    REQUIRED_FIELDS = ['name', 'file', 'department']
+    REQUIRED_FIELDS = ['name', 'file', 'departments']
 
     def __str__(self):
         if self.name is not None:

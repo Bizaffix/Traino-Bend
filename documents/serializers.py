@@ -106,7 +106,6 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         users = validated_data.pop('users', [])
         instance.users = users
-        # instance.question_id = question_id
         #get data from body
         new_department_ids = validated_data.pop('department_ids', [])
         all_flag = validated_data.pop('all', False)
@@ -125,29 +124,29 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         name = validated_data.pop('name', "")
 
         # Get current department and user associations
-        current_department_id = instance.department.id if instance.department else None
+        current_department_id = list(instance.departments.values_list('id', flat=True))
         current_user_ids = list(instance.assigned_users.values_list('id', flat=True))
 
         # Determine departments to add, keep, and remove
-        departments_to_add = set(new_department_ids) - ({current_department_id} if current_department_id else set())
-        departments_to_keep = {current_department_id} & set(new_department_ids) if current_department_id else set()
-        departments_to_remove = {current_department_id} - set(new_department_ids) if current_department_id else set()
+        departments_to_add = set(new_department_ids) - set(current_department_id)
+        departments_to_remove = set(current_department_id) - set(new_department_ids)
 
         # Determine users to add, keep, and remove
         users_to_add = set(new_user_ids) - set(current_user_ids)
-        users_to_keep = set(new_user_ids) & set(current_user_ids)
         users_to_remove = set(current_user_ids) - set(new_user_ids)
 
         # Handle department assignment
         for department_id in departments_to_remove:
-            instance.department = None
+            department_to_remove = Departments.objects.get(id=department_id)
+            instance.departments.remove(department_to_remove)
             instance.save()
 
         for department_id in departments_to_add:
-            instance.department = Departments.objects.get(id=department_id)
+            department_to_add = Departments.objects.get(id=department_id)
+            instance.departments.add(department_to_add)
             instance.save()
         # Handle user assignment
-       
+
         firstQuiz= DocumentQuiz.objects.filter(document=instance.id).order_by('created_at').first().id
         first_question = QuizQuestions.objects.filter(quiz_id=firstQuiz).order_by('created_at').first().id
         if all_flag:
