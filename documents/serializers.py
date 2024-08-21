@@ -45,7 +45,19 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
         return [user.id for user in obj.assigned_users.all()]
     
     def get_assigned_users_details(self, obj):
-        return [{"id": user.id, "first_name": user.members.first_name, "last_name":user.members.last_name, "email":user.members.email} for user in obj.assigned_users.all()]
+        assigned_users_details=[]
+        for user in obj.assigned_users.all():
+            schedule_details=ScheduleDetail.objects.get(user_id=user.id,document_id=obj.id)
+            assigned_user_details={"id": user.id,
+                                    "first_name": user.members.first_name, 
+                                    "last_name":user.members.last_name, 
+                                    "email":user.members.email,
+                                    "quiz_id":  schedule_details.quiz_id if schedule_details is not None else None ,
+                                    "question_id": schedule_details.question_id if schedule_details is not None else None 
+                                    }
+            assigned_users_details.append(assigned_user_details)
+
+        return assigned_users_details
 
 # class UserDetailSerializer(serializers.Serializer):
 #     id = serializers.UUIDField(format='hex_verbose')
@@ -327,3 +339,32 @@ class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
             documents.append(document)
 
         return documents
+    
+
+
+class ScheduleDetailsUpdateSerializer(serializers.ModelSerializer):
+    users_id = serializers.UUIDField
+    department_id= serializers.UUIDField
+    question_id= serializers.UUIDField
+    quiz_id= serializers.UUIDField(required=False)
+    document_id=serializers.UUIDField
+
+
+
+    class Meta:
+        model = ScheduleDetail
+        fields = ['id', 'quiz_id', 'question_id', 'user_id',"document_id"]
+
+
+    def update(self, instance, validated_data):
+        
+        new_question_id=validated_data.pop('question_id',None)
+        new_quiz_id=validated_data.pop('quiz_id',None)
+        
+        instance.question_id=new_question_id
+        instance.quiz_id=new_quiz_id
+        
+        instance.save()
+        
+        return instance
+    
