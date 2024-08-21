@@ -148,8 +148,8 @@ class KeypointsCount(models.Model):
 
 class ScheduleDetail(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True)
-    quiz_id = models.UUIDField()
-    question_id = models.UUIDField()
+    quiz_id = models.UUIDField(null=True)
+    question_id = models.UUIDField(null=True)
     user_id = models.UUIDField()
     document_id = models.UUIDField()
     created_at = models.DateTimeField(auto_now_add=True)

@@ -478,7 +478,7 @@ from rest_framework import serializers
 from rest_framework.filters import SearchFilter, OrderingFilter 
 import logging
 from django.db.models import OuterRef, Exists, Count, Case, When, Value, IntegerField
-from documents.models import DocumentKeyPoints , DocumentSummary, DocumentQuiz
+from documents.models import DocumentKeyPoints , DocumentSummary, DocumentQuiz,ScheduleDetail
 
 logger = logging.getLogger(__name__)
 
@@ -563,7 +563,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
         raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized")
 
     
-from .serializers import DepartmentsDocumentsUpdateSerializer
+from .serializers import DepartmentsDocumentsUpdateSerializer,ScheduleDetailsUpdateSerializer
 class DepartmentsDocumentsUpdateDestroyRetrieveAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     serializer_class = DepartmentsDocumentsUpdateSerializer
@@ -621,8 +621,39 @@ class AssignDocumentsToUsersAPIView(APIView):
         
         return Response({"message": "Document assigned to users successfully."}, status=status.HTTP_200_OK)
 
+
+class UpdateScheduleDetailsAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ScheduleDetail.objects.all()
+    serializer_class = ScheduleDetailsUpdateSerializer
+    authentication_classes = [JWTAuthentication]
+
+    def get_object(self):
+        # Fetch document_id and user_id from the request body
+        document_id = self.request.data.get('document_id')
+        user_id = self.request.data.get('user_id')
+        
+        # Ensure both fields are provided
+        if not document_id or not user_id:
+            raise NotFound({"detail": "Both document_id and user_id must be provided in the request body."})
+        
+        try:
+            # Query using both document_id and user_id
+            return ScheduleDetail.objects.get(document_id=document_id, user_id=user_id)
+        except ScheduleDetail.DoesNotExist:
+            raise NotFound({"detail": "No ScheduleDetail matches the given query."})
+
+    def put(self, request, *args, **kwargs):
+        if not request.user.role == "Super Admin":
+            raise serializers.ValidationError({"Access Denied": "You do not have permission to update schedule details."})
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        update_response = self.update(request, *args, **kwargs)
+        if update_response.status_code == status.HTTP_200_OK:
+            return Response(update_response.data, status=status.HTTP_200_OK)
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from departments.models import DepartmentsDocuments
 from documents.models import DocumentQuiz, QuizQuestions
+from rest_framework.exceptions import NotFound
