@@ -281,7 +281,7 @@ class DepartmentRetrieveApiView(RetrieveAPIView , UpdateAPIView , DestroyAPIView
                 instance.is_active = False
                 instance.save()
                 
-                department_documents = DepartmentsDocuments.objects.filter(department=instance)
+                department_documents = DepartmentsDocuments.objects.filter(id=instance.id)
                 for doc in department_documents:
                     doc.is_active = False  # or doc.delete() to delete
                     doc.save()
@@ -928,7 +928,7 @@ class CreateQuizessApiView(APIView):
                 admin = AdminUser.objects.get(admin=request.user)
                 if not admin.is_active:
                     raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
-                if str(admin.company.id) != str(quiz.document.department.company.id):
+                if str(admin.company.id) != str(quiz.document.departments.first().company.id):
                     return Response({"Access Denied": "You are not allowed to delete this quiz"}, status=status.HTTP_401_UNAUTHORIZED)
 
                 quiz.delete()
@@ -996,7 +996,7 @@ class EditQuizes(APIView):
         admin = AdminUser.objects.get(admin=user)
         if not admin.is_active:
             raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
-        if str(admin.company.id) != str(question.quiz.document.department.company.id):
+        if str(admin.company.id) != str(question.quiz.document.departments.first().company.id):
             return Response({"Access Denied": "You are not allowed to edit this question"}, status=status.HTTP_403_FORBIDDEN)
 
         # Ensure that options is a list of dictionaries
@@ -1046,7 +1046,7 @@ class EditQuizes(APIView):
         admin = AdminUser.objects.get(admin=user)
         if not admin.is_active:
             raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
-        if str(admin.company.id) != str(question.quiz.document.department.company.id):
+        if str(admin.company.id) != str(question.quiz.document.departments.first().company.id):
             return Response({"Access Denied": "You are not allowed to delete this question"}, status=status.HTTP_403_FORBIDDEN)
         q_id = question.id
         question.delete()
@@ -1073,7 +1073,7 @@ class SubmitQuizView(APIView):
             if not document:
                 return Response({"Not Found": "Document Not Found"}, status=status.HTTP_404_NOT_FOUND)
             
-            document_department = document.document.department
+            document_department = document.document.departments.first()
 
             if not user_departments.filter(id=document_department.id).exists():
                 return Response({"Access Denied": "You are not allowed to submit quiz for this document"}, status=status.HTTP_403_FORBIDDEN)

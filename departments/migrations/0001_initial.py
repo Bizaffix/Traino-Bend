@@ -2,8 +2,8 @@
 
 import departments.models
 import django.db.models.deletion
-import django_enum_choices.choice_builders
-import django_enum_choices.fields
+# import django_enum_choices.choice_builders
+# import django_enum_choices.fields
 import uuid
 from django.conf import settings
 from django.db import migrations, models

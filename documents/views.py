@@ -498,9 +498,14 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
         user = self.request.user
         department_id = self.request.query_params.get('department_id', None)
         user_id = self.request.query_params.get('user_id', None)
+        company_id = self.request.query_params.get('company_id', None)
 
         if user.role in ["Super Admin", "Admin"]:
             queryset = DepartmentsDocuments.objects.filter(is_active=True)
+
+            if company_id:
+                queryset = queryset.filter(departments__company_id=company_id)  # Filter by company_id
+
             if department_id:
                 queryset = DepartmentsDocuments.objects.filter(is_active=True, departments__id=department_id)
 
