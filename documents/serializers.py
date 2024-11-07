@@ -73,6 +73,11 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
     department_ids = serializers.ListField(
         child=serializers.UUIDField(format='hex_verbose'), required=True, write_only=True,
     )
+    user_ids = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        write_only=True,
+    )
     users = serializers.ListField(
         child=serializers.CharField(),
         required=False,
@@ -116,7 +121,7 @@ class DepartmentsDocumentsUpdateSerializer(serializers.ModelSerializer):
         return [{"id": user.id, "first_name": user.members.first_name, "last_name":user.members.last_name,"email":user.members.email} for user in obj.assigned_users.all()]
 
     def update(self, instance, validated_data):
-        users = validated_data.pop('users', [])
+        users = validated_data.pop('user_ids', [])
         instance.users = users
         #get data from body
         new_department_ids = validated_data.pop('department_ids', [])
