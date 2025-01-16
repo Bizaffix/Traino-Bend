@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
-    # 'post_office',
+    #  'post_office',
     'documents',
     'dal',
     'dal_select2',
@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'company',
     'api',
     'departments',
+    'emailfunc',
 ]
 
 MIDDLEWARE = [
@@ -72,7 +73,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -214,7 +215,7 @@ CORS_ALLOW_HEADERS = [
     "dnt",
     "origin",
     "user-agent",
-    "x-csrftoken",
+    # "x-csrftoken",
     "x-requested-with",
 ]
 
@@ -229,19 +230,19 @@ CORS_ALLOW_METHODS = [
     'OPTIONS',
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://app.traino.ai",
-    # "https://app.traino.ai/media/documents/",
-    "https://traino-ai-api.vercel.app",
-    # "https://traino-ai-api.vercel.app/media/documents/",
-    "https://dashboard.traino.ai",
-    # "https://dashboard.traino.ai/media/documents/",
-    "http://localhost:3000",
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:8000"
-    # "https://localhost:3000/media/documents/",
-    "http://127.0.0.1:3000",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "https://app.traino.ai",
+#     # "https://app.traino.ai/media/documents/",
+#     "https://traino-ai-api.vercel.app",
+#     # "https://traino-ai-api.vercel.app/media/documents/",
+#     "https://dashboard.traino.ai",
+#     # "https://dashboard.traino.ai/media/documents/",
+#     "http://localhost:3000",
+#     "http://127.0.0.1:8000",
+#     "http://127.0.0.1:8000"
+#     # "https://localhost:3000/media/documents/",
+#     "http://127.0.0.1:3000",
+# ]
 
 # Email Configurations
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
