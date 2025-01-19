@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/', include('documents.urls')),
     path('api/', include("accounts.api.urls")),
     path('api/', include('emailfunc.urls')), 
+    path('api/', include('reminderemailfunc.urls')), 
 
 ]
 

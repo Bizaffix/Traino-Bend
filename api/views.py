@@ -671,7 +671,14 @@ class CreateKeypointsApiView(APIView):
             
             return Response({"id":created_keypoint.id , "keypoints":f"{created_keypoint.keypoints}", "prompt":f"{created_keypoint.prompt}"}, status=status.HTTP_200_OK)
         return Response({"Access Denied":"You Are not Allowed to create keypoints"}, status=status.HTTP_401_UNAUTHORIZED)
+# class CreateKeypointsApiView(APIView):
+#     def get(self, request):
+#         print("GET request received for /api/keypoints/")
+#         return Response({"message": "GET endpoint working!"})
 
+#     def post(self, request):
+#         print("POST request received for /api/keypoints/")
+#         return Response({"message": "POST endpoint working!"})
 from documents.models import QuizQuestions , QuizResult
 
 import json

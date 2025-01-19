@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     'api',
     'departments',
     'emailfunc',
+    'reminderemailfunc',
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -318,7 +320,14 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
-
+Q_CLUSTER = {
+    'name': 'traino_cluster',
+    'workers': 4,
+    'timeout': 60,
+    'django_redis': 'redis://localhost:6379/0',  # You can also use Django database-backed setup
+    'save': True,
+    'catch_up': False,  # Prevents tasks from running until they're scheduled
+}
 # Simple JWT Settings
 
 SIMPLE_JWT = {

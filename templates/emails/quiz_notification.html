@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Assignment Notification</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo {
+            max-width: 269px;
+            height: auto;
+        }
+        .header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            color: #2563eb;
+        }
+        .content {
+            padding: 30px 20px;
+            color:black;
+        }
+        .content h2 {
+            color: #2563eb;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #ffffff;
+            color: #2563eb;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-weight: bold;
+            border: 2px solid #2563eb;
+        }
+        .button:hover {
+            background-color: #2563eb;
+            color: #ffffff;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #f0f0f0;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100%;
+                margin: 0;
+                border-radius: 0;
+            }
+            .header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://traino.ai/wp-content/uploads/2024/10/ssxv-1536x440.png" alt="Traino.ai Logo" class="logo">
+            {% comment %} <h1>Traino.ai</h1> {% endcomment %}
+        </div>
+        <div class="content">
+            <h2>New Quiz Assignment</h2>
+            <p>Hello {{to_name}},</p>
+            <p>You have been assigned a new quiz by Traino.</p>
+            <p>Please complete the quiz before the due date. Good luck!</p>
+            <div style="text-align: center;">
+                <a href="https://dashboard.traino.ai/my-learning/" class="button">Start Quiz Now</a>
+            </div>
+        </div>
+        <div class="footer">
+            <p>This email was sent to {{to_email}} from Traino.ai</p>
+            <p>&copy; 2025 Traino.ai. All rights reserved.</p>
+            <p>If you believe this email was sent by mistake, please contact our support team.</p>
+        </div>
+    </div>
+</body>
+</html>

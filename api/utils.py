@@ -13,7 +13,7 @@ def generate_summary_from_gpt(content , prompt):
     # print(openai_api_key)
     # print(os.environ['OPENAI_API_KEY'])
     openai.api_key = openai_api_key
-    # prompt = f"You are the content creator , Provide me the descriptive, related and concise and everytime unique summary for:"
+    prompt = f"You are the content creator , Provide me the descriptive, related and concise and everytime unique summary for:"
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -29,9 +29,10 @@ def generate_summary_from_gpt(content , prompt):
 # Key-Points Generations from gpt
 def generate_keypoints_from_gpt(content, prompt):
     openai.api_key = openai_api_key
-    # prompt = f"You are the key-points generator , Provide me the keypoints in bollet-points, related to the and everytime provide me unique keypoints : \n\n{content[:7500]}"
+    prompt = f"You are the key-points generator , Provide me the keypoints in bollet-points, related to the and everytime provide me unique keypoints : \n\n{content[:7500]}"
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        # model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": f"{prompt}\n\n{content[:2000]}"}
