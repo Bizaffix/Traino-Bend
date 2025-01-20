@@ -27,3 +27,4 @@ nohup.out
 documents/management/*
 departments/migrations/*
 company/migrations/*
+.env
