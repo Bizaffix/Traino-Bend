@@ -48,6 +48,7 @@ ALLOWED_HOSTS = [
     'traino-ai-api.vercel.app',
     'dashboard.traino.ai',
     'http://f84gwgcgcskww8k8g0o4c4wc.145.223.101.115.sslip.io',
+    "trainoaitest1.vercel.app",  # Add this
 ]
 
 
@@ -85,7 +86,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
-    #  'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -214,6 +215,7 @@ CORS_ALLOWED_ORIGINS = [
     # "https://localhost:3000/media/documents/",
     "http://127.0.0.1:3000",
     "https://traino-ai-api.vercel.app",
+    "https://trainoaitest1.vercel.app",  
     # "https://traino-ai-api.vercel.app/media/documents/",
 ]
 
@@ -229,7 +231,7 @@ CORS_ALLOW_HEADERS = [
     "dnt",
     "origin",
     "user-agent",
-    # "x-csrftoken",
+    "x-csrftoken",
     "x-requested-with",
 ]
 
@@ -244,19 +246,20 @@ CORS_ALLOW_METHODS = [
     'OPTIONS',
 ]
 
-# CSRF_TRUSTED_ORIGINS = [
-#     "https://app.traino.ai",
-#     # "https://app.traino.ai/media/documents/",
-#     "https://traino-ai-api.vercel.app",
-#     # "https://traino-ai-api.vercel.app/media/documents/",
-#     "https://dashboard.traino.ai",
-#     # "https://dashboard.traino.ai/media/documents/",
-#     "http://localhost:3000",
-#     "http://127.0.0.1:8000",
-#     "http://127.0.0.1:8000"
-#     # "https://localhost:3000/media/documents/",
-#     "http://127.0.0.1:3000",
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://app.traino.ai",
+    # "https://app.traino.ai/media/documents/",
+    "https://traino-ai-api.vercel.app",
+    # "https://traino-ai-api.vercel.app/media/documents/",
+    "https://dashboard.traino.ai",
+    # "https://dashboard.traino.ai/media/documents/",
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:8000"
+    # "https://localhost:3000/media/documents/",
+    "http://127.0.0.1:3000",
+    "https://trainoaitest1.vercel.app",  # Add this line
+]
 
 # Email Configurations
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
