@@ -32,7 +32,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     # '127.0.0.1:3000',
-    
+    "*",
     'http://f84gwgcgcskww8k8g0o4c4wc.145.223.101.115.sslip.io', #remove below 3 lines
     'http://127.0.0.1:8000',
     'http://145.223.101.115:8000',
@@ -204,8 +204,7 @@ REST_FRAMEWORK = {
 
 
 CORS_ALLOWED_ORIGINS = [
-    "145.223.101.115",
-    "http://f84gwgcgcskww8k8g0o4c4wc.145.223.101.115.sslip.io",
+    
     "https://dashboard.traino.ai",
     # "https://dashboard.traino.ai/media/documents/",
     "https://app.traino.ai",
