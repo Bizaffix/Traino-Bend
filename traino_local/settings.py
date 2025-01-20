@@ -32,6 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     # '127.0.0.1:3000',
+    
+    'http://f84gwgcgcskww8k8g0o4c4wc.145.223.101.115.sslip.io', #remove below 3 lines
     'http://127.0.0.1:8000',
     'http://145.223.101.115:8000',
     '145.223.101.115',
@@ -39,7 +41,6 @@ ALLOWED_HOSTS = [
     '127.0.0.1:8000',
     'localhost:3000',
     '127.0.0.1',
-    'http://f84gwgcgcskww8k8g0o4c4wc.145.223.101.115.sslip.io', #remove below 3 lines
     'https://f84gwgcgcskww8k8g0o4c4wc.145.223.101.115.sslip.io'
     'f84gwgcgcskww8k8g0o4c4wc.145.223.101.115.sslip.io/',
     'localhost',
