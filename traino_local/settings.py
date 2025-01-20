@@ -204,6 +204,8 @@ REST_FRAMEWORK = {
 
 
 CORS_ALLOWED_ORIGINS = [
+    "145.223.101.115",
+    "http://f84gwgcgcskww8k8g0o4c4wc.145.223.101.115.sslip.io",
     "https://dashboard.traino.ai",
     # "https://dashboard.traino.ai/media/documents/",
     "https://app.traino.ai",
