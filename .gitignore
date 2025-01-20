@@ -23,7 +23,6 @@ media/*
 app.log
 public/static/*
 staticfiles/*
-.env
 nohup.out
 documents/management/*
 departments/migrations/*
