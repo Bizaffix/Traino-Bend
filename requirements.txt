@@ -23,4 +23,3 @@ django-ses==4.1.0
 gunicorn
 django_cron
 django-q
-django-cors-middleware
