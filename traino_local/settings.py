@@ -199,21 +199,21 @@ REST_FRAMEWORK = {
 }
 
 
-CORS_ALLOWED_ORIGINS = [
-    "*",
-    "https://dashboard.traino.ai",
-    "https://traino-moge.vercel.app",
-    "https://trainotestingserver.vercel.app",
-    # "https://dashboard.traino.ai/media/documents/",
-    "https://app.traino.ai",
-    # "https://app.traino.ai/media/documents/",
-    "http://localhost:3000",
-    "http://127.0.0.1:8000",
-    # "https://localhost:3000/media/documents/",
-    "http://127.0.0.1:3000",
-    "https://traino-ai-api.vercel.app",
-    # "https://traino-ai-api.vercel.app/media/documents/",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     # "*",
+#     "https://dashboard.traino.ai",
+#     "https://traino-moge.vercel.app",
+#     "https://trainotestingserver.vercel.app",
+#     # "https://dashboard.traino.ai/media/documents/",
+#     "https://app.traino.ai",
+#     # "https://app.traino.ai/media/documents/",
+#     "http://localhost:3000",
+#     "http://127.0.0.1:8000",
+#     # "https://localhost:3000/media/documents/",
+#     "http://127.0.0.1:3000",
+#     "https://traino-ai-api.vercel.app",
+#     # "https://traino-ai-api.vercel.app/media/documents/",
+# ]
 
 
 CORS_ALLOW_ALL_ORIGINS = True
