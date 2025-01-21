@@ -46,6 +46,8 @@ ALLOWED_HOSTS = [
     'localhost',
     'app.traino.ai',
     'traino-ai-api.vercel.app',
+    'trainotestingserver.vercel.app',
+    'traino-moge.vercel.app',
     'dashboard.traino.ai',
     'http://f84gwgcgcskww8k8g0o4c4wc.145.223.101.115.sslip.io',
 ]
@@ -206,6 +208,8 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "*",
     "https://dashboard.traino.ai",
+    "https://traino-moge.vercel.app",
+    "https://trainotestingserver.vercel.app",
     # "https://dashboard.traino.ai/media/documents/",
     "https://app.traino.ai",
     # "https://app.traino.ai/media/documents/",
@@ -251,6 +255,8 @@ CSRF_TRUSTED_ORIGINS = [
     "https://traino-ai-api.vercel.app",
     # "https://traino-ai-api.vercel.app/media/documents/",
     "https://dashboard.traino.ai",
+     "https://traino-moge.vercel.app",
+    "https://trainotestingserver.vercel.app",
     # "https://dashboard.traino.ai/media/documents/",
     "http://localhost:3000",
     "http://127.0.0.1:8000",
