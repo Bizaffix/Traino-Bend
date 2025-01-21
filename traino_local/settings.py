@@ -242,23 +242,23 @@ CORS_ALLOW_METHODS = [
     "OPTIONS",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    # "*",
-    "https://app.traino.ai",
-    # "https://app.traino.ai/media/documents/",
-    "https://traino-ai-api.vercel.app",
-    # "https://traino-ai-api.vercel.app/media/documents/",
-    "https://dashboard.traino.ai",
-    "https://traino-moge.vercel.app",
-    "https://trainotestingserver.vercel.app",
-    # "https://dashboard.traino.ai/media/documents/",
-    "http://localhost:3000",
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:8000"
-    # "https://localhost:3000/media/documents/",
-    "http://127.0.0.1:3000",
-]
-
+# CSRF_TRUSTED_ORIGINS = [
+#     # "*",
+#     "https://app.traino.ai",
+#     # "https://app.traino.ai/media/documents/",
+#     "https://traino-ai-api.vercel.app",
+#     # "https://traino-ai-api.vercel.app/media/documents/",
+#     "https://dashboard.traino.ai",
+#     "https://traino-moge.vercel.app",
+#     "https://trainotestingserver.vercel.app",
+#     # "https://dashboard.traino.ai/media/documents/",
+#     "http://localhost:3000",
+#     "http://127.0.0.1:8000",
+#     "http://127.0.0.1:8000"
+#     # "https://localhost:3000/media/documents/",
+#     "http://127.0.0.1:3000",
+# ]
+CSRF_TRUSTED_ORIGINS = ["http://*", "https://*"]
 # Email Configurations
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 # EMAIL_HOST = "mail.privateemail.com" #nsm TODO: Remove/Replace it
