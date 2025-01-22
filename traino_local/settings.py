@@ -87,7 +87,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    # "django.middleware.csrf.CsrfViewMiddleware", # either uncomment this or send csrf token in headers
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -227,7 +227,7 @@ CORS_ALLOW_HEADERS = [
     "dnt",
     "origin",
     "user-agent",
-    "x-csrftoken",
+    # "x-csrftoken",
     "x-requested-with",
 ]
 
@@ -258,7 +258,9 @@ CORS_ALLOW_METHODS = [
 #     # "https://localhost:3000/media/documents/",
 #     "http://127.0.0.1:3000",
 # ]
-CSRF_TRUSTED_ORIGINS = ["http://*", "https://*"]
+
+# CSRF_TRUSTED_ORIGINS = ["http://*", "https://*"]
+
 # Email Configurations
 # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 # EMAIL_HOST = "mail.privateemail.com" #nsm TODO: Remove/Replace it
