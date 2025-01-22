@@ -12,7 +12,7 @@ djhacker==0.2.3
 celery==5.4.0
 apscheduler==3.10.4
 pydantic
-openai==1.35.7
+openai==0.28.0
 django-countries==7.6.1
 langchain-community==0.2.7
 PyPDF2==3.0.1
