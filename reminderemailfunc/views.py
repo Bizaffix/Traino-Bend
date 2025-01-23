@@ -65,7 +65,7 @@ class SendEmailAPI(View):
                 {
                     "to_name": name,
                     "to_email": email,
-                    "key_points": key_points,  # Pass the dynamic key points
+                    "key_points": key_points[:3],  # Pass the dynamic key points
                     "doc_name": doc_name,
                     "date": date,
                 },
