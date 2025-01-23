@@ -49,6 +49,8 @@ class SendEmailAPI(View):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        key_points = keypoints.key_points.split("\n")  # Split the key points
+
         # Process each email
         for email, name in data:
             subject = f"Hello, {name}!"
@@ -61,7 +63,7 @@ class SendEmailAPI(View):
                 {
                     "to_name": name,
                     "to_email": email,
-                    "key_points": keypoints.keypoints,  # Pass the dynamic key points
+                    "key_points": key_points,  # Pass the dynamic key points
                 },
             )
 
