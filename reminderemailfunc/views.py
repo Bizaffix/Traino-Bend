@@ -5,7 +5,13 @@ from django.views import View
 import json
 from django.template.loader import render_to_string
 from departments.models import DepartmentsDocuments
-from documents.models import DocumentQuiz
+from rest_framework import status
+from rest_framework.response import Response
+from documents.models import (
+    DocumentSummary,
+    DocumentKeyPoints,
+)
+
 
 class SendEmailAPI(View):
     def post(self, request, *args, **kwargs):
@@ -16,8 +22,8 @@ class SendEmailAPI(View):
         # Get the data from the request body
         try:
             request_data = json.loads(request.body)
-            document_id = request_data.get('document_id')  # Extract document ID
-            data = request_data.get('emails', [])
+            document_id = request_data.get("document_id")  # Extract document ID
+            data = request_data.get("emails", [])
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
 
@@ -31,13 +37,17 @@ class SendEmailAPI(View):
 
         # Fetch key points (quiz questions) from the document
         try:
-            quizzes = DocumentQuiz.objects.filter(document=document, upload=True)
-            key_points = [quiz.name for quiz in quizzes]  # Extract quiz names as key points
-        except Exception as e:
-            return JsonResponse({"error": f"Failed to fetch quizzes: {str(e)}"}, status=500)
-
-        if not key_points:
-            return JsonResponse({"error": "No quizzes found for this document"}, status=404)
+            keypoints = DocumentKeyPoints.objects.filter(document=document).first()
+            if keypoints is None:
+                return Response(
+                    {"error": "No keypoints found for this document"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+        except DocumentSummary.DoesNotExist:
+            return Response(
+                {"error": "No keypoints found for this document"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         # Process each email
         for email, name in data:
@@ -47,12 +57,12 @@ class SendEmailAPI(View):
 
             # Render the HTML template with dynamic data
             html_content = render_to_string(
-                'emails/Key_notification.html',
+                "emails/Key_notification.html",
                 {
-                    'to_name': name,
-                    'to_email': email,
-                    'key_points': key_points  # Pass the dynamic key points
-                }
+                    "to_name": name,
+                    "to_email": email,
+                    "key_points": keypoints.keypoints,  # Pass the dynamic key points
+                },
             )
 
             # Create the email object
@@ -60,7 +70,7 @@ class SendEmailAPI(View):
                 subject=subject,
                 body=html_content,
                 from_email=from_email,
-                to=recipient_list
+                to=recipient_list,
             )
             email_message.content_subtype = "html"  # Mark the content as HTML
 
@@ -70,12 +80,9 @@ class SendEmailAPI(View):
             except Exception as e:
                 failed_emails.append({"email": email, "error": str(e)})
 
-        return JsonResponse({
-            "status": "completed",
-            "success": success_emails,
-            "failed": failed_emails
-        })
-
+        return JsonResponse(
+            {"status": "completed", "success": success_emails, "failed": failed_emails}
+        )
 
 
 # from django.shortcuts import render
