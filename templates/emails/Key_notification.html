@@ -104,14 +104,13 @@
             </ul>
             <p>The quiz will cover the following key points:</p>
             <ul>
-                <li>Basics of supervised and unsupervised learning</li>
-                <li>Understanding key algorithms like linear regression and clustering</li>
-                <li>Evaluation metrics for machine learning models</li>
-                <li>Real-world applications of machine learning</li>
+                {% for point in key_points %}
+            <li>{{ point }}</li>
+                {% endfor %}
             </ul>
             <p>Don’t miss out! This is your chance to showcase your knowledge and take a step forward in your learning journey.</p>
             <div style="text-align: center;">
-                <a href="https://trainotestserver.vercel.app/my-learning" class="button">Take the Quiz Now</a>
+                <a href="https://dashboard.traino.ai/my-learning/quiz/12345" class="button">Take the Quiz Now</a>
             </div>
         </div>
         <div class="footer">

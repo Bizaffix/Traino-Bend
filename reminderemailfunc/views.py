@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.views import View
 import json
 from django.template.loader import render_to_string
+from departments.models import DepartmentsDocuments
+from documents.models import DocumentQuiz
 
 class SendEmailAPI(View):
     def post(self, request, *args, **kwargs):
@@ -14,10 +16,30 @@ class SendEmailAPI(View):
         # Get the data from the request body
         try:
             request_data = json.loads(request.body)
+            document_id = request_data.get('document_id')  # Extract document ID
             data = request_data.get('emails', [])
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
 
+        # Validate and fetch the document
+        if not document_id:
+            return JsonResponse({"error": "document_id is required"}, status=400)
+        try:
+            document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+        except DepartmentsDocuments.DoesNotExist:
+            return JsonResponse({"error": "No Document Found"}, status=404)
+
+        # Fetch key points (quiz questions) from the document
+        try:
+            quizzes = DocumentQuiz.objects.filter(document=document, upload=True)
+            key_points = [quiz.name for quiz in quizzes]  # Extract quiz names as key points
+        except Exception as e:
+            return JsonResponse({"error": f"Failed to fetch quizzes: {str(e)}"}, status=500)
+
+        if not key_points:
+            return JsonResponse({"error": "No quizzes found for this document"}, status=404)
+
+        # Process each email
         for email, name in data:
             subject = f"Hello, {name}!"
             from_email = "no-reply@traino.ai"
@@ -26,7 +48,11 @@ class SendEmailAPI(View):
             # Render the HTML template with dynamic data
             html_content = render_to_string(
                 'emails/Key_notification.html',
-                {'to_name': name, 'to_email': email}
+                {
+                    'to_name': name,
+                    'to_email': email,
+                    'key_points': key_points  # Pass the dynamic key points
+                }
             )
 
             # Create the email object
@@ -49,3 +75,74 @@ class SendEmailAPI(View):
             "success": success_emails,
             "failed": failed_emails
         })
+
+
+
+# from django.shortcuts import render
+# from django.core.mail import EmailMessage
+# from django.http import JsonResponse
+# from django.views import View
+# from django.template.loader import render_to_string
+# import json
+# import logging
+
+# logger = logging.getLogger(__name__)
+
+# class SendEmailAPI(View):
+#     def post(self, request, *args, **kwargs):
+#         success_emails = []
+#         failed_emails = []
+
+#         try:
+#             request_data = json.loads(request.body)
+#             document_id = request_data.get('document_id')
+#             data = request_data.get('emails', [])
+#             logger.info(f"Request received with document_id: {document_id} and emails: {data}")
+#         except json.JSONDecodeError:
+#             logger.error("Invalid JSON format in request body")
+#             return JsonResponse({"error": "Invalid JSON format"}, status=400)
+
+#         if not document_id:
+#             logger.error("document_id is missing in the request")
+#             return JsonResponse({"error": "document_id is required"}, status=400)
+
+#         try:
+#             document = DepartmentsDocuments.objects.get(id=document_id, is_active=True)
+#             logger.info(f"Document retrieved: {document}")
+#         except DepartmentsDocuments.DoesNotExist:
+#             logger.error(f"No document found with id {document_id}")
+#             return JsonResponse({"error": "No Document Found"}, status=404)
+
+#         try:
+#             quizzes = DocumentQuiz.objects.filter(document=document, upload=True)
+#             key_points = [quiz.name for quiz in quizzes]
+#             logger.info(f"Key points extracted: {key_points}")
+#         except Exception as e:
+#             logger.error(f"Failed to fetch quizzes: {str(e)}")
+#             return JsonResponse({"error": f"Failed to fetch quizzes: {str(e)}"}, status=500)
+
+#         if not key_points:
+#             logger.warning("No quizzes found for the document")
+#             return JsonResponse({"error": "No quizzes available for this document"}, status=404)
+
+#         for email, name in data:
+#             try:
+#                 html_content = render_to_string(
+#                     'emails/Key_notification.html',
+#                     {'to_name': name, 'to_email': email, 'key_points': key_points}
+#                 )
+#                 email_message = EmailMessage(
+#                     subject=f"Hello, {name}!",
+#                     body=html_content,
+#                     from_email="no-reply@traino.ai",
+#                     to=[email]
+#                 )
+#                 email_message.content_subtype = "html"
+#                 email_message.send()
+#                 success_emails.append(email)
+#                 logger.info(f"Email sent successfully to {email}")
+#             except Exception as e:
+#                 logger.error(f"Failed to send email to {email}: {str(e)}")
+#                 failed_emails.append({"email": email, "error": str(e)})
+
+#         return JsonResponse({"status": "completed", "success": success_emails, "failed": failed_emails})
