@@ -22,7 +22,9 @@ class SendEmailAPI(View):
         # Get the data from the request body
         try:
             request_data = json.loads(request.body)
-            document_id = request_data.get("document_id")  # Extract document ID
+            document_id = request_data.get("document_id") 
+            date = request_data.get("date")
+            doc_name = request_data.get("doc_name")# Extract document ID
             data = request_data.get("emails", [])
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON format"}, status=400)
@@ -63,7 +65,9 @@ class SendEmailAPI(View):
                 {
                     "to_name": name,
                     "to_email": email,
-                    "key_points": key_points,  # Pass the dynamic key points
+                    "key_points": key_points,# Pass the dynamic key points
+                    "doc_name": doc_name,
+                    "date": date,
                 },
             )
 
