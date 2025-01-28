@@ -18,9 +18,9 @@ def generate_summary_from_gpt(content , prompt):
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"{prompt}\n\n{content[:2000]}"}
+            {"role": "user", "content": f"{prompt}\n\n{content}"}
         ],
-        max_tokens=3000  # Adjust the max tokens based on the required summary length
+        # max_tokens=3000  # Adjust the max tokens based on the required summary length
     )
     summary = response.choices[0].message['content'].strip()
     return summary , prompt
@@ -29,15 +29,15 @@ def generate_summary_from_gpt(content , prompt):
 # Key-Points Generations from gpt
 def generate_keypoints_from_gpt(content, prompt):
     openai.api_key = openai_api_key
-    prompt = f"You are the key-points generator , Provide me the keypoints in bollet-points, related to the and everytime provide me unique keypoints : \n\n{content[:7500]}"
+    prompt = f"You are the key-points generator , Provide me the keypoints in bollet-points, related to the and everytime provide me unique keypoints : \n\n{content}"
     response = openai.ChatCompletion.create(
         # model="gpt-3.5-turbo",
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"{prompt}\n\n{content[:2000]}"}
+            {"role": "user", "content": f"{prompt}\n\n{content}"}
         ],
-        max_tokens=1000  # Adjust the max tokens based on the required summary length
+        # max_tokens=1000  # Adjust the max tokens based on the required summary length
     )
     summary = response.choices[0].message['content'].strip()
     return summary , prompt
@@ -46,14 +46,14 @@ def generate_keypoints_from_gpt(content, prompt):
 # Quizes Generations from gpt
 def generate_quizes_from_gpt(content):
     openai.api_key = openai_api_key
-    prompt = f"You are the teacher, Provide me a quiz with a maximum limit of 10 questions and minimum 5 questions, each containing 4 options as MCQs. Indicate the correct option by labeling it A, B, C, or D and answer as 'Correct Answer'. Ensure the quizzes are different each time and challenging. Please ensure your response is concise with no extra text, and format questions as 'Question:', and options as 'A:', 'B:', etc also return the correct option (like A, B, C, etc)'. Please strictly follow this pattern for quiz and no other pattern will be allowed for quiz. Only allowed pattern is of question is 'Question:' and nothing else is allowed and make sure no new line will be in between 'Question:' and question heading. Please generate the quiz only from the following content:\n\n{content[:7500]}\n"
+    prompt = f"You are the teacher, Provide me a quiz with a maximum limit of 10 questions and minimum 5 questions, each containing 4 options as MCQs. Indicate the correct option by labeling it A, B, C, or D and answer as 'Correct Answer'. Ensure the quizzes are different each time and challenging. Please ensure your response is concise with no extra text, and format questions as 'Question:', and options as 'A:', 'B:', etc also return the correct option (like A, B, C, etc)'. Please strictly follow this pattern for quiz and no other pattern will be allowed for quiz. Only allowed pattern is of question is 'Question:' and nothing else is allowed and make sure no new line will be in between 'Question:' and question heading. Please generate the quiz only from the following content:\n\n{content}\n"
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=2000  # Adjust the max tokens based on the required summary length
+        # max_tokens=2000  # Adjust the max tokens based on the required summary length
     )
     quiz = response.choices[0].message['content'].strip()
     # Extracting individual questions from the generated text
