@@ -117,12 +117,25 @@ WSGI_APPLICATION = "traino_local.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db/db.sqlite3",
+#     }
+# }
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db/db.sqlite3",
+    'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'default',
+            'USER': 'mysql',
+            'PASSWORD': 'xaYap6xh2KVUJ0kNzSFj67EGycD9WvdMlNpkH2RsWNFcYg8ZkQL2syAqwn4XFBEf',
+            'HOST': '145.223.101.115',
+
+            'PORT': '5432',  #  default port
     }
 }
+
 
 
 # Password validation

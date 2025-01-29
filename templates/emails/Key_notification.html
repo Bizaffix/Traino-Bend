@@ -50,6 +50,27 @@
       .content p {
         margin: 10px 0;
       }
+      .content ul {
+        padding-left: 20px;
+        list-style-type: none;
+      }
+      .key-point {
+        background-color: #f0f8ff;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        color: #333;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .key-point span {
+        font-size: 1.8rem;
+        margin-right: 10px;
+      }
+      .key-point strong {
+        font-size: 1.3rem;
+        color: #1d4ed8;
+      }
       .button {
         display: inline-block;
         padding: 12px 24px;
@@ -92,33 +113,27 @@
           alt="Traino.ai Logo"
           class="logo"
         />
-        {% comment %}
-        <h1>Traino.ai</h1>
-        {% endcomment %}
       </div>
       <div class="content">
         <h2>Reminder: Your Quiz Awaits!</h2>
         <p>Hi {{to_name}},</p>
-        <p>
-          Just a friendly reminder that your quiz,
-          <strong>{{doc_name}}</strong>, is waiting for you!
-          Make sure to complete it before the deadline.
-        </p>
-        <p>Here are the key details:</p>
-        <ul>
-          <li><strong>Quiz Title:</strong> {{doc_name}}</li>
-          <li><strong>Assigned Date:</strong>{{date}}</li>
-        </ul>
-        <p>The quiz will cover the following key points:</p>
+
+        <div class="key-point">
+          <span>📌</span><strong>Key Points:</strong>
+        </div>
         <ul>
           {% for point in key_points %}
-          <li>{{ point }}</li>
+            <li class="key-point">
+              <span>🔑</span>{{ point }}
+            </li>
           {% endfor %}
         </ul>
-        <p>
-          Don’t miss out! This is your chance to showcase your knowledge and
-          take a step forward in your learning journey.
-        </p>
+        
+        <p>These key points are directly related to your quiz. Please read through them carefully. Understanding them will help you succeed!</p>
+        
+        <p><strong>Instructions:</strong></p>
+        <p>After reviewing the key points, proceed with the quiz. The questions are designed to test your knowledge based on these points. Don't miss your chance to showcase your learning!</p>
+
         <div style="text-align: center">
           <a
             href="https://dashboard.traino.ai/my-learning/quiz/12345"

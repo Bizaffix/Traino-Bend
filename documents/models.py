@@ -16,11 +16,11 @@ class UserDocuments(models.Model):
     added_by = models.ForeignKey(CustomUser, models.CASCADE, default=None, null=True, related_name="document_added_by")
 
 
-#   # Naye fields frontend ke liye
-#     duedate = models.DateField(null=True, blank=True)
-#     overview = models.TextField(null=True, blank=True)
-#     avg_time_to_complete = models.IntegerField(null=True, blank=True)  # Minutes mein
-#     REQUIRED_FIELDS = ['name', 'file', 'department']
+  # Naye fields frontend ke liye
+    duedate = models.DateField(null=True, blank=True)
+    overview = models.TextField(null=True, blank=True)
+    avg_time_to_complete = models.IntegerField(null=True, blank=True)  # Minutes mein
+    REQUIRED_FIELDS = ['name', 'file', 'department']
 
     def __str__(self):
         return self.name

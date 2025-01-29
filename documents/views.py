@@ -397,6 +397,82 @@ def generateDocumentQuiz(request):
     return JsonResponse(data, status=200)
 
 
+# from django.utils import timezone
+# from .tasks import upload_document
+
+# class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
+#     queryset = DepartmentsDocuments.objects.filter(is_active=True)
+#     serializer_class = DepartmentsDocumentsCreateSerializer
+#     permission_classes = [IsAdminUserOrReadOnly]
+#     authentication_classes = [JWTAuthentication]
+
+#     def perform_create(self, serializer):
+#         documents = serializer.save(added_by=self.request.user)
+#         return documents
+
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+
+#         validated_data = serializer.validated_data
+#         department_ids = validated_data.pop('department_ids')
+#         user_ids = validated_data.pop('user_ids', [])
+#         all_users = validated_data.pop('all', False)
+#         name = validated_data['name']
+#         # print(all_users)
+#         failure_departments = []
+#         created_documents = []
+        
+#         for department_id in department_ids:
+#             try:
+#                 department = Departments.objects.get(id=department_id, is_active=True)
+#             except Departments.DoesNotExist:
+#                 continue  # Skip invalid departments
+
+#             existing_document = DepartmentsDocuments.objects.filter(name=name, departments__id=department.id, is_active=True).exists()
+#             if existing_document:
+#                 failure_departments.append(department_id)
+#             else:
+#                 document = DepartmentsDocuments.objects.create(
+#                     name=name,
+#                     added_by=request.user,
+#                     file=validated_data['file'],
+#                     published=validated_data.get('published', False)
+#                 )
+#                 if department:  # Ensure department is provided
+#                     document.departments.add(department)  
+#                 valid_team_ids = []
+                
+#                 if all_users:
+#                     assigned_users = CompaniesTeam.objects.filter(departments__id=department_id)
+#                     # print(assigned_users)
+#                     # document.assigned_users.set(assigned_users)
+#                 else:
+#                     valid_team_ids = []
+#                     for user_id in user_ids:
+#                         if department.users.filter(id=user_id, is_active=True).exists():
+#                             valid_team_ids.append(user_id)
+#                     assigned_users = CompaniesTeam.objects.filter(id__in=valid_team_ids)
+#                     # print(assigned_users)
+#                     # document.assigned_users.set(assigned_users)
+                
+#                 document.assigned_users.set(assigned_users)
+#                 created_documents.append(document.id)
+
+#         if sorted(failure_departments) == sorted(department_ids):
+#             failure_message = f"Document with name '{name}' already exists in departments: {failure_departments}."
+#             response_data = {
+#                 "message": failure_message,
+#             }
+#             return Response(response_data, status=status.HTTP_409_CONFLICT)
+
+#         success_message = f"Document '{name}' added to departments successfully."
+#         response_data = {
+#             "message": success_message,
+#             "created_documents": created_documents
+#         }
+#         return Response(response_data, status=status.HTTP_201_CREATED)
+
 from django.utils import timezone
 from .tasks import upload_document
 
@@ -419,7 +495,12 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
         user_ids = validated_data.pop('user_ids', [])
         all_users = validated_data.pop('all', False)
         name = validated_data['name']
-        # print(all_users)
+
+        # Handle new fields
+        duedate = validated_data.get('duedate')  # Optional
+        overview = validated_data.get('overview')  # Optional
+        avg_time_to_complete = validated_data.get('avg_time_to_complete')  # Optional
+
         failure_departments = []
         created_documents = []
         
@@ -437,7 +518,10 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                     name=name,
                     added_by=request.user,
                     file=validated_data['file'],
-                    published=validated_data.get('published', False)
+                    published=validated_data.get('published', False),
+                    duedate=duedate,
+                    overview=overview,
+                    avg_time_to_complete=avg_time_to_complete
                 )
                 if department:  # Ensure department is provided
                     document.departments.add(department)  
@@ -445,16 +529,12 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                 
                 if all_users:
                     assigned_users = CompaniesTeam.objects.filter(departments__id=department_id)
-                    # print(assigned_users)
-                    # document.assigned_users.set(assigned_users)
                 else:
                     valid_team_ids = []
                     for user_id in user_ids:
                         if department.users.filter(id=user_id, is_active=True).exists():
                             valid_team_ids.append(user_id)
                     assigned_users = CompaniesTeam.objects.filter(id__in=valid_team_ids)
-                    # print(assigned_users)
-                    # document.assigned_users.set(assigned_users)
                 
                 document.assigned_users.set(assigned_users)
                 created_documents.append(document.id)
@@ -472,7 +552,6 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
             "created_documents": created_documents
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
-
         
 from rest_framework import serializers
 from rest_framework.filters import SearchFilter, OrderingFilter 
@@ -483,6 +562,89 @@ from documents.models import DocumentKeyPoints , DocumentSummary, DocumentQuiz,S
 logger = logging.getLogger(__name__)
 
 
+
+# class DepartmentsDocumentsListAPIView(generics.ListAPIView):
+#     serializer_class = DepartmentsDocumentsSerializer
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = [JWTAuthentication]
+#     filter_backends = [SearchFilter, OrderingFilter]
+#     search_fields = ['id', 'name', 'file', 'departments__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
+#     ordering_fields = ['id', 'name', 'file', 'departments__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
+#     ordering = ['id', 'name', 'file', 'departments__name', 'published', 'created_at', 'updated_at', 'added_by__first_name']
+#     queryset = DepartmentsDocuments.objects.filter(is_active=True)
+
+#     def get_queryset(self):
+#         user = self.request.user
+#         department_id = self.request.query_params.get('department_id', None)
+#         user_id = self.request.query_params.get('user_id', None)
+#         company_id = self.request.query_params.get('company_id', None)
+
+#         if user.role in ["Super Admin", "Admin"]:
+#             queryset = DepartmentsDocuments.objects.filter(is_active=True)
+
+#             if company_id:
+#                 queryset = queryset.filter(departments__company_id=company_id)  # Filter by company_id
+
+#             if department_id:
+#                 queryset = DepartmentsDocuments.objects.filter(is_active=True, departments__id=department_id)
+
+#             if user.role == "Admin":
+#                 try:
+#                     admin_company = AdminUser.objects.get(admin=user, is_active=True).company
+#                     queryset = queryset.filter(departments__company=admin_company)
+#                 except AdminUser.DoesNotExist:
+#                     raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
+
+#             # Annotate the queryset with is_summary and is_keypoints
+#             queryset = queryset.annotate(
+#                 is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
+#                 is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id'))),
+#                 is_quizzes=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True)),
+#                 quizzes= Case(
+#                     When(
+#                         Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True)),
+#                         then=Count('documentquiz', filter=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))),
+#                     ),
+#                     default=Value(0),
+#                     output_field=IntegerField()
+#                 )
+#             )
+#             return queryset
+
+#         if user.role == "User":
+#             try:
+#                 if user_id:
+#                     user_teams = CompaniesTeam.objects.filter(id=user_id, is_active=True)
+#                 else:
+#                     user_teams = CompaniesTeam.objects.filter(members=user, is_active=True)
+
+#                 queryset = DepartmentsDocuments.objects.filter(
+#                     assigned_users__in=user_teams, is_active=True
+#                 )
+                
+#                 if department_id:
+#                     queryset = queryset.filter(departments__id=department_id)
+
+#                 queryset = queryset.distinct().annotate(
+#                     is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
+#                     is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id'))),
+#                     is_quizzes=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True)),
+#                     quizzes= Case(
+#                         When(
+#                             Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True)),
+#                             then=Count('documentquiz', filter=Exists(DocumentQuiz.objects.filter(document=OuterRef('id'), upload=True))),
+#                         ),
+#                         default=Value(0),
+#                         output_field=IntegerField()
+#                     )
+
+#                 )    
+                
+#                 return queryset
+#             except CompaniesTeam.DoesNotExist:
+#                 raise serializers.ValidationError({"Unauthorized": "The specified team does not exist or you are blocked"})
+
+#         raise serializers.ValidationError({"Unauthorized": "You are not authorized to view these documents."}, code="unauthorized")
 
 class DepartmentsDocumentsListAPIView(generics.ListAPIView):
     serializer_class = DepartmentsDocumentsSerializer
@@ -507,7 +669,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                 queryset = queryset.filter(departments__company_id=company_id)  # Filter by company_id
 
             if department_id:
-                queryset = DepartmentsDocuments.objects.filter(is_active=True, departments__id=department_id)
+                queryset = queryset.filter(departments__id=department_id)
 
             if user.role == "Admin":
                 try:
@@ -516,7 +678,7 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                 except AdminUser.DoesNotExist:
                     raise serializers.ValidationError({"Unauthorized": "You are blocked or deleted"})
 
-            # Annotate the queryset with is_summary and is_keypoints
+            # Annotate the queryset with additional fields
             queryset = queryset.annotate(
                 is_summary=Exists(DocumentSummary.objects.filter(document=OuterRef('id'))),
                 is_keypoints=Exists(DocumentKeyPoints.objects.filter(document=OuterRef('id'))),
@@ -558,7 +720,6 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                         default=Value(0),
                         output_field=IntegerField()
                     )
-
                 )    
                 
                 return queryset
