@@ -17,10 +17,10 @@ class UserDocuments(models.Model):
 
 
 #   # Naye fields frontend ke liye
-#     duedate = models.DateField(null=True, blank=True)
+#     dueDate = models.DateField(null=True, blank=True)
 #     overview = models.TextField(null=True, blank=True)
-#     avg_time_to_complete = models.IntegerField(null=True, blank=True)  # Minutes mein
-#     REQUIRED_FIELDS = ['name', 'file', 'department']
+#     avgCompletionTime = models.IntegerField(null=True, blank=True)  # Minutes mein
+    REQUIRED_FIELDS = ['name', 'file', 'department']
 
     def __str__(self):
         return self.name

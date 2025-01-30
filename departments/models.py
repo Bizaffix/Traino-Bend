@@ -37,6 +37,11 @@ class DepartmentsDocuments(models.Model):
     added_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="document_departments_added_by", null=True, blank=True)
     is_active= models.BooleanField(default=True)
 
+
+  # Naye fields frontend ke liye
+    dueDate = models.DateField(null=True, blank=True)
+    overview = models.TextField(null=True, blank=True)
+    avgCompletionTime = models.IntegerField(null=True, blank=True)  # Minutes mein
     REQUIRED_FIELDS = ['name', 'file', 'departments']
 
     def __str__(self):
