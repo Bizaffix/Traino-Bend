@@ -79,6 +79,16 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
         model = DepartmentsDocuments
         fields = '__all__'
 
+
+    def get_dueDate(self, obj):
+        return obj.added_by.dueDate
+    
+    def get_avgCompletionTime(self, obj):
+        return obj.added_by.avgCompletionTime
+    
+    def get_overview(self, obj):
+        return obj.added_by.overview
+    
     def get_first_name(self, obj):
         return obj.added_by.first_name
 
@@ -365,7 +375,7 @@ class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DepartmentsDocuments
-        fields = ['id', 'name', 'file', 'department_ids', 'all', 'user_ids', 'schedule_time', 'published', 'added_by', 'created_at']
+        fields = ['id', 'name', 'file', 'department_ids', 'all', 'user_ids', 'schedule_time', 'published', 'added_by', 'created_at', 'dueDate','avgCompletionTime','overview']
 
     def validate_department_ids(self, value):
         # Check if all departments are active
