@@ -22,7 +22,7 @@ def generate_summary_from_gpt(content, prompt):
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"{prompt}\n\n{content[:]}"},
+            {"role": "user", "content": f"{prompt}\n\n{content[:5000]}"},
         ],
         # max_tokens=9000  # Adjust the max tokens based on the required summary length
     )
@@ -33,13 +33,13 @@ def generate_summary_from_gpt(content, prompt):
 # Key-Points Generations from gpt
 def generate_keypoints_from_gpt(content, prompt):
     openai.api_key = openai_api_key
-    prompt = f"You are the key-points generator , Provide me the keypoints in bollet-points, related to the and everytime provide me unique keypoints : \n\n{content[:]}"
+    prompt = f"You are the key-points generator , Provide me the keypoints in bollet-points, related to the and everytime provide me unique keypoints : \n\n{content[:7500]}"
     response = openai.ChatCompletion.create(
         # model="gpt-3.5-turbo",
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"{prompt}\n\n{content[:]}"},
+            {"role": "user", "content": f"{prompt}\n\n{content[:5000]}"},
         ],
         # max_tokens=9000  # Adjust the max tokens based on the required summary length
     )
@@ -50,7 +50,7 @@ def generate_keypoints_from_gpt(content, prompt):
 # Quizes Generations from gpt
 def generate_quizes_from_gpt(content):
     openai.api_key = openai_api_key
-    prompt = f"You are the teacher, Provide me a quiz with a maximum limit of 10 questions and minimum 5 questions, each containing 4 options as MCQs. Indicate the correct option by labeling it A, B, C, or D and answer as 'Correct Answer'. Ensure the quizzes are different each time and challenging. Please ensure your response is concise with no extra text, and format questions as 'Question:', and options as 'A:', 'B:', etc also return the correct option (like A, B, C, etc)'. Please strictly follow this pattern for quiz and no other pattern will be allowed for quiz. Only allowed pattern is of question is 'Question:' and nothing else is allowed and make sure no new line will be in between 'Question:' and question heading. Please generate the quiz only from the following content:\n\n{content[:]}\n"
+    prompt = f"You are the teacher, Provide me a quiz with a maximum limit of 10 questions and minimum 5 questions, each containing 4 options as MCQs. Indicate the correct option by labeling it A, B, C, or D and answer as 'Correct Answer'. Ensure the quizzes are different each time and challenging. Please ensure your response is concise with no extra text, and format questions as 'Question:', and options as 'A:', 'B:', etc also return the correct option (like A, B, C, etc)'. Please strictly follow this pattern for quiz and no other pattern will be allowed for quiz. Only allowed pattern is of question is 'Question:' and nothing else is allowed and make sure no new line will be in between 'Question:' and question heading. Please generate the quiz only from the following content:\n\n{content[:7500]}\n"
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
