@@ -609,6 +609,7 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
         return documents
 
     def create(self, request, *args, **kwargs):
+        print("called")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -623,6 +624,8 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
 
         failure_departments = []
         created_documents = []
+
+        print("department_ids", department_ids)
 
         for department_id in department_ids:
             try:
@@ -647,6 +650,11 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                 )
                 if department:
                     document.departments.add(department)
+                    print("department", document)
+                    print("department", document.dueDate)
+                    print("department", document.overview)
+                    print("department", document.avgCompletionTime)
+                    print("department", document.file)
 
                 valid_team_ids = []
 

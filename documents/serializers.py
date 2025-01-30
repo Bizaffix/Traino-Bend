@@ -72,7 +72,7 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     is_quizzes = serializers.BooleanField(read_only=True)
     quizzes = serializers.SerializerMethodField(read_only=True)
     assigned_users_details = serializers.SerializerMethodField(read_only=True)
-    dueDate = serializers.DateTimeField(read_only=True)
+    dueDate = serializers.DateField(read_only=True)
     avgCompletionTime = serializers.IntegerField(read_only=True)
     overview = serializers.CharField(read_only=True)
     name = serializers.CharField(read_only=True)
