@@ -28,3 +28,4 @@ documents/management/*
 departments/migrations/*
 company/migrations/*
 .env
+myenv
