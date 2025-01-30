@@ -17,7 +17,7 @@ def generate_summary_from_gpt(content, prompt):
     # print(openai_api_key)
     # print(os.environ['OPENAI_API_KEY'])
     openai.api_key = openai_api_key
-    prompt = f"You are the content creator , Provide me the descriptive, related and concise and everytime unique summary for:"
+    prompt = f"You are the content creator , Provide me the descriptive, related and concise and everytime unique summary for: \n\n{content[:7500]}"
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
