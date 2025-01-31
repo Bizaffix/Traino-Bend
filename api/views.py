@@ -60,7 +60,7 @@ def generateDocumentSummary(request):
         try:
             # print("test: 1")
             # Instantiate the LLM model
-            llm = ChatOpenAI(model_name='gpt-3.5-turbo')
+            llm = ChatOpenAI(model_name='gpt-4-turbo')
             # print("test: 2")
             # print(document.file.path)
 
@@ -131,7 +131,7 @@ def generateDocumentKeypoints(keypoint_id, document_id, prompt_text):
     if document.file.path is not None:
         try:
 
-            llm = ChatOpenAI(model_name='gpt-3.5-turbo')
+            llm = ChatOpenAI(model_name='gpt-4-turbo')
 
             text = readPDFFile(document.file.path)
 
@@ -1235,7 +1235,7 @@ class DocumentSummaryModelViewSet(viewsets.ModelViewSet):
     def generate_summary(self, content, prompt_text):
         openai.api_key = openai_api_key
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": f"{prompt_text}\n\n{content}"}
