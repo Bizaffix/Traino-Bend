@@ -68,7 +68,7 @@ def generateDocumentSummary(request):
             document = DepartmentsDocuments.objects.get(id=document_id)
             if document.file.path is not None:
                 try:
-                    llm = ChatOpenAI(model_name="gpt-3.5-turbo")
+                    llm = ChatOpenAI(model_name="gpt-4-turbo")
 
                     loader = PyPDFLoader(document.file.path)
 
@@ -146,7 +146,7 @@ def generateDocumentKeypoints(request):
             if document.file.path is not None:
                 try:
 
-                    llm = ChatOpenAI(model_name="gpt-3.5-turbo")
+                    llm = ChatOpenAI(model_name="gpt-4-turbo")
                     # print("test: 2")
                     print(document.file.path)
                     text = readPDFFile(document.file.path)
@@ -338,7 +338,7 @@ def generateDocumentQuiz(request):
             document = DepartmentsDocuments.objects.get(id=document_id)
             if document.file.path is not None:
                 try:
-                    llm = ChatOpenAI(model_name="gpt-3.5-turbo")
+                    llm = ChatOpenAI(model_name="gpt-4-turbo")
                     # print("test: 2")
                     print(document.file.path)
                     text = readPDFFile(document.file.path)
