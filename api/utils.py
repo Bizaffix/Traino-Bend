@@ -9,14 +9,14 @@ logging.basicConfig(filename="app.log", level=logging.INFO)
 logger = logging.getLogger(__name__)
 from dotenv import load_dotenv
 
-openai.api_base = "https://api.kluster.ai/v1"
+# openai.api_base = "https://api.kluster.ai/v1"
 
 
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
-openai.api_key = "c2d922dc-e340-4fc7-9b80-288bbe18775f" #openai_api_key  # Set your OpenAI API key
+openai.api_key = openai_api_key  # Set your OpenAI API key
 
 
 def generate_summary_from_gpt(content, prompt=None):
@@ -54,7 +54,7 @@ def generate_summary_from_gpt(content, prompt=None):
             for attempt in range(retries):
                 try:
                     return openai.ChatCompletion.create(
-                        model="deepseek-ai/DeepSeek-R1",
+                        model="gpt-4-turbo",
                         messages=messages,
                         max_tokens=max_tokens,
                         temperature=0.5,
@@ -112,62 +112,6 @@ def generate_summary_from_gpt(content, prompt=None):
         print("Something is wrong with Summary Gen Func", e)
 
 
-
-generate_summary_from_gpt("""### Job Title: React and Next.js Developer (Full-Time Remote)  
-
-#### *About the Role*  
-We are looking for a talented and experienced React and Next.js Developer to join our team! As a key contributor, you will work on modern web applications, utilizing the latest tools and technologies to deliver high-quality solutions. This is a full-time remote position, giving you the flexibility to work from anywhere while collaborating with a dynamic and passionate team.
-
----
-
-#### *Key Responsibilities*  
-- Develop, maintain, and optimize scalable web applications using *React* and *Next.js*.  
-- Implement *Server Actions* for seamless server-side operations.  
-- Design and manage databases using *Prisma* or *Drizzle* ORM tools.  
-- Build and integrate robust and efficient *APIs*.  
-- Create stunning, responsive, and user-friendly UIs using *TailwindCSS*.  
-- Write clean, maintainable, and well-documented code following best practices.  
-- Collaborate with designers, product managers, and other developers to deliver high-quality solutions.  
-- Stay updated with the latest industry trends and technologies to continually improve the development process.  
-
----
-
-#### *Skills and Qualifications*  
-- *Proven experience* in developing applications with *React* and *Next.js*.  
-- Solid understanding of *Server Actions* and server-side rendering (SSR).  
-- Experience with *Prisma* or *Drizzle* for database management.  
-- Strong proficiency in *API development* and integration.  
-- Expertise in *TailwindCSS* for building responsive and visually appealing designs.  
-- Familiarity with version control systems like *Git* and CI/CD pipelines.  
-- Excellent problem-solving skills and a strong attention to detail.  
-- Strong communication and collaboration skills to work effectively in a remote team environment.  
-
----
-
-#### *Preferred Qualifications*  
-- Experience with state management libraries like *Redux* or *Zustand*.  
-- Knowledge of performance optimization techniques for React and Next.js applications.  
-- Familiarity with authentication tools like *NextAuth.js* or *Auth0*.  
-- Experience working with cloud platforms like *AWS, **Vercel, or **Firebase*.  
-- Understanding of modern build tools like *Webpack* and *Vite*.  
-- Experience in A.I applications.
----
-
-#### *What We Offer*  
-- *Full-time remote role* with a flexible schedule.  
-- Competitive salary based on your skills and experience.  
-- Opportunity to work on cutting-edge projects with a talented team.  
-- Professional development and learning opportunities.  
-- Collaborative and supportive work culture.  
-
----
-
-If you are a skilled React and Next.js developer who thrives in a remote working environment and loves solving complex problems, we’d love to hear from you!  
-
-📧 *How to Apply:*  
-Send your resume to [your email address].  
-
-Join us and help shape the future of web development! 🚀""")
 
 def generate_keypoints_from_gpt(content, prompt=None):
     """
