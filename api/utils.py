@@ -58,7 +58,7 @@ def generate_summary_from_gpt(content, prompt=None):
                     )
                 except openai.error.RateLimitError as e:
                     if attempt < retries - 1:
-                        wait_time = backoff_factor ** attempt
+                        wait_time = 60
                         print(f"Rate limit hit. Retrying in {wait_time} seconds...")
                         time.sleep(wait_time)
                     else:
