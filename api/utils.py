@@ -12,8 +12,6 @@ load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
-import openai
-
 openai.api_key = openai_api_key  # Set your OpenAI API key
 
 def generate_summary_from_gpt(content, prompt=None):
@@ -50,7 +48,7 @@ def generate_summary_from_gpt(content, prompt=None):
             print(f"Processing chunk {i + 1}/{len(chunks)}...")  # Optional progress tracking
             try:
                 response = openai.ChatCompletion.create(
-                    model="gpt-4-turbo",
+                    model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are a professional assistant specializing in summarizing content."},
                         {"role": "user", "content": f"{prompt}{chunk}"},
@@ -71,7 +69,7 @@ def generate_summary_from_gpt(content, prompt=None):
         )
         try:
             final_response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a professional assistant specializing in organizing summaries."},
                     {"role": "user", "content": f"{final_prompt}{combined_content}"},
@@ -125,7 +123,7 @@ def generate_keypoints_from_gpt(content, prompt=None):
         print(f"Processing chunk {i + 1}/{len(chunks)}...")  # Optional progress tracking
         try:
             response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a professional assistant specializing in generating key points."},
                     {"role": "user", "content": f"{prompt}{chunk}"},
@@ -147,7 +145,7 @@ def generate_keypoints_from_gpt(content, prompt=None):
     )
     try:
         final_response = openai.ChatCompletion.create(
-            model="gpt-4-turbo",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a professional assistant specializing in organizing key points."},
                 {"role": "user", "content": f"{final_prompt}{combined_content}"},
@@ -163,10 +161,6 @@ def generate_keypoints_from_gpt(content, prompt=None):
     return final_keypoints, prompt
 
 
-
-import openai
-
-openai.api_key = openai_api_key  # Set your OpenAI API key
 
 def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
     """
@@ -213,7 +207,7 @@ def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
         print(f"Processing chunk {i + 1}/{len(chunks)}...")  # Optional progress tracking
         try:
             response = openai.ChatCompletion.create(
-                model="gpt-4-turbo",
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": "You are a professional quiz generator."},
                     {"role": "user", "content": f"{prompt}{chunk}"},
@@ -235,7 +229,7 @@ def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
     )
     try:
         final_response = openai.ChatCompletion.create(
-            model="gpt-4-turbo",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a professional quiz generator."},
                 {"role": "user", "content": f"{final_prompt}{combined_content}"},
