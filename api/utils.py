@@ -40,7 +40,7 @@ def generate_summary_from_gpt(content, prompt=None):
             stream=False,
             temperature=0.5,
         )
-        summary = response["choices"][0]["message"]["content"].strip()
+        summary = response.choices[0].message.content.strip()
 
         return summary, prompt
     except Exception as e:
