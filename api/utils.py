@@ -184,9 +184,17 @@ def generate_keypoints_from_gpt(content, prompt=None):
             stream=False,
             temperature=0.5,
         )
+
+        # Add error checking and logging
+        if not response or not hasattr(response, "choices") or not response.choices:
+            logger.error(f"Invalid API response: {response}")
+            raise ValueError("Invalid response received from API")
+
         final_keypoints = response.choices[0].message.content.strip()
+        logger.info("Successfully generated key points")
+
     except Exception as e:
-        print(f"Error generating key points: {e}")
+        logger.error(f"Error generating key points: {str(e)}")
         raise
 
     return final_keypoints, prompt
@@ -237,9 +245,17 @@ def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
             stream=False,
             temperature=0.5,
         )
+
+        # Add error checking and logging
+        if not response or not hasattr(response, "choices") or not response.choices:
+            logger.error(f"Invalid API response: {response}")
+            raise ValueError("Invalid response received from API")
+
         final_quiz = response.choices[0].message.content.strip()
+        logger.info("Successfully generated quiz")
+
     except Exception as e:
-        print(f"Error generating quizes: {e}")
+        logger.error(f"Error generating quiz: {str(e)}")
         raise
 
     return final_quiz, prompt
