@@ -1,9 +1,8 @@
 import logging
-import openai
-import os
+from openai import OpenAI
 import chardet
 import pdfplumber
-import time
+import os
 
 logging.basicConfig(filename="app.log", level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -13,14 +12,14 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
-openai.api_key = openai_api_key  # Set your OpenAI API key
+client = OpenAI(
+    api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com"
+)
 
 
 def generate_summary_from_gpt(content, prompt=None):
-   
     try:
         # Default prompt if none is provided
         if not prompt:
@@ -28,15 +27,19 @@ def generate_summary_from_gpt(content, prompt=None):
                 "Summarize the following content in a concise, descriptive, and unique way. "
                 "Focus on key points, maintain relevance, and ensure the summary is easy to understand:\n\n"
             )
-        
-        response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                {"role": "system", "content": "You are a professional assistant specializing in summarizing content."},
+
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a professional assistant specializing in summarizing content.",
+                },
                 {"role": "user", "content": f"{prompt}{content}"},
             ],
-                    temperature=0.5,
-                )
+            stream=False,
+            temperature=0.5,
+        )
         summary = response["choices"][0]["message"]["content"].strip()
 
         return summary, prompt
@@ -45,12 +48,11 @@ def generate_summary_from_gpt(content, prompt=None):
         raise
 
 
-
 # def generate_summary_from_gpt(content, prompt=None):
 #     """
 #     Summarize large content by chunking it, processing each chunk, and combining the summaries.
 #     Handles rate limitations with retries and backoff.
-    
+
 #     Args:
 #         content (str): The full text to be summarized.
 #         prompt (str, optional): Custom prompt for GPT. Defaults to a concise summarization prompt.
@@ -66,7 +68,7 @@ def generate_summary_from_gpt(content, prompt=None):
 #                 "Summarize the following content in a concise, descriptive, and unique way. "
 #                 "Focus on key points, maintain relevance, and ensure the summary is easy to understand:\n\n"
 #             )
-        
+
 #         # Token limits
 #         max_input_tokens = 4000
 #         max_response_tokens = 500
@@ -139,12 +141,11 @@ def generate_summary_from_gpt(content, prompt=None):
 #         print("Something is wrong with Summary Gen Func", e)
 
 
-
 def generate_keypoints_from_gpt(content, prompt=None):
     """
-    Generate key points from large content by chunking it, processing each chunk, 
+    Generate key points from large content by chunking it, processing each chunk,
     and combining the key points into a final cohesive list.
-    
+
     Args:
         content (str): The full text to process for key points.
         prompt (str, optional): Custom prompt for GPT. Defaults to a detailed prompt.
@@ -160,63 +161,31 @@ def generate_keypoints_from_gpt(content, prompt=None):
             "that are concise, relevant, and unique. Focus on capturing critical ideas, "
             "actionable insights, and important highlights. Avoid repetition and ensure clarity:\n\n"
         )
-    
-    # Token limit for input per request (leave room for response tokens)
-    max_input_tokens = 4000
-    max_response_tokens = 500
-    chunk_size = max_input_tokens - len(prompt.split()) - 50  # Adjust for prompt and metadata
 
-    # Split content into manageable chunks
-    chunks = [content[i:i + chunk_size] for i in range(0, len(content), chunk_size)]
-
-    # Process each chunk for key points
-    partial_keypoints = []
-    for i, chunk in enumerate(chunks):
-        print(f"Processing chunk {i + 1}/{len(chunks)}...")  # Optional progress tracking
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a professional assistant specializing in generating key points."},
-                    {"role": "user", "content": f"{prompt}{chunk}"},
-                ],
-                max_tokens=max_response_tokens,
-                temperature=0.5,  # Adjust for balanced creativity and clarity
-            )
-            keypoints = response["choices"][0]["message"]["content"].strip()
-            partial_keypoints.append(keypoints)
-        except Exception as e:
-            print(f"Error processing chunk {i + 1}: {e}")
-            partial_keypoints.append("")  # Add an empty string for failed chunks
-
-    # Combine all partial key points into a single cohesive list
-    combined_content = "\n".join(partial_keypoints)
-    final_prompt = (
-        "Combine the following key points into a final cohesive and concise list of bullet points. "
-        "Ensure they are clear, non-repetitive, and categorized if necessary:\n\n"
-    )
     try:
-        final_response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        final_response = client.chat.completions.create(
+            model="deepseek-chat",
             messages=[
-                {"role": "system", "content": "You are a professional assistant specializing in organizing key points."},
-                {"role": "user", "content": f"{final_prompt}{combined_content}"},
+                {
+                    "role": "system",
+                    "content": "You are a professional assistant specializing in generating key points.",
+                },
+                {"role": "user", "content": f"{prompt}{content}"},
             ],
-            max_tokens=max_response_tokens,
+            stream=False,
             temperature=0.5,
         )
         final_keypoints = final_response["choices"][0]["message"]["content"].strip()
     except Exception as e:
-        print(f"Error generating final key points: {e}")
-        final_keypoints = combined_content  # Use raw concatenation as fallback
+        print(f"Error generating key points: {e}")
+        raise
 
     return final_keypoints, prompt
 
 
-
 def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
     """
-    Generate quizzes in the form of multiple-choice questions from large content by chunking it 
+    Generate quizzes in the form of multiple-choice questions from large content by chunking it
     and processing each chunk. Combines quizzes if the content is too large.
 
     Args:
@@ -229,72 +198,43 @@ def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
         prompt (str): The prompt used for quiz generation.
     """
     # Refined prompt for quiz generation
-    prompt = (
-        f"You are a teacher creating quizzes. Provide a quiz with a maximum of {max_questions} "
-        f"questions and a minimum of {min_questions} questions, each containing 4 options as MCQs. "
-        "Indicate the correct option by labeling it A, B, C, or D and answer as 'Correct Answer'. "
-        "Ensure the quizzes are unique, challenging, and directly derived from the content. "
-        "Strictly follow this format:\n\n"
-        "Question: [Write the question here]\n"
-        "A: [Option A]\n"
-        "B: [Option B]\n"
-        "C: [Option C]\n"
-        "D: [Option D]\n"
-        "Correct Answer: [Correct option (A, B, C, or D)]\n\n"
-        "No extra text, no new lines between the 'Question:' and the question text. "
-        "Generate the quiz only from the following content:\n\n"
-    )
-    
-    # Token limit for input per request (leave room for response tokens)
-    max_input_tokens = 4000
-    max_response_tokens = 500
-    chunk_size = max_input_tokens - len(prompt.split()) - 50  # Adjust for prompt and metadata
+    if not prompt:
+        prompt = (
+            f"You are a teacher creating quizzes. Provide a quiz with a maximum of {max_questions} "
+            f"questions and a minimum of {min_questions} questions, each containing 4 options as MCQs. "
+            "Indicate the correct option by labeling it A, B, C, or D and answer as 'Correct Answer'. "
+            "Ensure the quizzes are unique, challenging, and directly derived from the content. "
+            "Strictly follow this format:\n\n"
+            "Question: [Write the question here]\n"
+            "A: [Option A]\n"
+            "B: [Option B]\n"
+            "C: [Option C]\n"
+            "D: [Option D]\n"
+            "Correct Answer: [Correct option (A, B, C, or D)]\n\n"
+            "No extra text, no new lines between the 'Question:' and the question text. "
+            "Generate the quiz only from the following content:\n\n"
+        )
 
-    # Split content into manageable chunks
-    chunks = [content[i:i + chunk_size] for i in range(0, len(content), chunk_size)]
-
-    # Process each chunk to generate quizzes
-    partial_quizzes = []
-    for i, chunk in enumerate(chunks):
-        print(f"Processing chunk {i + 1}/{len(chunks)}...")  # Optional progress tracking
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a professional quiz generator."},
-                    {"role": "user", "content": f"{prompt}{chunk}"},
-                ],
-                max_tokens=max_response_tokens,
-                temperature=0.5,  # Adjust for balanced creativity and clarity
-            )
-            quiz = response["choices"][0]["message"]["content"].strip()
-            partial_quizzes.append(quiz)
-        except Exception as e:
-            print(f"Error processing chunk {i + 1}: {e}")
-            partial_quizzes.append("")  # Add an empty string for failed chunks
-
-    # Combine all partial quizzes into a final cohesive quiz
-    combined_content = "\n\n".join(partial_quizzes)
-    final_prompt = (
-        "Combine the following quizzes into a final cohesive set of questions. Ensure no duplicates "
-        "and maintain the required format for all questions:\n\n"
-    )
     try:
-        final_response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        final_response = client.chat.completions.create(
+            model="deepseek-chat",
             messages=[
-                {"role": "system", "content": "You are a professional quiz generator."},
-                {"role": "user", "content": f"{final_prompt}{combined_content}"},
+                {
+                    "role": "system",
+                    "content": "You are a professional quiz generator.",
+                },
+                {"role": "user", "content": f"{prompt}{content}"},
             ],
-            max_tokens=max_response_tokens,
+            stream=False,
             temperature=0.5,
         )
         final_quiz = final_response["choices"][0]["message"]["content"].strip()
     except Exception as e:
-        print(f"Error generating final quiz: {e}")
-        final_quiz = combined_content  # Use raw concatenation as fallback
+        print(f"Error generating quizes: {e}")
+        raise
 
     return final_quiz, prompt
+
 
 def read_file_content(file):
     file_type = file.name.split(".")[-1].lower()
