@@ -40,11 +40,20 @@ def generate_summary_from_gpt(content, prompt=None):
             stream=False,
             temperature=0.5,
         )
+
+        # Add debug logging
+        logger.info(f"API Response: {response}")
+
+        # Check if response is None or empty
+        if not response:
+            raise ValueError("Empty response received from API")
+
         summary = response.choices[0].message.content.strip()
 
         return summary, prompt
     except Exception as e:
-        print("Something is wrong with Summary Gen Func", e)
+        logger.error(f"Error in generate_summary_from_gpt: {str(e)}")
+        logger.error(f"Response type: {type(response)}")
         raise
 
 
@@ -198,22 +207,22 @@ def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
         prompt (str): The prompt used for quiz generation.
     """
     # Refined prompt for quiz generation
-    if not prompt:
-        prompt = (
-            f"You are a teacher creating quizzes. Provide a quiz with a maximum of {max_questions} "
-            f"questions and a minimum of {min_questions} questions, each containing 4 options as MCQs. "
-            "Indicate the correct option by labeling it A, B, C, or D and answer as 'Correct Answer'. "
-            "Ensure the quizzes are unique, challenging, and directly derived from the content. "
-            "Strictly follow this format:\n\n"
-            "Question: [Write the question here]\n"
-            "A: [Option A]\n"
-            "B: [Option B]\n"
-            "C: [Option C]\n"
-            "D: [Option D]\n"
-            "Correct Answer: [Correct option (A, B, C, or D)]\n\n"
-            "No extra text, no new lines between the 'Question:' and the question text. "
-            "Generate the quiz only from the following content:\n\n"
-        )
+
+    prompt = (
+        f"You are a teacher creating quizzes. Provide a quiz with a maximum of {max_questions} "
+        f"questions and a minimum of {min_questions} questions, each containing 4 options as MCQs. "
+        "Indicate the correct option by labeling it A, B, C, or D and answer as 'Correct Answer'. "
+        "Ensure the quizzes are unique, challenging, and directly derived from the content. "
+        "Strictly follow this format:\n\n"
+        "Question: [Write the question here]\n"
+        "A: [Option A]\n"
+        "B: [Option B]\n"
+        "C: [Option C]\n"
+        "D: [Option D]\n"
+        "Correct Answer: [Correct option (A, B, C, or D)]\n\n"
+        "No extra text, no new lines between the 'Question:' and the question text. "
+        "Generate the quiz only from the following content:\n\n"
+    )
 
     try:
         response = client.chat.completions.create(
