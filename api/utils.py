@@ -163,7 +163,7 @@ def generate_keypoints_from_gpt(content, prompt=None):
         )
 
     try:
-        final_response = client.chat.completions.create(
+        response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[
                 {
@@ -175,7 +175,7 @@ def generate_keypoints_from_gpt(content, prompt=None):
             stream=False,
             temperature=0.5,
         )
-        final_keypoints = final_response["choices"][0]["message"]["content"].strip()
+        final_keypoints = response.choices[0].message.content.strip()
     except Exception as e:
         print(f"Error generating key points: {e}")
         raise
@@ -216,7 +216,7 @@ def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
         )
 
     try:
-        final_response = client.chat.completions.create(
+        response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[
                 {
@@ -228,7 +228,7 @@ def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
             stream=False,
             temperature=0.5,
         )
-        final_quiz = final_response["choices"][0]["message"]["content"].strip()
+        final_quiz = response.choices[0].message.content.strip()
     except Exception as e:
         print(f"Error generating quizes: {e}")
         raise
