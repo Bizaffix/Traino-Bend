@@ -25,3 +25,4 @@ django_cron
 django-q
 google-genai==1.0.0
 google-auth==2.38.0
+requests==2.32.3
