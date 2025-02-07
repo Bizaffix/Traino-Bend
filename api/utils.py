@@ -183,6 +183,9 @@ def read_pdf_content(file):
         return None
 
 
+# pushing
+
+
 def read_text_file_content(file):
     encodings = ["utf-8", "latin-1"]
     content = None
