@@ -51,7 +51,7 @@ def call_model(prompt, content, model, system_mssg):
         try:
             response = client.models.generate_content(
                 model="gemini-2.0-flash",
-                contents=f"You are a professional assistant specializing in summarizing content. \n\n Summarize the following content in a concise, descriptive, and unique way. {content}",
+                contents=f"{prompt}{content}",
             )
 
             # Add debug logging
