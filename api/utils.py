@@ -44,7 +44,7 @@ def call_model(prompt, content, model, system_mssg):
         if not response:
             raise ValueError(f"Empty response received from {model} API")
 
-        summary = response.choices[0].message.content.strip()
+        summary = response.text.strip()
 
         return summary, prompt
     except Exception as e:
@@ -61,7 +61,7 @@ def call_model(prompt, content, model, system_mssg):
             if not response:
                 raise ValueError(f"Empty response received from {model} API")
 
-            summary = response.choices[0].message.content.strip()
+            summary = response.text.strip()
 
             return summary, prompt
 
