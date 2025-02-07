@@ -23,3 +23,5 @@ django-ses==4.1.0
 gunicorn
 django_cron
 django-q
+google-genai==1.0.0
+google-auth==2.38.0

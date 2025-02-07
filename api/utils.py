@@ -3,6 +3,8 @@ from openai import OpenAI
 import chardet
 import pdfplumber
 import os
+from google import genai
+
 
 logging.basicConfig(filename="app.log", level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,9 +18,7 @@ load_dotenv()
 
 def call_model(prompt, content, model, system_mssg):
     if model == "deepseek-chat":
-        client = OpenAI(
-            api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com"
-        )
+        client = genai.Client(api_key="AIzaSyDz_MvESKjQtYKoeUHJISfhpWFqHQdODCg")
     else:
         client = OpenAI(
             api_key=os.getenv("OPENAI_API_KEY"), base_url="https://api.openai.com"
@@ -48,9 +48,27 @@ def call_model(prompt, content, model, system_mssg):
 
         return summary, prompt
     except Exception as e:
-        logger.error(f"Error in calling {model} with prompt:{prompt} :\n {str(e)}")
-        logger.error(f"Response type: {type(response)}")
-        raise
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=f"You are a professional assistant specializing in summarizing content. \n\n Summarize the following content in a concise, descriptive, and unique way. {content}",
+            )
+
+            # Add debug logging
+            logger.info(f"API Response: {response}")
+
+            # Check if response is None or empty
+            if not response:
+                raise ValueError(f"Empty response received from {model} API")
+
+            summary = response.choices[0].message.content.strip()
+
+            return summary, prompt
+
+        except Exception as e:
+            logger.error(f"Error in calling {model} with prompt:{prompt} :\n {str(e)}")
+            logger.error(f"Response type: {type(response)}")
+            raise
 
 
 def generate_summary_from_gpt(content, prompt=None):
@@ -68,13 +86,9 @@ def generate_summary_from_gpt(content, prompt=None):
             "deepseek-chat",
             "You are a professional assistant specializing in summarizing content.",
         )
-    except:
-        return call_model(
-            prompt,
-            content,
-            "gpt-3.5-turbo",
-            "You are a professional assistant specializing in summarizing content.",
-        )
+    except Exception as e:
+        print("Error with Generating Summary ", e)
+        raise
 
 
 def generate_keypoints_from_gpt(content, prompt=None):
@@ -105,13 +119,9 @@ def generate_keypoints_from_gpt(content, prompt=None):
             "deepseek-chat",
             "You are a professional assistant specializing in generating key points.",
         )
-    except:
-        return call_model(
-            prompt,
-            content,
-            "gpt-3.5-turbo",
-            "You are a professional assistant specializing in generating key points.",
-        )
+    except Exception as e:
+        print("Error with Generating Summary ", e)
+        raise
 
 
 def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
@@ -139,13 +149,9 @@ def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
             "deepseek-chat",
             "You are a professional quiz generator.",
         )
-    except:
-        return call_model(
-            prompt,
-            content,
-            "gpt-3.5-turbo",
-            "You are a professional quiz generator.",
-        )
+    except Exception as e:
+        print("Error with Generating Summary ", e)
+        raise
 
 
 def read_file_content(file):
