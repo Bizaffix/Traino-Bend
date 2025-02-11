@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Reminder - Traino.ai</title>
+    <style>
+      body {
+        font-family: Rubik;
+        margin: 0;
+        padding: 0;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        height: auto;
+        width: 100%;
+      }
+
+      .content {
+        padding: 5px 20px;
+      }
+
+      .key-points {
+        background-color: #f8f9fe;
+        border: 1px dashed #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .key-point {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+      }
+
+      .checkmark {
+        color: #4054b2;
+        margin-right: 10px;
+      }
+
+      .quiz-details {
+        margin: 30px 0;
+      }
+
+      .quiz-link {
+        color: #4054b2;
+        text-decoration: none;
+      }
+
+      .button {
+        display: inline-block;
+        background-color: #3447d4;
+        color: white;
+        padding: 15px 50px;
+        border-radius: 5px;
+        text-decoration: none;
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      .footer {
+        background-color: #1a237e;
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+      }
+
+      .social-links {
+        margin: 20px 0;
+      }
+
+      .social-links a {
+        margin: 0 10px;
+        color: white;
+        text-decoration: none;
+      }
+      .social-links a img {
+        height: 20px;
+        width: 20px;
+      }
+
+      .footer-text {
+        font-size: 14px;
+        color: #ffffff99;
+      }
+      .quiz-btn {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- <header class="header">
+            <img src="traino-logo.png" alt="Traino.ai">
+        </header> -->
+      <img src="assets/header_title.png" class="header" />
+
+      <div class="content">
+        <h1>Reminder: Your Quiz Awaits!</h1>
+
+        <p>Hi, <span style="color: #4054b2">{{to_name}}</span></p>
+
+        <p>
+          Here are some key points that will help you prepare for the quiz
+          effectively:
+        </p>
+
+        <div class="key-points">
+          {% for point in key_points %}
+          <div class="key-point">
+            <span class="checkmark">✓</span>
+            <div>{{ point }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <p>
+          Just a friendly reminder that your quiz,
+          <a href="#" class="quiz-link">{{doc_name}}</a>, is waiting for you!
+          Make sure to complete it before the deadline.
+        </p>
+
+        <div class="quiz-details">
+          <p>
+            <strong>Quiz Title:</strong>
+            <a href="#" class="quiz-link">{{doc_name}}</a>
+          </p>
+          <p><strong>Assigned Date:</strong> {{date}}</p>
+        </div>
+
+        <p>
+          Don't miss out! This is your chance to showcase your knowledge and
+          take a step forward in your learning journey.
+        </p>
+
+        <div class="quiz-btn">
+          <a href="#" class="button">Take the Quiz Now →</a>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <img
+          src="assets/footer_logo.png"
+          alt="Traino.ai"
+          style="height: 30px; margin-bottom: 20px"
+        />
+
+        <div class="social-links">
+          <a href="#"><img src="assets/fb.png" /> </a>
+          <a href="#"><img src="assets/insta.png" /></a>
+          <a href="#"><img src="assets/x.png" /></a>
+          <a href="#"><img src="assets/in.png" /></a>
+        </div>
+
+        <p>© 2025 Traino.ai. All rights reserved.</p>
+        <p class="footer-text">
+          If you believe this email was sent by mistake, please contact our
+          support team.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>
