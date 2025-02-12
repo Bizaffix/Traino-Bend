@@ -8,6 +8,8 @@ from departments.models import DepartmentsDocuments
 from rest_framework import status
 from rest_framework.response import Response
 from django.conf import settings
+import base64
+
 
 from documents.models import (
     DocumentSummary,
@@ -17,6 +19,12 @@ from documents.models import (
 
 class SendEmailAPI(View):
     def post(self, request, *args, **kwargs):
+
+        def image_to_base64(image_path):
+            with open(image_path, "rb") as img_file:
+                return base64.b64encode(img_file.read()).decode("utf-8")
+
+        # base64_image =
         # Initialize email tracking lists
         success_emails = []
         failed_emails = []
@@ -71,6 +79,13 @@ class SendEmailAPI(View):
                     "doc_name": doc_name,
                     "date": date,
                     "base_url": settings.BASE_URL,
+                    "fb": image_to_base64("templates/fb.png"),
+                    "in": image_to_base64("templates/in.png"),
+                    "insta": image_to_base64("templates/insta.png"),
+                    "x": image_to_base64("templates/x.png"),
+                    "footer_logo": image_to_base64("templates/footer_logo.png"),
+                    "header_title": image_to_base64("templates/header_title.png"),
+                    "header": image_to_base64("templates/header.png"),
                 },
             )
 
