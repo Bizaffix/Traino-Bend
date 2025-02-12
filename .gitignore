@@ -22,7 +22,6 @@ traino_env/*
 media/*
 app.log
 public/static/*
-staticfiles/*
 nohup.out
 documents/management/*
 departments/migrations/*
