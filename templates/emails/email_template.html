@@ -104,7 +104,10 @@
       <!-- <header class="header">
             <img src="traino-logo.png" alt="Traino.ai">
         </header> -->
-      <img src="{% static 'templates/header_title.png' %}" class="header" />
+      <img
+        src="{{ base_url }}{% static 'templates/header_title.png' %}"
+        class="header"
+      />
 
       <div class="content">
         <h1>Reminder: Your Quiz Awaits!</h1>
@@ -151,16 +154,24 @@
 
       <footer class="footer">
         <img
-          src="{% static 'templates/footer_logo.png' %}"
+          src="{{ base_url }}{% static 'templates/footer_logo.png' %}"
           alt="Traino.ai"
           style="height: 30px; margin-bottom: 20px"
         />
 
         <div class="social-links">
-          <a href="#"><img src="{% static 'templates/fb.png' %}" /> </a>
-          <a href="#"><img src="{% static 'templates/insta.png' %}" /></a>
-          <a href="#"><img src="{% static 'templates/x.png' %}" /></a>
-          <a href="#"><img src="{% static 'templates/in.png' %}" /></a>
+          <a href="#"
+            ><img src="{{ base_url }}{% static 'templates/fb.png' %}" />
+          </a>
+          <a href="#"
+            ><img src="{{ base_url }}{% static 'templates/insta.png' %}"
+          /></a>
+          <a href="#"
+            ><img src="{{ base_url }}{% static 'templates/x.png' %}"
+          /></a>
+          <a href="#"
+            ><img src="{{ base_url }}{% static 'templates/in.png' %}"
+          /></a>
         </div>
 
         <p>© 2025 Traino.ai. All rights reserved.</p>

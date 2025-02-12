@@ -7,6 +7,8 @@ from django.template.loader import render_to_string
 from departments.models import DepartmentsDocuments
 from rest_framework import status
 from rest_framework.response import Response
+from django.conf import settings
+
 from documents.models import (
     DocumentSummary,
     DocumentKeyPoints,
@@ -68,6 +70,7 @@ class SendEmailAPI(View):
                     "key_points": key_points[:3],  # Pass the dynamic key points
                     "doc_name": doc_name,
                     "date": date,
+                    "base_url": settings.BASE_URL,
                 },
             )
 
