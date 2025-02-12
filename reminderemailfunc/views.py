@@ -6,7 +6,10 @@ import json
 from django.template.loader import render_to_string
 from departments.models import DepartmentsDocuments
 from rest_framework import status
+
 from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
+from rest_framework.views import APIView
 from django.conf import settings
 import base64
 
@@ -17,7 +20,7 @@ from documents.models import (
 )
 
 
-class SendEmailAPI(View):
+class SendEmailAPI(APIView):
     def post(self, request, *args, **kwargs):
 
         def image_to_base64(image_path):
@@ -104,8 +107,9 @@ class SendEmailAPI(View):
             except Exception as e:
                 failed_emails.append({"email": email, "error": str(e)})
 
-        return JsonResponse(
-            {"status": "completed", "success": success_emails, "failed": failed_emails}
+        return Response(
+            {"status": "completed", "success": success_emails, "failed": failed_emails},
+            status=status.HTTP_200_OK,
         )
 
 
