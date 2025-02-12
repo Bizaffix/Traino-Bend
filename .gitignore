@@ -21,7 +21,7 @@ api/__pycache__/*
 traino_env/*
 media/*
 app.log
-public/static/*
+# public/static/*
 staticfiles/*
 nohup.out
 documents/management/*

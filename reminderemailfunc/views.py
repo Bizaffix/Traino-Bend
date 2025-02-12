@@ -61,7 +61,7 @@ class SendEmailAPI(View):
 
             # Render the HTML template with dynamic data
             html_content = render_to_string(
-                "emails/Key_notification.html",
+                "emails/email_template.html",
                 {
                     "to_name": name,
                     "to_email": email,
