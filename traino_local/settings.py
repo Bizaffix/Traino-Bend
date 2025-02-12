@@ -168,6 +168,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "public/static/"),
 ]
 
+# Add your site's base URL
+BASE_URL = "https://dev-traino-bk.bizaffix.com"  # Use your production URL here
+
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'public/static/')
 MEDIA_ROOT = os.path.join(BASE_DIR, "")
 MEDIA_URL = "/"

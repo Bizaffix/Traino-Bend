@@ -650,11 +650,6 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                 )
                 if department:
                     document.departments.add(department)
-                    print("department", document)
-                    print("department", document.dueDate)
-                    print("department", document.overview)
-                    print("department", document.avgCompletionTime)
-                    print("department", document.file)
 
                 valid_team_ids = []
 
