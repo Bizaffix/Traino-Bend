@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render
 from django.core.mail import EmailMessage
 from django.http import JsonResponse
@@ -24,7 +25,11 @@ class SendEmailAPI(APIView):
     def post(self, request, *args, **kwargs):
 
         def image_to_base64(image_path):
-            with open(image_path, "rb") as img_file:
+            absolute_image_path = os.path.join(
+                settings.BASE_DIR, "templates", image_path
+            )
+
+            with open(absolute_image_path, "rb") as img_file:
                 return base64.b64encode(img_file.read()).decode("utf-8")
 
         # base64_image =
@@ -82,13 +87,17 @@ class SendEmailAPI(APIView):
                     "doc_name": doc_name,
                     "date": date,
                     "base_url": settings.BASE_URL,
-                    "fb": image_to_base64("templates/fb.png"),
-                    "in": image_to_base64("templates/in.png"),
-                    "insta": image_to_base64("templates/insta.png"),
-                    "x": image_to_base64("templates/x.png"),
-                    "footer_logo": image_to_base64("templates/footer_logo.png"),
-                    "header_title": image_to_base64("templates/header_title.png"),
-                    "header": image_to_base64("templates/header.png"),
+                    "fb": image_to_base64("email_template_assets/fb.png"),
+                    "in": image_to_base64("email_template_assets/in.png"),
+                    "insta": image_to_base64("email_template_assets/insta.png"),
+                    "x": image_to_base64("email_template_assets/x.png"),
+                    "footer_logo": image_to_base64(
+                        "email_template_assets/footer_logo.png"
+                    ),
+                    "header_title": image_to_base64(
+                        "email_template_assets/header_title.png"
+                    ),
+                    "header": image_to_base64("email_template_assets/header.png"),
                 },
             )
 
