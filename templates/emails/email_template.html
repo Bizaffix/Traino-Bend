@@ -9,7 +9,7 @@
         font-family: Rubik;
         margin: 0;
         padding: 0;
-        color: #333;
+        color: #333 !important;
         line-height: 1.6;
       }
 
@@ -29,8 +29,8 @@
       }
 
       .key-points {
-        background-color: #f8f9fe;
-        border: 1px dashed #e0e0e0;
+        background-color: #f8f9fe !important;
+        border: 1px dashed #e0e0e0 !important;
         border-radius: 8px;
         padding: 20px;
         margin: 20px 0;
@@ -43,7 +43,7 @@
       }
 
       .checkmark {
-        color: #4054b2;
+        color: #4054b2 !important;
         margin-right: 10px;
       }
 
@@ -52,14 +52,14 @@
       }
 
       .quiz-link {
-        color: #4054b2;
+        color: #4054b2 !important;
         text-decoration: none;
       }
 
       .button {
         display: inline-block;
-        background-color: #3447d4;
-        color: white;
+        background-color: #3447d4 !important;
+        color: white !important;
         padding: 15px 50px;
         border-radius: 5px;
         text-decoration: none;
@@ -68,7 +68,7 @@
       }
 
       .footer {
-        background-color: #1a237e;
+        background-color: #1a237e !important;
         color: white;
         padding: 40px 20px;
         text-align: center;
@@ -80,7 +80,7 @@
 
       .social-links a {
         margin: 0 10px;
-        color: white;
+        color: white !important;
         text-decoration: none;
       }
       .social-links a img {
@@ -90,10 +90,11 @@
 
       .footer-text {
         font-size: 14px;
-        color: #ffffff99;
+        color: #ffffff99 !important;
       }
       .quiz-btn {
         text-align: center;
+        color: white !important;
       }
     </style>
   </head>
@@ -102,7 +103,7 @@
       <!-- <header class="header">
             <img src="traino-logo.png" alt="Traino.ai">
         </header> -->
-      <img src="data:image/png;base64,{{ header_title }}" class="header" />
+      <img src="cid:header_title" class="header" />
 
       <div class="content">
         <h1>Reminder: Your Quiz Awaits!</h1>
@@ -149,16 +150,16 @@
 
       <footer class="footer">
         <img
-          src="data:image/png;base64,{{ footer_logo }}"
+          src="cid:footer_logo"
           alt="Traino.ai"
           style="height: 30px; margin-bottom: 20px"
         />
 
         <div class="social-links">
-          <a href="#"><img src="data:image/png;base64,{{ fb }}" /> </a>
-          <a href="#"><img src="data:image/png;base64,{{ insta }}" /></a>
-          <a href="#"><img src="data:image/png;base64,{{ x }}" /></a>
-          <a href="#"><img src="data:image/png;base64,{{ in }}" /></a>
+          <a href="#"><img src="cid:fb" /> </a>
+          <a href="#"><img src="cid:insta" /></a>
+          <a href="#"><img src="cid:x" /></a>
+          <a href="#"><img src="cid:in" /></a>
         </div>
 
         <p>© 2025 Traino.ai. All rights reserved.</p>
