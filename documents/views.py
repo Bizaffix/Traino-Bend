@@ -760,6 +760,10 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
                     is_active=True, departments__id=department_id
                 )
 
+            # for searching purpose
+            if company_id == None and department_id == None:
+                queryset = DepartmentsDocuments.objects.filter(is_active=True)
+
             if user.role == "Admin":
                 try:
                     admin_company = AdminUser.objects.get(
@@ -804,14 +808,6 @@ class DepartmentsDocumentsListAPIView(generics.ListAPIView):
             )
             # print(queryset)
 
-            for document in queryset:
-                if document.name == "d4":
-                    print(document.name)
-                    print(document.dueDate)
-                    print(document.overview)
-                    print(document.file)
-
-            print("RETURNING", queryset.values().filter(name="d4"))
             return queryset
 
         if user.role == "User":
