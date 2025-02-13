@@ -1,3 +1,4 @@
+from email.mime.image import MIMEImage
 import os
 from django.shortcuts import render
 from django.core.mail import EmailMessage
@@ -23,14 +24,6 @@ from documents.models import (
 
 class SendEmailAPI(APIView):
     def post(self, request, *args, **kwargs):
-
-        def image_to_base64(image_path):
-            absolute_image_path = os.path.join(
-                settings.BASE_DIR, "templates", image_path
-            )
-
-            with open(absolute_image_path, "rb") as img_file:
-                return base64.b64encode(img_file.read()).decode("utf-8")
 
         # base64_image =
         # Initialize email tracking lists
@@ -86,18 +79,6 @@ class SendEmailAPI(APIView):
                     "key_points": key_points[:3],  # Pass the dynamic key points
                     "doc_name": doc_name,
                     "date": date,
-                    "base_url": settings.BASE_URL,
-                    "fb": image_to_base64("email_template_assets/fb.png"),
-                    "in": image_to_base64("email_template_assets/in.png"),
-                    "insta": image_to_base64("email_template_assets/insta.png"),
-                    "x": image_to_base64("email_template_assets/x.png"),
-                    "footer_logo": image_to_base64(
-                        "email_template_assets/footer_logo.png"
-                    ),
-                    "header_title": image_to_base64(
-                        "email_template_assets/header_title.png"
-                    ),
-                    "header": image_to_base64("email_template_assets/header.png"),
                 },
             )
 
@@ -109,6 +90,32 @@ class SendEmailAPI(APIView):
                 to=recipient_list,
             )
             email_message.content_subtype = "html"  # Mark the content as HTML
+
+            BASE_IMAGE_PATH = os.path.join("public", "static", "email_template_assets")
+            images = [
+                {"path": os.path.join(BASE_IMAGE_PATH, "fb.png"), "cid": "fb"},
+                {"path": os.path.join(BASE_IMAGE_PATH, "in.png"), "cid": "in"},
+                {"path": os.path.join(BASE_IMAGE_PATH, "insta.png"), "cid": "insta"},
+                {"path": os.path.join(BASE_IMAGE_PATH, "x.png"), "cid": "x"},
+                {
+                    "path": os.path.join(BASE_IMAGE_PATH, "header_title.png"),
+                    "cid": "header_title",
+                },
+                {"path": os.path.join(BASE_IMAGE_PATH, "header.png"), "cid": "header"},
+                {
+                    "path": os.path.join(BASE_IMAGE_PATH, "footer_logo.png"),
+                    "cid": "footer_logo",
+                },
+            ]
+
+            # Attach each image with its CID
+            for image in images:
+                with open(image["path"], "rb") as img_file:
+                    img = MIMEImage(img_file.read())
+                    img.add_header(
+                        "Content-ID", f"<{image['cid']}>"
+                    )  # Match the CID in the template
+                    email_message.attach(img)
 
             try:
                 email_message.send()
