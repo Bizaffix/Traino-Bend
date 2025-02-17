@@ -1,7 +1,6 @@
 # Use official Python image as a base
 FROM python:3.11
 
-
 # Set environment variables to prevent prompts during package installation
 ENV PYTHONUNBUFFERED=1
 
