@@ -124,7 +124,7 @@ def generate_keypoints_from_gpt(content, prompt=None):
         raise
 
 
-def generate_quizes_from_gpt(content, max_questions=10, min_questions=5):
+def generate_quizes_from_gpt(content, max_questions=10, min_questions=7):
 
     prompt = (
         f"You are a teacher creating quizzes. Provide a quiz with a maximum of {max_questions} "

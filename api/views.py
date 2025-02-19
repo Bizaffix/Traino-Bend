@@ -1629,7 +1629,7 @@ class SubmitQuizView(APIView):
             # Calculate the score
             score = (correct_answers / total_questions) * 100
 
-            if score > 33:
+            if score > 75:
                 status_test = "Pass"
             else:
                 status_test = "Fail"
