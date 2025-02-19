@@ -1,0 +1,52 @@
+# 1. Create a super admin.
+super_admin = CustomUser.objects.create_superuser(
+    email='superadmin@example.com',
+    password='pass',
+    first_name='Super',
+    last_name='Admin',
+    role='Super Admin'
+
+)
+print("Super admin created:", super_admin)
+
+# 2. Create three companies.
+c1 = company.objects.create(
+    name='Company One',
+    company_id='C001',
+    country='US',            # Ensure 'US' is valid per django_countries
+    phone='+11234567890',
+    address='123 Main St',
+    city='Metropolis',
+    fax='123-456-7890',
+    state_or_province='StateOne',
+    zip_code='12345'
+)
+c2 = company.objects.create(
+    name='Company Two',
+    company_id='C002',
+    country='US',
+    phone='+11234567891',
+    address='456 Side St',
+    city='Gotham',
+    fax='123-456-7891',
+    state_or_province='StateTwo',
+    zip_code='23456'
+)
+c3 = company.objects.create(
+    name='Company Three',
+    company_id='C003',
+    country='US',
+    phone='+11234567892',
+    address='789 High St',
+    city='Star City',
+    fax='123-456-7892',
+    state_or_province='StateThree',
+    zip_code='34567'
+)
+print("Companies created:", c1, c2, c3)
+
+# 3. Assign each company to the super admin via AdminUser.
+AdminUser.objects.create(admin=super_admin, company=c1)
+AdminUser.objects.create(admin=super_admin, company=c2)
+AdminUser.objects.create(admin=super_admin, company=c3)
+print("All companies have been assigned to the super admin.")
