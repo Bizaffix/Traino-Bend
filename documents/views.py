@@ -597,7 +597,6 @@ from .tasks import upload_document
 #             status=status.HTTP_201_CREATED
 #         )
 
-
 class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
     queryset = DepartmentsDocuments.objects.filter(is_active=True)
     serializer_class = DepartmentsDocumentsCreateSerializer
@@ -605,7 +604,12 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
     authentication_classes = [JWTAuthentication]
 
     def perform_create(self, serializer):
-        documents = serializer.save(added_by=self.request.user)
+        # ✅ Default thumbnail ka logic
+        thumbnail = self.request.FILES.get("thumbnail", None)
+        if not thumbnail:
+            thumbnail = "public/static/thumbnails/default.png"  # Default image
+
+        documents = serializer.save(added_by=self.request.user, thumbnail=thumbnail)
         return documents
 
     def create(self, request, *args, **kwargs):
@@ -639,6 +643,11 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
             if existing_document:
                 failure_departments.append(department_id)
             else:
+                # ✅ Thumbnail handling
+                thumbnail = request.FILES.get("thumbnail", None)
+                if not thumbnail:
+                    thumbnail = "public/static/thumbnails/default.png"  # Default image
+
                 document = DepartmentsDocuments.objects.create(
                     name=name,
                     added_by=request.user,
@@ -647,7 +656,9 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
                     dueDate=dueDate,
                     avgCompletionTime=avgCompletionTime,
                     overview=overview,
+                    thumbnail=thumbnail,  # ✅ Added thumbnail field
                 )
+
                 if department:
                     document.departments.add(department)
 
@@ -680,6 +691,91 @@ class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
             "created_documents": created_documents,
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+
+# class DepartmentsDocumentsCreateAPIView(generics.CreateAPIView):
+#     queryset = DepartmentsDocuments.objects.filter(is_active=True)
+#     serializer_class = DepartmentsDocumentsCreateSerializer
+#     permission_classes = [IsAdminUserOrReadOnly]
+#     authentication_classes = [JWTAuthentication]
+
+#     def perform_create(self, serializer):
+#         documents = serializer.save(added_by=self.request.user)
+#         return documents
+
+#     def create(self, request, *args, **kwargs):
+#         print("called")
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+
+#         validated_data = serializer.validated_data
+#         department_ids = validated_data.pop("department_ids")
+#         user_ids = validated_data.pop("user_ids", [])
+#         all_users = validated_data.pop("all", False)
+#         name = validated_data["name"]
+#         dueDate = validated_data.get("dueDate", None)
+#         avgCompletionTime = validated_data.get("avgCompletionTime", None)
+#         overview = validated_data.get("overview", None)
+
+#         failure_departments = []
+#         created_documents = []
+
+#         print("department_ids", department_ids)
+
+#         for department_id in department_ids:
+#             try:
+#                 department = Departments.objects.get(id=department_id, is_active=True)
+#             except Departments.DoesNotExist:
+#                 continue  # Skip invalid departments
+
+#             existing_document = DepartmentsDocuments.objects.filter(
+#                 name=name, departments__id=department.id, is_active=True
+#             ).exists()
+#             if existing_document:
+#                 failure_departments.append(department_id)
+#             else:
+#                 document = DepartmentsDocuments.objects.create(
+#                     name=name,
+#                     added_by=request.user,
+#                     file=validated_data["file"],
+#                     published=validated_data.get("published", False),
+#                     dueDate=dueDate,
+#                     avgCompletionTime=avgCompletionTime,
+#                     overview=overview,
+#                 )
+#                 if department:
+#                     document.departments.add(department)
+
+#                 valid_team_ids = []
+
+#                 if all_users:
+#                     assigned_users = CompaniesTeam.objects.filter(
+#                         departments__id=department_id
+#                     )
+#                 else:
+#                     valid_team_ids = []
+#                     for user_id in user_ids:
+#                         if department.users.filter(id=user_id, is_active=True).exists():
+#                             valid_team_ids.append(user_id)
+#                     assigned_users = CompaniesTeam.objects.filter(id__in=valid_team_ids)
+
+#                 document.assigned_users.set(assigned_users)
+#                 created_documents.append(document.id)
+
+#         if sorted(failure_departments) == sorted(department_ids):
+#             failure_message = f"Document with name '{name}' already exists in departments: {failure_departments}."
+#             response_data = {
+#                 "message": failure_message,
+#             }
+#             return Response(response_data, status=status.HTTP_409_CONFLICT)
+
+#         success_message = f"Document '{name}' added to departments successfully."
+#         response_data = {
+#             "message": success_message,
+#             "created_documents": created_documents,
+#         }
+#         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 from rest_framework import serializers

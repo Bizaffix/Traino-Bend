@@ -44,6 +44,13 @@ class DepartmentsDocuments(models.Model):
     avgCompletionTime = models.IntegerField(null=True, blank=True)  # Minutes mein
     REQUIRED_FIELDS = ['name', 'file', 'departments']
 
+ # ✅ Thumbnail Field Added
+    thumbnail = models.ImageField(
+    upload_to="public/static/thumbnails/",  # Corrected upload path
+    default="thumbnails/default.png",  # Default path relative to STATICFILES_DIRS
+    null=True,
+    blank=True,
+)
     def __str__(self):
         if self.name is not None:
             return self.name
