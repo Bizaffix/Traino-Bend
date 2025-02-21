@@ -60,6 +60,89 @@ from documents.models import DocumentQuiz, QuizQuestions, ScheduleDetail
 #         return assigned_users_details
 
 
+# class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
+#     first_name = serializers.SerializerMethodField(read_only=True)
+#     last_name = serializers.SerializerMethodField(read_only=True)
+#     email = serializers.SerializerMethodField(read_only=True)
+#     phone = serializers.SerializerMethodField(read_only=True)
+#     created_at = serializers.SerializerMethodField(read_only=True)
+#     assigned_users = serializers.SerializerMethodField(read_only=True)
+#     is_summary = serializers.BooleanField(read_only=True)
+#     is_keypoints = serializers.BooleanField(read_only=True)
+#     is_quizzes = serializers.BooleanField(read_only=True)
+#     quizzes = serializers.SerializerMethodField(read_only=True)
+#     assigned_users_details = serializers.SerializerMethodField(read_only=True)
+#     dueDate = serializers.DateField(read_only=True)
+#     avgCompletionTime = serializers.IntegerField(read_only=True)
+#     overview = serializers.CharField(read_only=True)
+#     name = serializers.CharField(read_only=True)
+
+#     class Meta:
+#         model = DepartmentsDocuments
+#         fields = "__all__"
+
+#     def get_dueDate(self, obj):
+#         return obj.added_by.dueDate
+
+#     def get_avgCompletionTime(self, obj):
+#         return obj.added_by.avgCompletionTime
+
+#     def get_overview(self, obj):
+#         return obj.added_by.overview
+
+#     def get_first_name(self, obj):
+#         return obj.added_by.first_name
+
+#     def get_last_name(self, obj):
+#         return obj.added_by.last_name
+
+#     def get_email(self, obj):
+#         return obj.added_by.email
+
+#     def get_phone(self, obj):
+#         return str(obj.added_by.phone)
+
+#     def get_created_at(self, obj):
+#         return obj.created_at
+
+#     def get_quizzes(self, obj):
+#         # pass
+#         return obj.quizzes
+
+#     def get_assigned_users(self, obj):
+#         return [user.id for user in obj.assigned_users.all()]
+
+#     def get_assigned_users_details(self, obj):
+#         assigned_users_details = []
+#         for user in obj.assigned_users.all():
+#             try:
+#                 schedule_details = ScheduleDetail.objects.get(
+#                     user_id=user.id, document_id=obj.id
+#                 )
+#                 assigned_user_details = {
+#                     "id": user.id,
+#                     "first_name": user.members.first_name,
+#                     "last_name": user.members.last_name,
+#                     "email": user.members.email,
+#                     "quiz_id": schedule_details.quiz_id if schedule_details else None,
+#                     "question_id": (
+#                         schedule_details.question_id if schedule_details else None
+#                     ),
+#                 }
+#             except ScheduleDetail.DoesNotExist:
+#                 assigned_user_details = {
+#                     "id": user.id,
+#                     "first_name": user.members.first_name,
+#                     "last_name": user.members.last_name,
+#                     "email": user.members.email,
+#                     "quiz_id": None,
+#                     "question_id": None,
+#                 }
+
+#             assigned_users_details.append(assigned_user_details)
+
+#         return assigned_users_details
+
 class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     first_name = serializers.SerializerMethodField(read_only=True)
     last_name = serializers.SerializerMethodField(read_only=True)
@@ -77,9 +160,27 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
     overview = serializers.CharField(read_only=True)
     name = serializers.CharField(read_only=True)
 
+    # ✅ New Thumbnail Field
+    thumbnail = serializers.SerializerMethodField()
+
     class Meta:
         model = DepartmentsDocuments
         fields = "__all__"
+
+    def get_thumbnail(self, obj):
+        """
+        Agar user ne image di hai to uska URL return karo,
+        warna default.png ka URL return karo.
+        """
+        request = self.context.get("request")
+        if obj.thumbnail:
+            thumbnail_url = obj.thumbnail.url
+        else:
+            thumbnail_url = "/public/static/thumbnails/default.png"  # Default image path
+
+        if request is not None:
+            return request.build_absolute_uri(thumbnail_url)
+        return thumbnail_url
 
     def get_dueDate(self, obj):
         return obj.added_by.dueDate
@@ -106,7 +207,6 @@ class DepartmentsDocumentsSerializer(serializers.ModelSerializer):
         return obj.created_at
 
     def get_quizzes(self, obj):
-        # pass
         return obj.quizzes
 
     def get_assigned_users(self, obj):
@@ -439,6 +539,7 @@ class DepartmentsDocumentsCreateSerializer(serializers.ModelSerializer):
             "dueDate",
             "avgCompletionTime",
             "overview",
+            "thumbnail"
         ]
 
     def validate_department_ids(self, value):
